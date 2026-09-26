@@ -1,8 +1,18 @@
-/* PWA Service Worker — 莉萝阅读器 P3a UX·标注入口+引导横幅+空态提示（2026-09-26）
-   外壳缓存 reader-p2-dg-v8（含 pdf.js 全套）；PDF 缓存 reader-pdf-v1（按需 cache-first）
+/* PWA Service Worker — 莉萝阅读器 PWA离线·预缓存全部公开PDF（2026-09-26）
+   外壳缓存 reader-p2-dg-v9（含 pdf.js 全套）；PDF 缓存 reader-pdf-v1（按需 cache-first）
    升级纪律：改外壳/pdf.js → 同时改缓存名 */
-var CACHE_SHELL = "reader-p2-dg-v8";
+var CACHE_SHELL = "reader-p2-dg-v9";
 var CACHE_PDF   = "reader-pdf-v1";
+
+/* PWA 离线预缓存：公开 6 本 PDF（共约 4MB），安装后全部本地可用 */
+var PDF_URLS = [
+  "./papers/c-ch4.pdf",
+  "./papers/c-ch4-ex.pdf",
+  "./papers/c-ch10.pdf",
+  "./papers/c-ch10-ex.pdf",
+  "./papers/c-ch12.pdf",
+  "./papers/c-ch12-ex.pdf"
+];
 
 var SHELL_URLS = [
   "./",
@@ -127,6 +137,13 @@ self.addEventListener("install", function(ev){
       catch(e){ failed.push(SHELL_URLS[i]); }
     }
     if (failed.length) console.warn("[SW] 预缓存失败 " + failed.length + " 项:", failed);
+    /* 预缓存 PDF（按需 cache-first 的 PDF 也在此提前全量缓存，PWA 离线可用） */
+    try {
+      var pc = await caches.open(CACHE_PDF);
+      for (var p = 0; p < PDF_URLS.length; p++) {
+        try { await pc.add(PDF_URLS[p]); } catch(e){}
+      }
+    } catch(e){}
     await self.skipWaiting();
   })());
 });
