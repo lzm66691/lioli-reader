@@ -130,9 +130,15 @@ a{color:var(--teal);text-decoration:none}
 .shelf-item .sf-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .shelf-sections{display:none;padding:2px 6px 6px 26px}
 .shelf-sections.open{display:block}
-.sf-section{display:flex;align-items:center;gap:6px;width:100%;text-align:left;padding:5px 8px;border-radius:7px;font-size:12.5px;color:var(--body);margin-bottom:2px}
-.sf-section:hover{background:var(--glass-hover)}
-.sf-section .sf-sp{margin-left:auto;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;flex-shrink:0}
+.sf-ch{margin-bottom:2px}
+.sf-ch-btn{display:flex;align-items:center;gap:6px;width:100%;text-align:left;padding:5px 8px;border-radius:7px;font-size:12.5px;color:var(--body)}
+.sf-ch-btn:hover{background:var(--glass-hover)}
+.sf-ch-arrow{width:12px;text-align:center;font-size:10px;color:var(--teal-dark);flex-shrink:0}
+.sf-subsecs{display:none;padding-left:16px}
+.sf-subsecs.open{display:block}
+.sf-subsec{display:flex;align-items:center;gap:6px;width:100%;text-align:left;padding:4px 8px;border-radius:6px;font-size:12px;color:var(--muted)}
+.sf-subsec:hover{background:var(--glass-hover);color:var(--body)}
+.sf-subsec .sf-sp{margin-left:auto;font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums;flex-shrink:0}
 /* PDF 区 */
 .pdf-wrap{flex:1;display:flex;flex-direction:column;background:var(--glass-input);min-width:0;backdrop-filter:blur(10px)}
 .pdf-frame{flex:1;border:none;width:100%;background:#fff}
@@ -379,25 +385,25 @@ body.dark .pdf-frame{background:#fff}
     {
       id:"mat-la", title:"数学 · 线性代数", meta:"同济五版 · 178 页 · 扫描版", group:"数学教材", pdf:"papers/mat-la.pdf", pages:178,
       toc:[
-        { t:"第一章 行列式", p:12 },
-        { t:"第二章 矩阵及其运算", p:40 },
-        { t:"第三章 矩阵的初等变换与线性方程组", p:68 },
-        { t:"第四章 向量组的线性相关性", p:92 },
-        { t:"第五章 相似矩阵及二次型", p:122 },
-        { t:"第六章 线性空间与线性变换", p:149 },
+        { t:"第一章 行列式", p:12, secs:[{t:"二阶与三阶行列式",p:12},{t:"全排列及其逆序数",p:13},{t:"n 阶行列式的定义",p:15},{t:"对换",p:16},{t:"行列式的性质",p:17},{t:"行列式按行(列)展开",p:27},{t:"克拉默法则",p:32}] },
+        { t:"第二章 矩阵及其运算", p:40, secs:[{t:"矩阵",p:40},{t:"矩阵的运算",p:44},{t:"逆矩阵",p:53},{t:"矩阵分块法",p:58}] },
+        { t:"第三章 矩阵的初等变换与线性方程组", p:68, secs:[{t:"矩阵的初等变换",p:68},{t:"矩阵的秩",p:76},{t:"线性方程组的解",p:82}] },
+        { t:"第四章 向量组的线性相关性", p:92, secs:[{t:"向量组及其线性组合",p:92},{t:"向量组的线性相关性",p:98},{t:"向量组的秩",p:101},{t:"线性方程组的解的结构",p:105},{t:"向量空间",p:113}] },
+        { t:"第五章 相似矩阵及二次型", p:122, secs:[{t:"向量的内积、长度及正交性",p:122},{t:"方阵的特征值与特征向量",p:128},{t:"相似矩阵",p:132},{t:"对称矩阵的对角化",p:135},{t:"二次型及其标准形",p:138},{t:"用配方法化二次型成标准形",p:142},{t:"正定二次型",p:143}] },
+        { t:"第六章 线性空间与线性变换", p:149, secs:[{t:"线性空间的定义与性质",p:149},{t:"维数、基与坐标",p:152},{t:"基变换与坐标变换",p:154},{t:"线性变换",p:157},{t:"线性变换的矩阵表示式",p:160}] },
         { t:"习题答案", p:166 }
       ]
     },
     {
       id:"mat-calc1", title:"数学 · 高等数学（上）", meta:"同济八版 · 442 页 · 扫描版", group:"数学教材", pdf:"papers/mat-calc1.pdf", pages:442,
       toc:[
-        { t:"第一章 函数与极限", p:20 },
-        { t:"第二章 导数与微分", p:90 },
-        { t:"第三章 微分中值定理与导数的应用", p:141 },
-        { t:"第四章 不定积分", p:199 },
-        { t:"第五章 定积分", p:238 },
-        { t:"第六章 定积分的应用", p:286 },
-        { t:"第七章 微分方程", p:308 },
+        { t:"第一章 函数与极限", p:20, secs:[{t:"第一节 映射与函数",p:20},{t:"第二节 数列的极限",p:37},{t:"第三节 函数的极限",p:45},{t:"第四节 无穷小与无穷大",p:52},{t:"第五节 极限运算法则",p:55},{t:"第六节 极限存在准则 两个重要极限",p:63},{t:"第七节 无穷小的比较",p:66},{t:"第八节 函数的连续性与间断点",p:73},{t:"第九节 连续函数的运算与初等函数的连续性",p:78},{t:"第十节 闭区间上连续函数的性质",p:83}] },
+        { t:"第二章 导数与微分", p:90, secs:[{t:"第一节 导数概念",p:90},{t:"第二节 函数的求导法则",p:101},{t:"第三节 高阶导数",p:109},{t:"第四节 隐函数及由参数方程所确定的函数的导数 相关变化率",p:117},{t:"第五节 函数的微分",p:126}] },
+        { t:"第三章 微分中值定理与导数的应用", p:141, secs:[{t:"第一节 微分中值定理",p:141},{t:"第二节 洛必达法则",p:148},{t:"第三节 泰勒公式",p:153},{t:"第四节 函数的单调性与曲线的凹凸性",p:159},{t:"第五节 函数的极值与最大值最小值",p:168},{t:"第六节 函数图形的描绘",p:178},{t:"第七节 曲率",p:183},{t:"第八节 方程的近似解",p:192}] },
+        { t:"第四章 不定积分", p:199, secs:[{t:"第一节 不定积分的概念与性质",p:199},{t:"第二节 换元积分法",p:208},{t:"第三节 分部积分法",p:223},{t:"第四节 有理函数的积分",p:227},{t:"第五节 积分表的使用",p:232}] },
+        { t:"第五章 定积分", p:238, secs:[{t:"第一节 定积分的概念与性质",p:238},{t:"第二节 微积分基本公式",p:251},{t:"第三节 定积分的换元法和分部积分法",p:259},{t:"第四节 反常积分",p:268},{t:"第五节 反常积分的审敛法 Γ函数",p:275}] },
+        { t:"第六章 定积分的应用", p:286, secs:[{t:"第一节 定积分的元素法",p:286},{t:"第二节 定积分在几何学上的应用",p:288},{t:"第三节 定积分在物理学上的应用",p:301}] },
+        { t:"第七章 微分方程", p:308, secs:[{t:"第一节 微分方程的基本概念",p:308},{t:"第二节 可分离变量的微分方程",p:313},{t:"第三节 齐次方程",p:320},{t:"第四节 一阶线性微分方程",p:326},{t:"第五节 可降阶的高阶微分方程",p:332},{t:"第六节 高阶线性微分方程",p:340},{t:"第七节 常系数齐次线性微分方程",p:349},{t:"第八节 常系数非齐次线性微分方程",p:358}] },
         { t:"附录I 初等数学几个内容简介", p:374 },
         { t:"附录II 基本初等函数的图形", p:383 },
         { t:"附录III 几种常用的曲线", p:386 },
@@ -408,11 +414,11 @@ body.dark .pdf-frame{background:#fff}
     {
       id:"mat-calc2", title:"数学 · 高等数学（下）", meta:"同济八版 · 354 页 · 扫描版", group:"数学教材", pdf:"papers/mat-calc2.pdf", pages:354,
       toc:[
-        { t:"第八章 向量代数与空间解析几何", p:8 },
-        { t:"第九章 多元函数微分法及其应用", p:59 },
-        { t:"第十章 重积分", p:137 },
-        { t:"第十一章 曲线积分与曲面积分", p:187 },
-        { t:"第十二章 无穷级数", p:248 },
+        { t:"第八章 向量代数与空间解析几何", p:8, secs:[{t:"第一节 向量及其线性运算",p:8},{t:"第二节 数量积 向量积 混合积",p:21},{t:"第三节 平面及其方程",p:30},{t:"第四节 空间直线及其方程",p:36},{t:"第五节 曲面及其方程",p:43},{t:"第六节 空间曲线及其方程",p:51}] },
+        { t:"第九章 多元函数微分法及其应用", p:59, secs:[{t:"第一节 多元函数的基本概念",p:59},{t:"第二节 偏导数",p:70},{t:"第三节 全微分",p:76},{t:"第四节 多元复合函数的求导法则",p:83},{t:"第五节 隐函数的求导公式",p:90},{t:"第六节 多元函数微分学的几何应用",p:96},{t:"第七节 方向导数与梯度",p:107},{t:"第八节 多元函数的极值及其求法",p:115},{t:"第九节 二元函数的泰勒公式",p:125},{t:"第十节 最小二乘法",p:130}] },
+        { t:"第十章 重积分", p:137, secs:[{t:"第一节 二重积分的概念与性质",p:137},{t:"第二节 二重积分的计算法",p:143},{t:"第三节 三重积分",p:161},{t:"第四节 重积分的应用",p:168},{t:"第五节 含参变量的积分",p:178}] },
+        { t:"第十一章 曲线积分与曲面积分", p:187, secs:[{t:"第一节 对弧长的曲线积分",p:187},{t:"第二节 对坐标的曲线积分",p:193},{t:"第三节 格林公式及其应用",p:203},{t:"第四节 对面积的曲面积分",p:216},{t:"第五节 对坐标的曲面积分",p:220},{t:"第六节 高斯公式 通量与散度",p:230},{t:"第七节 斯托克斯公式 环流量与旋度",p:237}] },
+        { t:"第十二章 无穷级数", p:248, secs:[{t:"第一节 常数项级数的概念和性质",p:248},{t:"第二节 常数项级数的审敛法",p:255},{t:"第三节 幂级数",p:269},{t:"第四节 函数展开成幂级数",p:277},{t:"第五节 函数的幂级数展开式的应用",p:285},{t:"第六节 函数项级数的一致收敛性及一致收敛级数的基本性质",p:293},{t:"第七节 傅里叶级数",p:301},{t:"第八节 一般周期函数的傅里叶级数",p:314}] },
         { t:"部分习题参考答案与提示", p:322 }
       ]
     },
@@ -532,15 +538,40 @@ body.dark .pdf-frame{background:#fff}
           var secs = document.createElement("div");
           secs.className = "shelf-sections";
           b.toc.forEach(function(t){
-            var sb = document.createElement("button");
-            sb.className = "sf-section";
-            sb.innerHTML = "<span>" + esc(t.t) + "</span><span class=\"sf-sp\">p" + t.p + "</span>";
-            sb.onclick = function(ev){
+            var hasSecs = t.secs && t.secs.length;
+            var row = document.createElement("div");
+            row.className = "sf-ch";
+            var chBtn = document.createElement("button");
+            chBtn.className = "sf-ch-btn";
+            chBtn.innerHTML = "<span class=\"sf-ch-arrow\">" + (hasSecs ? "▸" : "") + "</span><span>" + esc(t.t) + "</span><span class=\"sf-sp\">p" + t.p + "</span>";
+            chBtn.onclick = function(ev){
               ev.stopPropagation();
-              if (b.id === BOOK.id) { goPage(t.p); }
-              else { switchBook(b.id, t.p); }
+              if (hasSecs) {
+                var open = sub.classList.toggle("open");
+                chBtn.querySelector(".sf-ch-arrow").textContent = open ? "▾" : "▸";
+              } else {
+                if (b.id === BOOK.id) { goPage(t.p); }
+                else { switchBook(b.id, t.p); }
+              }
             };
-            secs.appendChild(sb);
+            row.appendChild(chBtn);
+            if (hasSecs) {
+              var sub = document.createElement("div");
+              sub.className = "sf-subsecs";
+              t.secs.forEach(function(sec){
+                var sb = document.createElement("button");
+                sb.className = "sf-subsec";
+                sb.innerHTML = "<span>" + esc(sec.t) + "</span><span class=\"sf-sp\">p" + sec.p + "</span>";
+                sb.onclick = function(ev){
+                  ev.stopPropagation();
+                  if (b.id === BOOK.id) { goPage(sec.p); }
+                  else { switchBook(b.id, sec.p); }
+                };
+                sub.appendChild(sb);
+              });
+              row.appendChild(sub);
+            }
+            secs.appendChild(row);
           });
           list.appendChild(secs);
           exp.onclick = function(ev){
