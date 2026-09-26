@@ -35,19 +35,19 @@
 
   /* 毛玻璃（glassmorphism）—— v2 参考 DSH 通透质感：更低不透明度 + 更强光晕层次 */
 
-  --glass:rgba(255,255,255,.44);
+  --glass:rgba(255,255,255,.34);
 
-  --glass-strong:rgba(255,255,255,.68);
+  --glass-strong:rgba(255,255,255,.60);
 
   --glass-border:rgba(255,255,255,.62);
 
-  --glass-hover:rgba(255,255,255,.52);
+  --glass-hover:rgba(255,255,255,.42);
 
   --glass-input:rgba(255,255,255,.38);
 
   --glass-shadow:0 8px 32px rgba(2,6,23,.10), inset 0 1px 0 rgba(255,255,255,.65);
 
-  --blur:blur(20px) saturate(1.6);
+  --blur:blur(26px) saturate(1.7);
 
 }
 
@@ -216,6 +216,11 @@ body.dark .guide-banner{background:rgba(42,42,42,.95);border-color:rgba(255,255,
 .toc-chapter .arrow{display:inline-block;width:15px;text-align:center;color:var(--muted);font-size:11px;flex-shrink:0}
 .toc-chapter .toc-item{width:100%}
 .app-ver{margin-left:8px;font-size:11px;font-weight:600;color:var(--muted);padding:2px 7px;border:1px solid var(--line);border-radius:6px;background:var(--glass);letter-spacing:.3px}
+.drawing-active{touch-action:none!important}
+#selModeBtn.active{background:var(--teal-light)!important;color:var(--teal-dark)!important;font-weight:700}
+#selTip{position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:2000;display:none;padding:9px 16px;font-size:13px;color:var(--teal-dark);background:rgba(255,255,255,.94);border:1px solid rgba(0,140,160,.35);border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.16);backdrop-filter:blur(8px);max-width:88vw;text-align:center}
+body.dark #selTip{background:rgba(40,40,40,.94);color:#8fd8e0}
+body.sel-mode #selTip{display:block}
 .toc-note{margin:4px 8px 6px;padding:6px 8px;font-size:12px;color:var(--muted);background:var(--glass);border-radius:8px;border:1px dashed var(--line)}
 
 /* 收藏夹列表 */
@@ -505,7 +510,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v16</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v17</span></div>
 
   <div class="spacer"></div>
 
@@ -525,6 +530,8 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
     <button class="tool-btn" id="markBtn" title="划词标注：选中 PDF 文字即可高亮/记笔记，标注列表在收藏夹"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l6-6 2 2-6 6-2 2zM9 7l3-3 2 2-3 3z"/></svg><span>标注</span></button>
 
+    <button class="tool-btn" id="selModeBtn" title="框选模式：进入后直接拖动框选标注（平板/扫描版教材友好）"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2.2 1.6"><rect x="2.5" y="2.5" width="11" height="11" rx="1.5"/></svg><span>框选</span></button>
+
   </div>
 
   <div class="tool-group">
@@ -538,6 +545,8 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
   <div class="tool-group">
 
     <a class="tool-btn" id="sysOpen" href="papers/c-ch4.pdf" target="_blank" rel="noopener" title="用系统阅读器打开当前 PDF（pdf.js 异常时的兜底）"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3H3v10h10v-3M9 2h5v5M14 2l-7 7"/></svg><span>系统打开</span></button></a>
+
+    <a class="tool-btn" href="guide.html" target="_blank" rel="noopener" title="使用教程：安装/书架/目录/标注/笔记"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3.5A2 2 0 0 1 4 2h9v11H4.5A2.5 2.5 0 0 0 2 15.5z"/><path d="M2 13.5A2.5 2.5 0 0 1 4.5 11H13"/></svg><span>教程</span></a>
 
   </div>
 
@@ -1600,6 +1609,21 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
   /* 事件绑定 */
 
+  /* 框选模式开关（平板友好：进入后无需长按，直接拖动框选标注） */
+  window.__selMode = false;
+  var _selBtn = document.getElementById("selModeBtn");
+  if (_selBtn) {
+    _selBtn.addEventListener("click", function(){
+      window.__selMode = !window.__selMode;
+      document.body.classList.toggle("sel-mode", window.__selMode);
+      _selBtn.classList.toggle("active", window.__selMode);
+      _selBtn.title = window.__selMode ? "框选模式已开启：拖动框选标注（点此退出）" : "框选模式：进入后直接拖动框选标注（平板友好）";
+    });
+    var _selTip = document.createElement("div"); _selTip.id = "selTip";
+    _selTip.textContent = "框选模式：按住拖动，框选要标注的区域 → 松手选颜色或写笔记 → 点「框选」退出";
+    document.body.appendChild(_selTip);
+  }
+
   pageInput.addEventListener("change", function(){ goPage(this.value); });
 
   document.getElementById("darkBtn").addEventListener("click", toggleDark);
@@ -2037,13 +2061,29 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
             function pageOf(t){ var n = t; while (n && !(n.classList && n.classList.contains("page"))) n = n.parentElement; return n; }
 
+            function setDrawing(on){ if (pd && pd.page) { try { pd.page.classList.toggle("drawing-active", on); } catch(e){} } }
+
+            function cancel(){ clearTimeout(timer); timer = null; setDrawing(false); pd = null; active = false; hidePreview(); }
+
+            function beginPreview(p){
+
+              preview = doc.createElement("div");
+
+              preview.style.cssText = "position:absolute;z-index:4;border:1.5px dashed rgba(80,140,220,.95);background:rgba(80,140,220,.12);pointer-events:none;display:none;border-radius:2px";
+
+              p.appendChild(preview);
+
+            }
+
+            function selOn(){ try { return !!window.parent.__selMode; } catch(e){ return false; } }
+
             doc.addEventListener("pointerdown", function(ev){
 
               if (ev.button !== 0 && ev.pointerType === "mouse") return;
 
               var p = pageOf(ev.target); if (!p) return;
 
-              if (pd) { if (pd.id !== ev.pointerId) { clearTimeout(timer); pd = null; hidePreview(); } return; }
+              if (pd) { if (pd.id !== ev.pointerId) cancel(); return; }
 
               hidePreview();
 
@@ -2053,17 +2093,16 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
               clearTimeout(timer);
 
-              timer = setTimeout(function(){
+              if (selOn()) {
 
-                active = true;
+                /* 框选模式：立即激活绘制（平板无需长按） */
+                active = true; setDrawing(true); beginPreview(p);
 
-                preview = doc.createElement("div");
+              } else {
 
-                preview.style.cssText = "position:absolute;z-index:4;border:1.5px dashed rgba(80,140,220,.95);background:rgba(80,140,220,.12);pointer-events:none;display:none;border-radius:2px";
+                timer = setTimeout(function(){ active = true; setDrawing(true); beginPreview(p); }, 300);
 
-                p.appendChild(preview);
-
-              }, 300);
+              }
 
             });
 
@@ -2075,7 +2114,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
               if (!active) {
 
-                if (Math.abs(dx) > 8 || Math.abs(dy) > 8) { clearTimeout(timer); timer = null; pd = null; hidePreview(); }
+                if (Math.abs(dx) > 8 || Math.abs(dy) > 8) { cancel(); }
 
               } else if (preview) {
 
@@ -2099,7 +2138,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
               var dx = ev.clientX - x0, dy = ev.clientY - y0;
 
-              clearTimeout(timer); timer = null; pd = null; active = false; hidePreview();
+              cancel();
 
               if (!wasActive || Math.abs(dx) < 12 || Math.abs(dy) < 12) return;
 
@@ -2126,6 +2165,12 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
               bar.style.display = "flex";
 
             });
+
+            /* 浏览器打断（长按菜单/滚动判定/多指）→ 干净清理 */
+            doc.addEventListener("pointercancel", function(){ cancel(); });
+
+            /* 长按菜单拦截（绘制期间禁止系统菜单抢事件） */
+            doc.addEventListener("contextmenu", function(ev){ if (pd) { ev.preventDefault(); } });
 
           })();
 
