@@ -472,7 +472,7 @@ body.dark .pdf-frame{background:#fff}
 
   <button class="tool-btn" id="noteBtn" title="笔记与书签">笔记</button>
 
-  <a class="tool-btn" id="sysOpen" href="papers/fvis.pdf" target="_blank" rel="noopener" title="用系统阅读器打开当前 PDF（pdf.js 异常时的兜底）">系统打开</a>
+  <a class="tool-btn" id="sysOpen" href="papers/c-ch4.pdf" target="_blank" rel="noopener" title="用系统阅读器打开当前 PDF（pdf.js 异常时的兜底）">系统打开</a>
 
 </header>
 
@@ -740,7 +740,7 @@ body.dark .pdf-frame{background:#fff}
 
   var LS_CUR = "reader-app-current";
 
-  var rawCur = localStorage.getItem(LS_CUR) || "fvis";
+  var rawCur = localStorage.getItem(LS_CUR) || "c-ch4";
 
   var curId = rawCur;
 
@@ -770,7 +770,7 @@ body.dark .pdf-frame{background:#fff}
 
   }
 
-  /* localStorage 按书隔离；旧 key（无后缀）首次自动迁移到 :fvis */
+  /* localStorage 按书隔离；旧 key（无后缀）首次自动迁移到 :c-ch4 */
 
   var LS_STATE = "reader-app-state:" + BOOK.id;
 
@@ -780,7 +780,7 @@ body.dark .pdf-frame{background:#fff}
 
   [["reader-app-state",LS_STATE],["reader-app-notes",LS_NOTES],["reader-app-bookmarks",LS_BM]].forEach(function(pair){
 
-    if (BOOK.id === "fvis" && !localStorage.getItem(pair[1]) && localStorage.getItem(pair[0])) {
+    if (BOOK.id === "c-ch4" && !localStorage.getItem(pair[1]) && localStorage.getItem(pair[0])) {
 
       localStorage.setItem(pair[1], localStorage.getItem(pair[0]));
 
