@@ -1,7 +1,7 @@
-/* PWA Service Worker — 莉萝阅读器 PWA离线·预缓存全部公开PDF（2026-09-26）
-   外壳缓存 reader-p2-dg-v9（含 pdf.js 全套）；PDF 缓存 reader-pdf-v1（按需 cache-first）
+/* PWA Service Worker — 莉萝阅读器 目录树形化·章/节折叠+当前页自动展开+本地书总页数（2026-09-26）
+   外壳缓存 reader-p2-dg-v11（含 pdf.js 全套）；PDF 缓存 reader-pdf-v1（按需 cache-first）
    升级纪律：改外壳/pdf.js → 同时改缓存名 */
-var CACHE_SHELL = "reader-p2-dg-v9";
+var CACHE_SHELL = "reader-p2-dg-v11";
 var CACHE_PDF   = "reader-pdf-v1";
 
 /* PWA 离线预缓存：公开 6 本 PDF（共约 4MB），安装后全部本地可用 */
