@@ -26,9 +26,13 @@
 
   --ink:#0f172a; --body:#334155; --muted:#64748b;
 
-  --bg:#ffffff; --bg-soft:#f8fafc; --line:#e2e8f0; --surface:#ffffff;
+  --bg:#ffffff; --bg-soft:#FAFAF8; --line:#e2e8f0; --surface:#ffffff;
 
   --code:#0f172a;
+
+  --hl-1:#FBDA83; --hl-2:#E4938E; --hl-3:#8DBBFF;
+
+  .hl-marker.hl-1{background:rgba(251,218,131,.42)} .hl-marker.hl-2{background:rgba(228,147,142,.38)} .hl-marker.hl-3{background:rgba(141,187,255,.38)}
 
   /* 毛玻璃（glassmorphism）—— v2 参考 DSH 通透质感：更低不透明度 + 更强光晕层次 */
 
@@ -89,8 +93,10 @@ a{color:var(--teal);text-decoration:none}
   background:var(--glass); backdrop-filter:var(--blur); -webkit-backdrop-filter:var(--blur);
 
   box-shadow:var(--glass-shadow); z-index:2; position:relative;
-
+  transition:transform .28s ease, opacity .28s ease;
 }
+.topbar.hidden{transform:translateY(-110%); opacity:0; pointer-events:none}
+
 
 .brand{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--ink);white-space:nowrap}
 
@@ -109,6 +115,10 @@ a{color:var(--teal);text-decoration:none}
 .tool-btn:hover{background:var(--glass-hover);color:var(--teal-dark)}
 
 .tool-btn.active{background:var(--teal-light);color:var(--teal-dark);border-color:var(--teal-light);backdrop-filter:blur(6px)}
+.tool-group{display:inline-flex;align-items:center;gap:4px;padding-left:10px;margin-left:4px;border-left:1px solid var(--line)}
+.tool-group:first-of-type{border-left:none;padding-left:0;margin-left:0}
+.tool-btn svg{width:15px;height:15px;flex-shrink:0}
+.tool-btn span{line-height:1}
 
 .page-jump{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
 
@@ -257,6 +267,10 @@ a{color:var(--teal);text-decoration:none}
 .shelf-item .sf-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 
 .shelf-item .sf-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.shelf-item{box-shadow:0 1px 3px rgba(0,0,0,.05);border-radius:10px;transition:box-shadow .18s,transform .18s,background .18s}
+.shelf-item:hover{box-shadow:0 6px 18px rgba(0,0,0,.10);transform:translateX(2px)}
+.sf-progress{height:2px;background:var(--line);border-radius:1px;overflow:hidden;margin-top:3px}
+.sf-progress i{display:block;height:100%;background:var(--teal);border-radius:1px}
 
 .shelf-sections{display:none;padding:2px 6px 6px 26px}
 
@@ -282,7 +296,7 @@ a{color:var(--teal);text-decoration:none}
 
 /* PDF 区 */
 
-.pdf-wrap{flex:1;display:flex;flex-direction:column;background:var(--glass-input);min-width:0;backdrop-filter:blur(10px)}
+.pdf-wrap{flex:1;display:flex;flex-direction:column;background:var(--bg-soft);min-width:0;backdrop-filter:blur(10px)}
 
 .pdf-frame{flex:1;border:none;width:100%;background:#fff}
 
@@ -362,9 +376,9 @@ body.dark .pdf-frame{filter:invert(0.92) hue-rotate(180deg)}
 
 body.dark{
 
-  --bg:#0d1117; --bg-soft:#161b22; --surface:#161b22; --line:#2b3245;
+  --bg:#1E1E1E; --bg-soft:#262626; --surface:#262626; --line:#333333;
 
-  --ink:#f1f5f9; --body:#c9d1e0; --muted:#8b96ad; --teal-light:#23294a;
+  --ink:#E6E6E6; --body:#c9d1e0; --muted:#8b96ad; --teal-light:#23294a;
 
   --teal:#4D6BFE; --teal-dark:#7c9bff;
 
@@ -399,6 +413,24 @@ body.dark{
 }
 
 body.dark .pdf-frame{background:#fff}
+
+/* ===== 米黄护眼（Sepia）===== */
+body.sepia{
+  --bg:#F7F1E3; --bg-soft:#F0E8D8; --surface:#FBF7EC; --line:#E3D9C4;
+  --ink:#5C4B37; --body:#6B5B45; --muted:#8A7A62;
+  --teal:#4D6BFE; --teal-dark:#3b56f0; --teal-light:#EDE3D0;
+  --glass:rgba(247,241,227,.55); --glass-strong:rgba(251,247,236,.72);
+  --glass-border:rgba(92,75,55,.16); --glass-hover:rgba(92,75,55,.08);
+  --glass-input:rgba(255,255,255,.45);
+  --glass-shadow:0 8px 32px rgba(92,75,55,.10), inset 0 1px 0 rgba(255,255,255,.6);
+  background:
+    radial-gradient(50vw 40vw at 85% -10%, rgba(255,246,214,.5), transparent 60%),
+    linear-gradient(165deg,#FBF6E9 0%,#F7F1E3 55%,#F2E9D6 100%);
+  background-attachment:fixed;
+}
+body.sepia .pdf-frame{filter:sepia(.30) contrast(.95) brightness(1.03); background:#fff}
+body.sepia .page-jump input, body.sepia .search-box{background:#fff}
+
 
 
 
@@ -464,15 +496,27 @@ body.dark .pdf-frame{background:#fff}
 
   </div>
 
-  <button class="tool-btn" id="darkBtn" title="深色模式（D）">深色</button>
+  <div class="tool-group">
 
-  <button class="tool-btn" id="fullBtn" title="全屏（F）">全屏</button>
+    <button class="tool-btn" id="sidebarBtn" title="目录（侧栏）"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 4h12M2 8h12M2 12h7"/></svg><span>目录</span></button>
 
-  <button class="tool-btn" id="sidebarBtn" title="目录">目录</button>
+    <button class="tool-btn" id="noteBtn" title="笔记与书签"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M3 2h10v11l-2-1.5L9 13V2"/></svg><span>笔记</span></button>
 
-  <button class="tool-btn" id="noteBtn" title="笔记与书签">笔记</button>
+  </div>
 
-  <a class="tool-btn" id="sysOpen" href="papers/c-ch4.pdf" target="_blank" rel="noopener" title="用系统阅读器打开当前 PDF（pdf.js 异常时的兜底）">系统打开</a>
+  <div class="tool-group">
+
+    <button class="tool-btn" id="darkBtn" title="切换主题"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 9.2A5.5 5.5 0 1 1 6.8 2.5a4.6 4.6 0 0 0 6.7 6.7z"/></svg><span id="darkLabel">日间</span></button>
+
+    <button class="tool-btn" id="fullBtn" title="全屏（F）"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4"/></svg><span>全屏</span></button>
+
+  </div>
+
+  <div class="tool-group">
+
+    <a class="tool-btn" id="sysOpen" href="papers/c-ch4.pdf" target="_blank" rel="noopener" title="用系统阅读器打开当前 PDF（pdf.js 异常时的兜底）"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3H3v10h10v-3M9 2h5v5M14 2l-7 7"/></svg><span>系统打开</span></button></a>
+
+  </div>
 
 </header>
 
@@ -790,9 +834,10 @@ body.dark .pdf-frame{background:#fff}
 
 
 
-  var state = { page: 1, dark: false, sidebar: true, note: true };
+  var state = { page: 1, dark: false, theme: "", sidebar: true, note: true };
 
   try { var s = JSON.parse(localStorage.getItem(LS_STATE) || "null"); if (s) state = Object.assign(state, s); } catch(e){}
+  if (state.dark && !state.theme) { state.theme = "dark"; }  /* 旧版 dark 迁移 */
 
   /* 书架章节直达：跨书跳页（reload 后定位） */
 
@@ -824,7 +869,7 @@ body.dark .pdf-frame{background:#fff}
 
   /* ?dark=1 深色直达（如分享/截图） */
 
-  try { if (location.search.indexOf("dark=1") >= 0) state.dark = true; } catch(e){}
+  try { if (location.search.indexOf("dark=1") >= 0) state.theme = "dark"; } catch(e){}
 
 
 
@@ -938,7 +983,9 @@ body.dark .pdf-frame{background:#fff}
 
         info.className = "sf-info";
 
-        info.innerHTML = "<span class=\"sf-title\">" + esc(b.title) + "</span><span class=\"sf-meta\">" + esc(b.meta || "") + "</span>";
+        var _prog = 0;
+        try { var _st = JSON.parse(localStorage.getItem("reader-app-state:" + b.id) || "null"); if (_st && b.pages && _st.page) _prog = Math.max(4, Math.round(_st.page / b.pages * 100)); } catch(e){}
+        info.innerHTML = "<span class=\"sf-title\">" + esc(b.title) + "</span><span class=\"sf-meta\">" + esc(b.meta || "") + "</span>" + (_prog ? "<span class=\"sf-progress\"><i style=\"width:" + _prog + "%\"></i></span>" : "");
 
         card.appendChild(exp);
 
@@ -1274,13 +1321,29 @@ body.dark .pdf-frame{background:#fff}
 
 
 
+  var THEME_NAMES = { "": "日间", "dark": "深色", "sepia": "米黄" };
+
+  var THEME_ORDER = ["", "dark", "sepia"];
+
+  function applyTheme(){
+
+    document.body.className = state.theme || "";
+
+    var btn = document.getElementById("darkBtn");
+
+    if (btn){ var lb = document.getElementById("darkLabel"); if (lb) lb.textContent = THEME_NAMES[state.theme] || "日间"; btn.title = "切换主题（当前：" + (THEME_NAMES[state.theme]||"日间") + "）"; }
+
+  }
+
   function toggleDark(){
 
-    state.dark = !state.dark; save();
+    var i = THEME_ORDER.indexOf(state.theme || "");
 
-    document.body.classList.toggle("dark", state.dark);
+    state.theme = THEME_ORDER[(i + 1) % THEME_ORDER.length];
 
-    document.getElementById("darkBtn").classList.toggle("active", state.dark);
+    state.dark = (state.theme === "dark"); save();
+
+    applyTheme();
 
   }
 
@@ -1470,15 +1533,35 @@ body.dark .pdf-frame{background:#fff}
 
   });
 
+  /* UI① 工具条自动隐藏：阅读态（侧栏+笔记折叠）空闲 2s 淡出；移顶/操作时呼出 */
+  (function(){
+    var topbar = document.querySelector(".topbar"), hideT = null;
+    var sbEl = document.getElementById("sidebar"), npEl = document.getElementById("notePanel");
+    function pinned(){
+      var sb = sbEl.classList.contains("collapsed"), np = npEl.classList.contains("collapsed");
+      var searching = (document.getElementById("searchInput").value || "").length > 0;
+      return !sb || !np || searching;
+    }
+    function show(){ topbar.classList.remove("hidden"); reset(); }
+    function reset(){
+      clearTimeout(hideT);
+      if (pinned()) return;
+      hideT = setTimeout(function(){ topbar.classList.add("hidden"); }, 2000);
+    }
+    document.addEventListener("mousemove", function(e){ if (e.clientY <= 48) show(); else reset(); });
+    document.addEventListener("mousedown", reset);
+    document.addEventListener("keydown", reset);
+    window.addEventListener("scroll", reset, true);
+    reset();
+  })();
+
 
 
   /* 初始化：pdf.js 渲染 + 注入 CSS 隐藏 viewer 自带按钮（不改 vendor 源文件）+ 兜底链接 + SW 注册 */
 
   document.getElementById("brandTxt").textContent = "阅读器 · " + BOOK.title.replace("C 讲义 · ","");
 
-  document.body.classList.toggle("dark", state.dark);
-
-  document.getElementById("darkBtn").classList.toggle("active", state.dark);
+  applyTheme();
 
   document.getElementById("sidebar").classList.toggle("collapsed", !state.sidebar);
 
@@ -1498,9 +1581,22 @@ body.dark .pdf-frame{background:#fff}
 
         var st = doc.createElement("style");
 
-        st.textContent = "#download,#print,#openFile,#secondaryToolbarToggle{display:none!important}";
+        st.textContent = "#download,#print,#openFile,#secondaryToolbarToggle{display:none!important} #viewer .page{box-shadow:0 4px 24px rgba(0,0,0,.13)!important;margin:18px auto!important;border-radius:2px;background:#fff} body.dark #viewer .page{box-shadow:0 4px 20px rgba(255,255,255,.08)!important} #viewerContainer{background:transparent!important}";
 
         doc.head.appendChild(st);
+
+        /* UI② 页面卡片阴影：observer 内联强加（pdf.js 翻页/缩放会重建 .page） */
+        function _applyPageUI(){
+          var ps = doc.querySelectorAll(".page");
+          for (var i = 0; i < ps.length; i++){
+            ps[i].style.boxShadow = "0 4px 24px rgba(0,0,0,.13)";
+            ps[i].style.margin = "18px auto";
+            ps[i].style.borderRadius = "2px";
+          }
+        }
+        _applyPageUI();
+        var _pgMo = new MutationObserver(function(){ _applyPageUI(); });
+        _pgMo.observe(doc.body, {childList:true, subtree:true});
 
       }
 
@@ -1682,7 +1778,9 @@ body.dark .pdf-frame{background:#fff}
 
         info.className = "sf-info";
 
-        info.innerHTML = "<span class=\"sf-title\">" + esc(b.title) + "</span><span class=\"sf-meta\">" + esc(b.meta || "") + "</span>";
+        var _prog = 0;
+        try { var _st = JSON.parse(localStorage.getItem("reader-app-state:" + b.id) || "null"); if (_st && b.pages && _st.page) _prog = Math.max(4, Math.round(_st.page / b.pages * 100)); } catch(e){}
+        info.innerHTML = "<span class=\"sf-title\">" + esc(b.title) + "</span><span class=\"sf-meta\">" + esc(b.meta || "") + "</span>" + (_prog ? "<span class=\"sf-progress\"><i style=\"width:" + _prog + "%\"></i></span>" : "");
 
         card.appendChild(info);
 
