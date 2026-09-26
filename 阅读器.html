@@ -14,14 +14,14 @@
   --ink:#0f172a; --body:#334155; --muted:#64748b;
   --bg:#ffffff; --bg-soft:#f8fafc; --line:#e2e8f0; --surface:#ffffff;
   --code:#0f172a;
-  /* 毛玻璃（glassmorphism）*/
-  --glass:rgba(255,255,255,.62);
-  --glass-strong:rgba(255,255,255,.82);
-  --glass-border:rgba(255,255,255,.55);
-  --glass-hover:rgba(255,255,255,.55);
-  --glass-input:rgba(255,255,255,.5);
-  --glass-shadow:0 8px 32px rgba(2,6,23,.08), inset 0 1px 0 rgba(255,255,255,.6);
-  --blur:blur(18px) saturate(1.5);
+  /* 毛玻璃（glassmorphism）—— v2 参考 DSH 通透质感：更低不透明度 + 更强光晕层次 */
+  --glass:rgba(255,255,255,.44);
+  --glass-strong:rgba(255,255,255,.68);
+  --glass-border:rgba(255,255,255,.62);
+  --glass-hover:rgba(255,255,255,.52);
+  --glass-input:rgba(255,255,255,.38);
+  --glass-shadow:0 8px 32px rgba(2,6,23,.10), inset 0 1px 0 rgba(255,255,255,.65);
+  --blur:blur(20px) saturate(1.6);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{
@@ -29,9 +29,9 @@ body{
   color:var(--body); height:100vh; display:flex; flex-direction:column;
   transition:background .25s,color .25s;
   background:
-    radial-gradient(58vw 58vw at 88% -12%, rgba(77,107,254,.32), transparent 62%),
-    radial-gradient(46vw 46vw at -8% 92%, rgba(124,58,237,.24), transparent 60%),
-    radial-gradient(34vw 34vw at 55% 110%, rgba(56,132,255,.14), transparent 65%),
+    radial-gradient(58vw 58vw at 88% -12%, rgba(77,107,254,.38), transparent 62%),
+    radial-gradient(46vw 46vw at -8% 92%, rgba(124,58,237,.30), transparent 60%),
+    radial-gradient(34vw 34vw at 55% 110%, rgba(56,132,255,.18), transparent 65%),
     linear-gradient(160deg,#f5f7ff 0%,#eef2ff 55%,#faf5ff 100%);
   background-attachment:fixed;
 }
@@ -93,13 +93,22 @@ a{color:var(--teal);text-decoration:none}
 .toc-item.active{background:var(--teal-light);color:var(--teal-dark);font-weight:700}
 .toc-item .pg{margin-left:auto;font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
 .toc-item.l2{padding-left:26px;font-size:13px}
-/* 书签列表 */
-.bm-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;font-size:13px;color:var(--body)}
+/* 收藏夹列表 */
+.bm-item{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-radius:8px;font-size:13px;color:var(--body)}
 .bm-item:hover{background:var(--glass-hover)}
-.bm-item .bm-del{margin-left:auto;color:var(--muted);font-size:12px;padding:2px 6px;border-radius:6px}
-.bm-item .bm-del:hover{color:#dc2626;background:#fee2e2}
+.bm-main{display:flex;align-items:center;gap:8px;width:100%}
+.bm-main .bm-page{font-weight:700;color:var(--teal-dark);white-space:nowrap}
+.bm-main .bm-ch{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;color:var(--muted)}
+.bm-del{margin-left:auto;color:var(--muted);font-size:12px;padding:2px 6px;border-radius:6px;flex-shrink:0}
+.bm-del:hover{color:#dc2626;background:#fee2e2}
+.bm-note{font-size:11.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .empty-tip{padding:14px;font-size:12.5px;color:var(--muted);line-height:1.7}
 /* 书架 */
+.shelf-group{
+  padding:8px 10px 4px;font-size:11.5px;font-weight:700;color:var(--muted);
+  letter-spacing:.06em;border-top:1px solid var(--glass-border);margin-top:6px;
+}
+.shelf-group:first-child{border-top:none;margin-top:0}
 .shelf-item{
   display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;
   padding:9px 10px;border-radius:8px;font-size:13.5px;color:var(--body);margin-bottom:4px;
@@ -151,18 +160,18 @@ body.dark{
   --bg:#0d1117; --bg-soft:#161b22; --surface:#161b22; --line:#2b3245;
   --ink:#f1f5f9; --body:#c9d1e0; --muted:#8b96ad; --teal-light:#23294a;
   --teal:#4D6BFE; --teal-dark:#7c9bff;
-  --glass:rgba(22,27,34,.58);
-  --glass-strong:rgba(30,36,46,.72);
-  --glass-border:rgba(148,163,184,.14);
-  --glass-hover:rgba(77,107,254,.12);
-  --glass-input:rgba(13,17,23,.5);
-  --glass-shadow:0 8px 32px rgba(0,0,0,.45), inset 0 1px 0 rgba(148,163,184,.1);
+  --glass:rgba(22,27,34,.42);
+  --glass-strong:rgba(30,36,46,.60);
+  --glass-border:rgba(148,163,184,.20);
+  --glass-hover:rgba(77,107,254,.16);
+  --glass-input:rgba(13,17,23,.38);
+  --glass-shadow:0 8px 32px rgba(0,0,0,.50), inset 0 1px 0 rgba(148,163,184,.14);
 }
 body.dark{
   background:
-    radial-gradient(58vw 58vw at 88% -12%, rgba(77,107,254,.20), transparent 62%),
-    radial-gradient(46vw 46vw at -8% 92%, rgba(124,58,237,.16), transparent 60%),
-    radial-gradient(34vw 34vw at 55% 110%, rgba(56,132,255,.10), transparent 65%),
+    radial-gradient(58vw 58vw at 88% -12%, rgba(77,107,254,.26), transparent 62%),
+    radial-gradient(46vw 46vw at -8% 92%, rgba(124,58,237,.22), transparent 60%),
+    radial-gradient(34vw 34vw at 55% 110%, rgba(56,132,255,.16), transparent 65%),
     linear-gradient(160deg,#0a0e17 0%,#0d1117 50%,#101527 100%);
   background-attachment:fixed;
 }
@@ -211,14 +220,14 @@ body.dark .pdf-frame{background:#fff}
   <aside class="sidebar" id="sidebar">
     <div class="side-tab">
       <button id="tabToc" class="active">目录</button>
-      <button id="tabBookmarks">书签</button>
+      <button id="tabBookmarks">收藏夹</button>
       <button id="tabShelf">书架</button>
     </div>
     <div class="side-body" id="tocBody">
       <div class="empty-tip">加载论文目录…</div>
     </div>
     <div class="side-body" id="bmBody" style="display:none">
-      <div class="empty-tip" id="bmEmpty">还没有书签。阅读时点右侧「收藏本页」。</div>
+      <div class="empty-tip" id="bmEmpty">还没有收藏。阅读时点右侧「收藏本页」，之后在这里点条目就能跳回对应页。</div>
     </div>
     <div class="side-body" id="shelfBody" style="display:none">
       <div class="empty-tip">书架：点选要阅读的书（切换后整页重载）。</div>
@@ -260,7 +269,7 @@ body.dark .pdf-frame{background:#fff}
   /* ===== BOOKS 书架模型（萝拍板：BOOKS 数据 + localStorage 按书隔离 + 换书整页重载）===== */
   var BOOKS = [
         {
-      id:"c-ch4", title:"C 讲义 · Ch4 输入输出", meta:"C Primer Plus 伴读 · 样品章 · 4 页", pdf:"papers/c-ch4.pdf", pages:4,
+      id:"c-ch4", title:"C 讲义 · Ch4 输入输出", meta:"C Primer Plus 伴读 · 样品章 · 4 页", group:"C 讲义", pdf:"papers/c-ch4.pdf", pages:4,
       toc:[
         { t:"4.1 先把程序框架摆正", p:1 },
         { t:"4.2 printf：把东西“打印”到屏幕上", p:1 },
@@ -272,7 +281,7 @@ body.dark .pdf-frame{background:#fff}
       ]
     },
     {
-      id:"c-ch4-ex", title:"练习册 · Ch4", meta:"填空/改错/编程/场景 · 5 页", pdf:"papers/c-ch4-ex.pdf", pages:5,
+      id:"c-ch4-ex", title:"练习册 · Ch4", meta:"填空/改错/编程/场景 · 5 页", group:"C 练习册", pdf:"papers/c-ch4-ex.pdf", pages:5,
       toc:[
         { t:"4-1 填空（★）", p:1 },
         { t:"4-2 改错（★★，最有价值的一题）", p:1 },
@@ -285,7 +294,7 @@ body.dark .pdf-frame{background:#fff}
       ]
     },
     {
-      id:"c-ch10", title:"C 讲义 · Ch10 数组和指针", meta:"重点章 · 4 页", pdf:"papers/c-ch10.pdf", pages:4,
+      id:"c-ch10", title:"C 讲义 · Ch10 数组和指针", meta:"重点章 · 4 页", group:"C 讲义", pdf:"papers/c-ch10.pdf", pages:4,
       toc:[
         { t:"10.1 数组：同一类数据的集合", p:1 },
         { t:"10.2 数组名就是地址（Ch4 伏笔兑现）", p:1 },
@@ -298,7 +307,7 @@ body.dark .pdf-frame{background:#fff}
       ]
     },
     {
-      id:"c-ch10-ex", title:"练习册 · Ch10", meta:"重点章 6 题 · 6 页", pdf:"papers/c-ch10-ex.pdf", pages:6,
+      id:"c-ch10-ex", title:"练习册 · Ch10", meta:"重点章 6 题 · 6 页", group:"C 练习册", pdf:"papers/c-ch10-ex.pdf", pages:6,
       toc:[
         { t:"10-1 填空（★）", p:1 },
         { t:"10-2 改错（★★，先自己找再对答案）", p:1 },
@@ -311,7 +320,7 @@ body.dark .pdf-frame{background:#fff}
       ]
     },
     {
-      id:"c-ch12", title:"C 讲义 · Ch12 存储与内存", meta:"重点章 · 4 页", pdf:"papers/c-ch12.pdf", pages:4,
+      id:"c-ch12", title:"C 讲义 · Ch12 存储与内存", meta:"重点章 · 4 页", group:"C 讲义", pdf:"papers/c-ch12.pdf", pages:4,
       toc:[
         { t:"12.1 两个问题：变量「管到哪」和「活多久」", p:1 },
         { t:"12.2 static：让局部变量「记住」上一次的值", p:1 },
@@ -323,7 +332,7 @@ body.dark .pdf-frame{background:#fff}
       ]
     },
     {
-      id:"c-ch12-ex", title:"练习册 · Ch12", meta:"重点章 5 题 · 5 页", pdf:"papers/c-ch12-ex.pdf", pages:5,
+      id:"c-ch12-ex", title:"练习册 · Ch12", meta:"重点章 5 题 · 5 页", group:"C 练习册", pdf:"papers/c-ch12-ex.pdf", pages:5,
       toc:[
         { t:"12-1 填空（★）", p:1 },
         { t:"12-2 改错（★★，先自己找再对答案）", p:1 },
@@ -332,6 +341,46 @@ body.dark .pdf-frame{background:#fff}
         { t:"12-5 专业场景拓展（★★★，不需要硬件知识）", p:2 },
         { t:"12-6 复习题索引", p:2 },
         { t:"12-7 参考答案（先自己写，再看思路与常见错法）", p:3 }
+      ]
+    },
+    {
+      id:"mat-la", title:"数学 · 线性代数", meta:"同济五版 · 178 页 · 扫描版", group:"数学教材", pdf:"papers/mat-la.pdf", pages:178,
+      toc:[
+        { t:"第一章 行列式", p:12 },
+        { t:"第二章 矩阵及其运算", p:40 },
+        { t:"第三章 矩阵的初等变换与线性方程组", p:68 },
+        { t:"第四章 向量组的线性相关性", p:92 },
+        { t:"第五章 相似矩阵及二次型", p:122 },
+        { t:"第六章 线性空间与线性变换", p:149 },
+        { t:"习题答案", p:166 }
+      ]
+    },
+    {
+      id:"mat-calc1", title:"数学 · 高等数学（上）", meta:"同济八版 · 442 页 · 扫描版", group:"数学教材", pdf:"papers/mat-calc1.pdf", pages:442,
+      toc:[
+        { t:"第一章 函数与极限", p:20 },
+        { t:"第二章 导数与微分", p:90 },
+        { t:"第三章 微分中值定理与导数的应用", p:141 },
+        { t:"第四章 不定积分", p:199 },
+        { t:"第五章 定积分", p:238 },
+        { t:"第六章 定积分的应用", p:286 },
+        { t:"第七章 微分方程", p:308 },
+        { t:"附录I 初等数学几个内容简介", p:374 },
+        { t:"附录II 基本初等函数的图形", p:383 },
+        { t:"附录III 几种常用的曲线", p:386 },
+        { t:"附录IV 积分表", p:390 },
+        { t:"部分习题参考答案与提示", p:401 }
+      ]
+    },
+    {
+      id:"mat-calc2", title:"数学 · 高等数学（下）", meta:"同济八版 · 354 页 · 扫描版", group:"数学教材", pdf:"papers/mat-calc2.pdf", pages:354,
+      toc:[
+        { t:"第八章 向量代数与空间解析几何", p:8 },
+        { t:"第九章 多元函数微分法及其应用", p:59 },
+        { t:"第十章 重积分", p:137 },
+        { t:"第十一章 曲线积分与曲面积分", p:187 },
+        { t:"第十二章 无穷级数", p:248 },
+        { t:"部分习题参考答案与提示", p:322 }
       ]
     }
   ];
@@ -388,14 +437,39 @@ body.dark .pdf-frame{background:#fff}
     localStorage.setItem(LS_CUR, id);
     location.reload();  /* 换书走完整重载（萝拍板：hash 对跨 PDF 无意义） */
   }
+  var GROUP_ORDER = ["论文","C 讲义","C 练习册","数学教材","日报"];
   function renderShelf(){
     shelfBody.innerHTML = "";
-    BOOKS.forEach(function(b){
-      var btn = document.createElement("button");
-      btn.className = "shelf-item" + (b.id === BOOK.id ? " active" : "");
-      btn.innerHTML = "<span>" + esc(b.title) + "</span><span class=\"sf-meta\">" + esc(b.meta || "") + "</span>";
-      btn.onclick = function(){ if (b.id !== BOOK.id) switchBook(b.id); };
-      shelfBody.appendChild(btn);
+    /* 按 group 分组渲染（group 缺省归「其他」）*/
+    var groups = {};
+    BOOKS.forEach(function(b){ var g = b.group || "其他"; (groups[g] = groups[g] || []).push(b); });
+    GROUP_ORDER.forEach(function(g){
+      if (!groups[g]) return;
+      var head = document.createElement("div");
+      head.className = "shelf-group";
+      head.textContent = g + " · " + groups[g].length;
+      shelfBody.appendChild(head);
+      groups[g].forEach(function(b){
+        var btn = document.createElement("button");
+        btn.className = "shelf-item" + (b.id === BOOK.id ? " active" : "");
+        btn.innerHTML = "<span>" + esc(b.title) + "</span><span class=\"sf-meta\">" + esc(b.meta || "") + "</span>";
+        btn.onclick = function(){ if (b.id !== BOOK.id) switchBook(b.id); };
+        shelfBody.appendChild(btn);
+      });
+    });
+    Object.keys(groups).forEach(function(g){
+      if (GROUP_ORDER.indexOf(g) >= 0) return;
+      var head = document.createElement("div");
+      head.className = "shelf-group";
+      head.textContent = g + " · " + groups[g].length;
+      shelfBody.appendChild(head);
+      groups[g].forEach(function(b){
+        var btn = document.createElement("button");
+        btn.className = "shelf-item" + (b.id === BOOK.id ? " active" : "");
+        btn.innerHTML = "<span>" + esc(b.title) + "</span><span class=\"sf-meta\">" + esc(b.meta || "") + "</span>";
+        btn.onclick = function(){ if (b.id !== BOOK.id) switchBook(b.id); };
+        shelfBody.appendChild(btn);
+      });
     });
   }
 
@@ -410,10 +484,13 @@ body.dark .pdf-frame{background:#fff}
     notePage.textContent = n;
     renderNotes();
     highlightToc(n);
-    /* P1：pdf.js viewer 跳页（整本已取，改 hash 即可；P2 再换同源 API 精确跳页）*/
+    /* P1：pdf.js viewer 跳页。必须保留 disableRange 参数（否则 viewer 重新解析会切换成 range 请求，破坏 SW 整本缓存）*/
     try {
       var w = pdfFrame.contentWindow;
-      if (w && w.location) { w.location.hash = "page=" + n; return; }
+      if (w && w.location) {
+        w.location.hash = "page=" + n + "&disableRange=true&disableStream=true&disableAutoFetch=true";
+        return;
+      }
     } catch(e){}
     pdfFrame.src = pdfUrl(n);
   }
@@ -422,6 +499,13 @@ body.dark .pdf-frame{background:#fff}
     var q = (filter || "").trim().toLowerCase();
     var hits = [];
     tocBody.innerHTML = "";
+    if (!TOC || !TOC.length) {
+      var tip = document.createElement("div");
+      tip.className = "empty-tip";
+      tip.textContent = "扫描版教材 · 暂无章节目录，可翻页阅读（目录已排进 OCR 计划）";
+      tocBody.appendChild(tip);
+      return hits;
+    }
     TOC.forEach(function(item){
       var ok = !q || item.t.toLowerCase().indexOf(q) >= 0;
       if (q && ok) hits.push(item);
@@ -465,6 +549,12 @@ body.dark .pdf-frame{background:#fff}
     renderNotes(); flashSave();
   });
   function flashSave(){ saveHint.textContent = "已保存"; setTimeout(function(){ saveHint.textContent = "自动保存到本机"; }, 1200); }
+  function chapterOf(p){
+    /* 从 toc 反查 p 所属章节（取最后一个起始页 ≤ p 的项）*/
+    var ch = "";
+    (TOC || []).forEach(function(item){ if (item.p <= p) ch = item.t; });
+    return ch;
+  }
   function renderBookmarks(){
     var keys = Object.keys(bookmarks).map(Number).sort(function(a,b){return a-b;});
     bmBody.innerHTML = "";
@@ -472,7 +562,11 @@ body.dark .pdf-frame{background:#fff}
     keys.forEach(function(p){
       var row = document.createElement("div");
       row.className = "bm-item";
-      row.innerHTML = "<span>第 " + p + " 页</span><span style=\"color:var(--muted)\">" + esc(notes[p] ? (notes[p].slice(0,14) + (notes[p].length>14?"…":"")) : "") + "</span><button class=\"bm-del\">删</button>";
+      var ch = chapterOf(p);
+      row.innerHTML = "<div class=\"bm-main\"><span class=\"bm-page\">第 " + p + " 页</span>" +
+        (ch ? "<span class=\"bm-ch\" title=\"" + esc(ch) + "\">" + esc(ch) + "</span>" : "") +
+        "<button class=\"bm-del\" title=\"取消收藏\">删</button></div>" +
+        "<div class=\"bm-note\">" + esc(notes[p] ? (notes[p].slice(0,24) + (notes[p].length>24?"…":"")) : "无笔记") + "</div>";
       row.querySelector(".bm-del").onclick = function(ev){
         ev.stopPropagation(); delete bookmarks[p]; localStorage.setItem(LS_BM, JSON.stringify(bookmarks)); renderBookmarks();
       };
