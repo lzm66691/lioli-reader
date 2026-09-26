@@ -1,7 +1,7 @@
-/* PWA Service Worker — 莉萝阅读器 P3a·划词标注+浮动工具条+收藏夹列表（2026-09-26）
-   外壳缓存 reader-p2-dg-v7（含 pdf.js 全套）；PDF 缓存 reader-pdf-v1（按需 cache-first）
+/* PWA Service Worker — 莉萝阅读器 P3a UX·标注入口+引导横幅+空态提示（2026-09-26）
+   外壳缓存 reader-p2-dg-v8（含 pdf.js 全套）；PDF 缓存 reader-pdf-v1（按需 cache-first）
    升级纪律：改外壳/pdf.js → 同时改缓存名 */
-var CACHE_SHELL = "reader-p2-dg-v7";
+var CACHE_SHELL = "reader-p2-dg-v8";
 var CACHE_PDF   = "reader-pdf-v1";
 
 var SHELL_URLS = [
