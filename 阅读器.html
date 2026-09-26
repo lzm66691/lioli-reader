@@ -1930,59 +1930,59 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
           };
 
-          doc.addEventListener("mouseup", function(){
+          function doHl(){
 
-            setTimeout(function(){
+            try {
 
-              try {
+              var sel = pdfFrame.contentWindow.getSelection();
 
-                var sel = pdfFrame.contentWindow.getSelection();
+              if (!sel || sel.isCollapsed || !sel.rangeCount) { hide(); return; }
 
-                if (!sel || sel.isCollapsed || !sel.rangeCount) { hide(); return; }
+              var range = sel.getRangeAt(0);
 
-                var range = sel.getRangeAt(0);
+              var rect = range.getBoundingClientRect();
 
-                var rect = range.getBoundingClientRect();
+              if (!rect || rect.width < 2 || rect.height < 2) { hide(); return; }
 
-                if (!rect || rect.width < 2 || rect.height < 2) { hide(); return; }
+              var node = range.commonAncestorContainer;
 
-                var node = range.commonAncestorContainer;
+              var pe = node.nodeType === 1 ? node : node.parentElement;
 
-                var pe = node.nodeType === 1 ? node : node.parentElement;
+              while (pe && !(pe.classList && pe.classList.contains("page"))) pe = pe.parentElement;
 
-                while (pe && !(pe.classList && pe.classList.contains("page"))) pe = pe.parentElement;
+              if (!pe) { hide(); return; }
 
-                if (!pe) { hide(); return; }
+              var pr = pe.getBoundingClientRect();
 
-                var pr = pe.getBoundingClientRect();
+              if (!pr.width || !pr.height) { hide(); return; }
 
-                if (!pr.width || !pr.height) { hide(); return; }
+              var xp = Math.max(0, Math.min(100, (rect.left - pr.left) / pr.width * 100));
 
-                var xp = Math.max(0, Math.min(100, (rect.left - pr.left) / pr.width * 100));
+              var yp = Math.max(0, Math.min(100, (rect.top - pr.top) / pr.height * 100));
 
-                var yp = Math.max(0, Math.min(100, (rect.top - pr.top) / pr.height * 100));
+              cur = { page: Number(pe.getAttribute("data-page-number")), rect: {
 
-                cur = { page: Number(pe.getAttribute("data-page-number")), rect: {
+                x: xp, y: yp,
 
-                  x: xp, y: yp,
+                w: Math.max(2, Math.min(100 - xp, rect.width / pr.width * 100)),
 
-                  w: Math.max(2, Math.min(100 - xp, rect.width / pr.width * 100)),
+                h: Math.max(2, Math.min(100 - yp, rect.height / pr.height * 100))
 
-                  h: Math.max(2, Math.min(100 - yp, rect.height / pr.height * 100))
+              }};
 
-                }};
+              bar.style.left = Math.max(8, Math.min(pdfFrame.contentWindow.innerWidth - 150, rect.left + rect.width / 2 - 60)) + "px";
 
-                bar.style.left = Math.max(8, Math.min(pdfFrame.contentWindow.innerWidth - 150, rect.left + rect.width / 2 - 60)) + "px";
+              bar.style.top = Math.max(8, rect.top - 36) + "px";
 
-                bar.style.top = Math.max(8, rect.top - 36) + "px";
+              bar.style.display = "flex";
 
-                bar.style.display = "flex";
+            } catch(e){}
 
-              } catch(e){}
+          }
 
-            }, 10);
+          doc.addEventListener("mouseup", function(){ setTimeout(doHl, 10); });
 
-          });
+          doc.addEventListener("selectionchange", function(){ setTimeout(doHl, 60); });
 
           doc.addEventListener("mousedown", function(ev){
 
@@ -2235,6 +2235,46 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
     });
   }
 
+  /* 大纲扁平化（章/节两级） */
+  function flattenOutline(pdf, outline){
+    var out = [];
+    function walk(items, depth){
+      var q = [];
+      (items || []).forEach(function(it){
+        q.push(pdf.getPageIndex(it.dest[0]).then(function(pi){
+          out.push({ t: it.title, p: pi + 1, l2: depth > 0 });
+          return walk(it.items, depth + 1);
+        }).catch(function(){ out.push({ t: it.title, p: 1, l2: depth > 0 }); return null; }));
+      });
+      return Promise.all(q);
+    }
+    return walk(outline, 0).then(function(){ return out; });
+  }
+
+  /* 本地书目录提取：优先复用 iframe 已解析的 PDF（稳、零重复下载），超时降级动态 import */
+  function extractTocForLocal(url, cb){
+    var tries = 0;
+    var iv = setInterval(function(){
+      try {
+        var app = pdfFrame.contentWindow.PDFViewerApplication;
+        if (app && app.pdfDocument) {
+          clearInterval(iv);
+          app.pdfDocument.getOutline().then(function(outline){
+            if (outline && outline.length) {
+              return flattenOutline(app.pdfDocument, outline);
+            }
+            return null;
+          }).then(function(items){ cb(items, null); }).catch(function(e){ cb(null, String(e && e.message || e)); });
+          return;
+        }
+      } catch(e){}
+      if (++tries > 60) {
+        clearInterval(iv);
+        extractTocFromPdf(url).then(function(items){ cb(items, null); }).catch(function(e){ cb(null, String(e && e.message || e)); });
+      }
+    }, 500);
+  }
+
   function openLocalBook(b){
 
     localStorage.setItem(LS_CUR, b.id);
@@ -2271,7 +2311,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
         if (tocBody) tocBody.innerHTML = '<div class="empty-tip">正在提取本地书目录…</div>';
 
-        extractTocFromPdf(BOOK.pdf).then(function(items){
+        extractTocForLocal(BOOK.pdf, function(items, err){
 
           if (items && items.length) {
 
@@ -2279,15 +2319,11 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
             renderToc();
 
-          } else {
+          } else if (tocBody) {
 
-            if (tocBody) tocBody.innerHTML = '<div class="empty-tip">这本书没有内置书签大纲，暂无法生成目录。</div>';
+            tocBody.innerHTML = '<div class="empty-tip">' + (err ? '目录提取失败（' + esc(err) + '），可翻页阅读。' : '这本书没有内置书签大纲，暂无法生成目录。') + '</div>';
 
           }
-
-        }).catch(function(e){
-
-          if (tocBody) tocBody.innerHTML = '<div class="empty-tip">目录提取失败，可翻页阅读。</div>';
 
         });
 
