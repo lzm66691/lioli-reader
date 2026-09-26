@@ -916,8 +916,26 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
   /* P3a 划词/区域标注（独立于页面笔记与书签） */
   var LS_MARKS = "reader-app-marks:" + BOOK.id;
   var marks = [];
-  try { marks = JSON.parse(localStorage.getItem(LS_MARKS) || "[]") || []; } catch(e){}
-  function saveMarks(){ try { localStorage.setItem(LS_MARKS, JSON.stringify(marks)); } catch(e){} }
+  try {
+    var _raw = localStorage.getItem(LS_MARKS);
+    if (_raw) {
+      var _p = JSON.parse(_raw);
+      marks = Array.isArray(_p) ? _p : (Array.isArray(_p && _p.list) ? _p.list : []);
+    }
+  } catch(e){}
+  function saveMarks(){
+    try {
+      localStorage.setItem(LS_MARKS, JSON.stringify({ v: 1, saved: Date.now(), list: marks }));
+    } catch(e){
+      /* 配额超限：可见报错，不静默丢标注 */
+      try {
+        var _msg = "标注保存失败：存储空间不足。可删除部分标注/笔记后再试。";
+        if (typeof alert === "function") alert(_msg);
+        var _bm = document.getElementById("bmBody");
+        if (_bm) { var _d = document.createElement("div"); _d.className = "bm-sec"; _d.textContent = _msg; _bm.insertBefore(_d, _bm.firstChild); }
+      } catch(e2){}
+    }
+  }
 
   var bookmarks = {};
 
