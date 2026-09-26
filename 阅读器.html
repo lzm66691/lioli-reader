@@ -254,7 +254,7 @@ body.dark .pdf-frame{background:#fff}
       <div class="empty-tip" id="bmEmpty">还没有收藏。阅读时点右侧「收藏本页」，之后在这里点条目就能跳回对应页。</div>
     </div>
     <div class="side-body" id="shelfBody" style="display:none">
-      <div class="empty-tip">书架：点选要阅读的书（切换后整页重载）。</div>
+      <div class="empty-tip">书架：点选要阅读的书。版权书（如教材）请用「＋ 导入 PDF」本地阅读，数据只存本机浏览器，不公开。</div>
     </div>
     <div class="side-body search-res" id="searchBody"></div>
   </aside>
@@ -382,46 +382,6 @@ body.dark .pdf-frame{background:#fff}
         { t:"12-7 参考答案（先自己写，再看思路与常见错法）", p:3 }
       ]
     },
-    {
-      id:"mat-la", title:"数学 · 线性代数", meta:"同济五版 · 178 页 · 扫描版", group:"数学教材", pdf:"papers/mat-la.pdf", pages:178,
-      toc:[
-        { t:"第一章 行列式", p:12, secs:[{t:"二阶与三阶行列式",p:12},{t:"全排列及其逆序数",p:13},{t:"n 阶行列式的定义",p:15},{t:"对换",p:16},{t:"行列式的性质",p:17},{t:"行列式按行(列)展开",p:27},{t:"克拉默法则",p:32}] },
-        { t:"第二章 矩阵及其运算", p:40, secs:[{t:"矩阵",p:40},{t:"矩阵的运算",p:44},{t:"逆矩阵",p:53},{t:"矩阵分块法",p:58}] },
-        { t:"第三章 矩阵的初等变换与线性方程组", p:68, secs:[{t:"矩阵的初等变换",p:68},{t:"矩阵的秩",p:76},{t:"线性方程组的解",p:82}] },
-        { t:"第四章 向量组的线性相关性", p:92, secs:[{t:"向量组及其线性组合",p:92},{t:"向量组的线性相关性",p:98},{t:"向量组的秩",p:101},{t:"线性方程组的解的结构",p:105},{t:"向量空间",p:113}] },
-        { t:"第五章 相似矩阵及二次型", p:122, secs:[{t:"向量的内积、长度及正交性",p:122},{t:"方阵的特征值与特征向量",p:128},{t:"相似矩阵",p:132},{t:"对称矩阵的对角化",p:135},{t:"二次型及其标准形",p:138},{t:"用配方法化二次型成标准形",p:142},{t:"正定二次型",p:143}] },
-        { t:"第六章 线性空间与线性变换", p:149, secs:[{t:"线性空间的定义与性质",p:149},{t:"维数、基与坐标",p:152},{t:"基变换与坐标变换",p:154},{t:"线性变换",p:157},{t:"线性变换的矩阵表示式",p:160}] },
-        { t:"习题答案", p:166 }
-      ]
-    },
-    {
-      id:"mat-calc1", title:"数学 · 高等数学（上）", meta:"同济八版 · 442 页 · 扫描版", group:"数学教材", pdf:"papers/mat-calc1.pdf", pages:442,
-      toc:[
-        { t:"第一章 函数与极限", p:20, secs:[{t:"第一节 映射与函数",p:20},{t:"第二节 数列的极限",p:37},{t:"第三节 函数的极限",p:45},{t:"第四节 无穷小与无穷大",p:52},{t:"第五节 极限运算法则",p:55},{t:"第六节 极限存在准则 两个重要极限",p:63},{t:"第七节 无穷小的比较",p:66},{t:"第八节 函数的连续性与间断点",p:73},{t:"第九节 连续函数的运算与初等函数的连续性",p:78},{t:"第十节 闭区间上连续函数的性质",p:83}] },
-        { t:"第二章 导数与微分", p:90, secs:[{t:"第一节 导数概念",p:90},{t:"第二节 函数的求导法则",p:101},{t:"第三节 高阶导数",p:109},{t:"第四节 隐函数及由参数方程所确定的函数的导数 相关变化率",p:117},{t:"第五节 函数的微分",p:126}] },
-        { t:"第三章 微分中值定理与导数的应用", p:141, secs:[{t:"第一节 微分中值定理",p:141},{t:"第二节 洛必达法则",p:148},{t:"第三节 泰勒公式",p:153},{t:"第四节 函数的单调性与曲线的凹凸性",p:159},{t:"第五节 函数的极值与最大值最小值",p:168},{t:"第六节 函数图形的描绘",p:178},{t:"第七节 曲率",p:183},{t:"第八节 方程的近似解",p:192}] },
-        { t:"第四章 不定积分", p:199, secs:[{t:"第一节 不定积分的概念与性质",p:199},{t:"第二节 换元积分法",p:208},{t:"第三节 分部积分法",p:223},{t:"第四节 有理函数的积分",p:227},{t:"第五节 积分表的使用",p:232}] },
-        { t:"第五章 定积分", p:238, secs:[{t:"第一节 定积分的概念与性质",p:238},{t:"第二节 微积分基本公式",p:251},{t:"第三节 定积分的换元法和分部积分法",p:259},{t:"第四节 反常积分",p:268},{t:"第五节 反常积分的审敛法 Γ函数",p:275}] },
-        { t:"第六章 定积分的应用", p:286, secs:[{t:"第一节 定积分的元素法",p:286},{t:"第二节 定积分在几何学上的应用",p:288},{t:"第三节 定积分在物理学上的应用",p:301}] },
-        { t:"第七章 微分方程", p:308, secs:[{t:"第一节 微分方程的基本概念",p:308},{t:"第二节 可分离变量的微分方程",p:313},{t:"第三节 齐次方程",p:320},{t:"第四节 一阶线性微分方程",p:326},{t:"第五节 可降阶的高阶微分方程",p:332},{t:"第六节 高阶线性微分方程",p:340},{t:"第七节 常系数齐次线性微分方程",p:349},{t:"第八节 常系数非齐次线性微分方程",p:358}] },
-        { t:"附录I 初等数学几个内容简介", p:374 },
-        { t:"附录II 基本初等函数的图形", p:383 },
-        { t:"附录III 几种常用的曲线", p:386 },
-        { t:"附录IV 积分表", p:390 },
-        { t:"部分习题参考答案与提示", p:401 }
-      ]
-    },
-    {
-      id:"mat-calc2", title:"数学 · 高等数学（下）", meta:"同济八版 · 354 页 · 扫描版", group:"数学教材", pdf:"papers/mat-calc2.pdf", pages:354,
-      toc:[
-        { t:"第八章 向量代数与空间解析几何", p:8, secs:[{t:"第一节 向量及其线性运算",p:8},{t:"第二节 数量积 向量积 混合积",p:21},{t:"第三节 平面及其方程",p:30},{t:"第四节 空间直线及其方程",p:36},{t:"第五节 曲面及其方程",p:43},{t:"第六节 空间曲线及其方程",p:51}] },
-        { t:"第九章 多元函数微分法及其应用", p:59, secs:[{t:"第一节 多元函数的基本概念",p:59},{t:"第二节 偏导数",p:70},{t:"第三节 全微分",p:76},{t:"第四节 多元复合函数的求导法则",p:83},{t:"第五节 隐函数的求导公式",p:90},{t:"第六节 多元函数微分学的几何应用",p:96},{t:"第七节 方向导数与梯度",p:107},{t:"第八节 多元函数的极值及其求法",p:115},{t:"第九节 二元函数的泰勒公式",p:125},{t:"第十节 最小二乘法",p:130}] },
-        { t:"第十章 重积分", p:137, secs:[{t:"第一节 二重积分的概念与性质",p:137},{t:"第二节 二重积分的计算法",p:143},{t:"第三节 三重积分",p:161},{t:"第四节 重积分的应用",p:168},{t:"第五节 含参变量的积分",p:178}] },
-        { t:"第十一章 曲线积分与曲面积分", p:187, secs:[{t:"第一节 对弧长的曲线积分",p:187},{t:"第二节 对坐标的曲线积分",p:193},{t:"第三节 格林公式及其应用",p:203},{t:"第四节 对面积的曲面积分",p:216},{t:"第五节 对坐标的曲面积分",p:220},{t:"第六节 高斯公式 通量与散度",p:230},{t:"第七节 斯托克斯公式 环流量与旋度",p:237}] },
-        { t:"第十二章 无穷级数", p:248, secs:[{t:"第一节 常数项级数的概念和性质",p:248},{t:"第二节 常数项级数的审敛法",p:255},{t:"第三节 幂级数",p:269},{t:"第四节 函数展开成幂级数",p:277},{t:"第五节 函数的幂级数展开式的应用",p:285},{t:"第六节 函数项级数的一致收敛性及一致收敛级数的基本性质",p:293},{t:"第七节 傅里叶级数",p:301},{t:"第八节 一般周期函数的傅里叶级数",p:314}] },
-        { t:"部分习题参考答案与提示", p:322 }
-      ]
-    },
     { id:"dig-0920", title:"日报 · 09-20", meta:"每日前沿日报 · 8 页", group:"日报", pdf:"digests/dig-2026-09-20.pdf", pages:8 },
     { id:"dig-0921", title:"日报 · 09-21", meta:"每日前沿日报 · 9 页", group:"日报", pdf:"digests/dig-2026-09-21.pdf", pages:9 },
     { id:"dig-0922", title:"日报 · 09-22", meta:"每日前沿日报 · 8 页", group:"日报", pdf:"digests/dig-2026-09-22.pdf", pages:8 },
@@ -431,7 +391,8 @@ body.dark .pdf-frame{background:#fff}
     { id:"dig-w38", title:"周报 · W38", meta:"本周回顾 · 1 页", group:"日报", pdf:"digests/dig-2026-W38.pdf", pages:1 }
   ];
   var LS_CUR = "reader-app-current";
-  var curId = localStorage.getItem(LS_CUR) || "fvis";
+  var rawCur = localStorage.getItem(LS_CUR) || "fvis";
+  var curId = rawCur;
   var BOOK = BOOKS.filter(function(b){ return b.id === curId; })[0] || BOOKS[0];
   curId = BOOK.id;
 
@@ -441,7 +402,8 @@ body.dark .pdf-frame{background:#fff}
   var VIEWER = "vendor/pdfjs/web/viewer.html";
   function pdfUrl(n){
     n = Math.max(1, Math.floor(n) || 1);
-    return VIEWER + "?file=" + encodeURIComponent("/" + BOOK.pdf) +
+    var target = new URL(BOOK.pdf, document.baseURI).href;
+    return VIEWER + "?file=" + encodeURIComponent(target) +
       "#page=" + n + "&disableRange=true&disableStream=true&disableAutoFetch=true";
   }
   /* localStorage 按书隔离；旧 key（无后缀）首次自动迁移到 :fvis */
@@ -498,7 +460,7 @@ body.dark .pdf-frame{background:#fff}
     if (page) { try { sessionStorage.setItem("reader-app-goto", id + ":" + page); } catch(e){} }
     location.reload();  /* 换书走完整重载（萝拍板：hash 对跨 PDF 无意义） */
   }
-  var GROUP_ORDER = ["论文","C 讲义","C 练习册","数学教材","日报"];
+  var GROUP_ORDER = ["论文","C 讲义","C 练习册","日报"];
   function renderShelf(){
     shelfBody.innerHTML = "";
     var groups = {};
@@ -820,6 +782,131 @@ body.dark .pdf-frame{background:#fff}
   renderToc();
   renderNotes();
   goPage(state.page);
+
+  /* ===== 本地书（B 方案）：导入 PDF → IndexedDB 本地存，不上传任何服务器 ===== */
+  var LOCAL_DB = "reader-local-books", LOCAL_STORE = "books";
+  function idbOpenLocal(){ return new Promise(function(res, rej){ var rq = indexedDB.open(LOCAL_DB, 1);
+    rq.onupgradeneeded = function(){ if (!rq.result.objectStoreNames.contains(LOCAL_STORE)) rq.result.createObjectStore(LOCAL_STORE, {keyPath:"id"}); };
+    rq.onsuccess = function(){ res(rq.result); }; rq.onerror = function(){ rej(rq.error); }; }); }
+  function idbLocalPut(b){ return idbOpenLocal().then(function(db){ return new Promise(function(res, rej){ var tx = db.transaction(LOCAL_STORE, "readwrite"); tx.objectStore(LOCAL_STORE).put(b); tx.oncomplete = function(){ res(); }; tx.onerror = function(){ rej(tx.error); }; }); }); }
+  function idbLocalAll(){ return idbOpenLocal().then(function(db){ return new Promise(function(res, rej){ var tx = db.transaction(LOCAL_STORE, "readonly"); var rq = tx.objectStore(LOCAL_STORE).getAll(); rq.onsuccess = function(){ res(rq.result || []); }; rq.onerror = function(){ rej(rq.error); }; }); }); }
+  function idbLocalGet(id){ return idbOpenLocal().then(function(db){ return new Promise(function(res, rej){ var tx = db.transaction(LOCAL_STORE, "readonly"); var rq = tx.objectStore(LOCAL_STORE).get(id); rq.onsuccess = function(){ res(rq.result); }; rq.onerror = function(){ rej(rq.error); }; }); }); }
+  function idbLocalDel(id){ return idbOpenLocal().then(function(db){ return new Promise(function(res, rej){ var tx = db.transaction(LOCAL_STORE, "readwrite"); tx.objectStore(LOCAL_STORE).delete(id); tx.oncomplete = function(){ res(); }; tx.onerror = function(){ rej(tx.error); }; }); }); }
+  function doImport(file){
+    if (!file || file.type !== "application/pdf") { alert("请选择 PDF 文件"); return; }
+    var id = "local-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
+    var title = file.name.replace(/\.pdf$/i, "") || "未命名";
+    var reader = new FileReader();
+    reader.onload = function(){
+      var blob = new Blob([reader.result], {type:"application/pdf"});
+      idbLocalPut({id:id, title:title, meta:"本地导入 · " + (file.size/1048576).toFixed(1) + " MB", added:new Date().toISOString(), blob:blob}).then(function(){
+        renderShelf();
+        alert("已导入《" + title + "》，存于本机浏览器（不公开）。");
+      }).catch(function(e){ alert("导入失败：" + e.message); });
+    };
+    reader.onerror = function(){ alert("读取文件失败"); };
+    reader.readAsArrayBuffer(file);
+  }
+  function exportLocal(){
+    idbLocalAll().then(function(list){
+      if (!list.length) { alert("还没有本地书"); return; }
+      list.forEach(function(b){
+        var a = document.createElement("a");
+        var u = URL.createObjectURL(b.blob);
+        a.href = u; a.download = b.title + ".pdf";
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function(){ URL.revokeObjectURL(u); }, 10000);
+      });
+    });
+  }
+  function ensureShelfTools(){
+    if (document.getElementById("shelfTools")) return;
+    var t = document.createElement("div");
+    t.id = "shelfTools"; t.className = "shelf-tools";
+    var btn1 = document.createElement("button"); btn1.className = "tool-btn small"; btn1.id = "importPdfBtn"; btn1.textContent = "＋ 导入 PDF";
+    var btn2 = document.createElement("button"); btn2.className = "tool-btn small"; btn2.id = "exportLocalBtn"; btn2.textContent = "导出本地书";
+    var inp = document.createElement("input"); inp.id = "pdfFileInput"; inp.type = "file"; inp.accept = "application/pdf"; inp.multiple = true; inp.style.display = "none";
+    t.appendChild(btn1); t.appendChild(btn2); t.appendChild(inp);
+    shelfBody.appendChild(t);
+    btn1.onclick = function(){ inp.click(); };
+    inp.onchange = function(){ Array.prototype.forEach.call(inp.files, doImport); inp.value = ""; };
+    btn2.onclick = exportLocal;
+  }
+  function renderLocalShelf(){
+    idbLocalAll().then(function(list){
+      if (!list.length) return;
+      var wrap = document.createElement("div");
+      wrap.className = "shelf-group-wrap";
+      var head = document.createElement("div");
+      head.className = "shelf-group";
+      var arrow = document.createElement("span");
+      arrow.className = "sg-arrow";
+      var collapsed = {}; try { collapsed = JSON.parse(localStorage.getItem("reader-app-shelf-collapse") || "{}") || {}; } catch(e){}
+      var key = "本地书";
+      arrow.textContent = collapsed[key] ? "▸" : "▾";
+      head.appendChild(arrow);
+      var t = document.createElement("span");
+      t.textContent = key + " · " + list.length;
+      head.appendChild(t);
+      head.onclick = function(){
+        var open = listEl.classList.toggle("collapsed");
+        arrow.textContent = open ? "▸" : "▾";
+        collapsed[key] = open;
+        try { localStorage.setItem("reader-app-shelf-collapse", JSON.stringify(collapsed)); } catch(e){}
+      };
+      wrap.appendChild(head);
+      var listEl = document.createElement("div");
+      listEl.className = "shelf-group-list" + (collapsed[key] ? " collapsed" : "");
+      list.forEach(function(b){
+        var card = document.createElement("div");
+        card.className = "shelf-item" + (curId === b.id ? " active" : "");
+        var info = document.createElement("span");
+        info.className = "sf-info";
+        info.innerHTML = "<span class=\"sf-title\">" + esc(b.title) + "</span><span class=\"sf-meta\">" + esc(b.meta || "") + "</span>";
+        card.appendChild(info);
+        card.title = b.title;
+        card.onclick = function(){ openLocalBook(b); };
+        var del = document.createElement("button");
+        del.className = "sf-expand";
+        del.textContent = "✕";
+        del.title = "删除此书（仅删本机，不影响服务器）";
+        del.onclick = function(ev){ ev.stopPropagation(); if (confirm("删除《" + b.title + "》？仅删本机。")) { idbLocalDel(b.id).then(function(){ renderShelf(); }); } };
+        card.appendChild(del);
+        listEl.appendChild(card);
+      });
+      wrap.appendChild(listEl);
+      shelfBody.appendChild(wrap);
+    });
+  }
+  function openLocalBook(b){
+    localStorage.setItem(LS_CUR, b.id);
+    try { sessionStorage.removeItem("reader-app-goto"); } catch(e){}
+    location.reload();
+  }
+  /* 本地书恢复：curId 是 local-* → 异步从 IndexedDB 取 blob，切到本地书视图 */
+  if (rawCur.indexOf("local-") === 0) {
+    window.__localDbg = { step: "start", curId: rawCur };
+    idbLocalGet(rawCur).then(function(lb){
+      if (!lb) { window.__localDbg.step = "missing"; localStorage.removeItem(LS_CUR); location.reload(); return; }
+      window.__localDbg.step = "got";
+      try {
+        curId = lb.id;
+        BOOK = { id: lb.id, title: lb.title, meta: lb.meta, group: "本地书", pdf: URL.createObjectURL(lb.blob), pages: null, toc: null };
+        PDF_SRC = BOOK.pdf;
+        TOC = null;
+        document.title = BOOK.title;
+        if (tocBody) tocBody.innerHTML = '<div class="empty-tip">本地书暂无目录（章节提取随 P3 提供）。</div>';
+        pdfFrame.src = pdfUrl(state.page);
+        renderShelf();
+        window.__localDbg.step = "done";
+      } catch (e) { window.__localDbg.err = String(e && e.stack || e); }
+    }).catch(function(e){ window.__localDbg.err = String(e && e.stack || e); });
+  }
+  /* renderShelf 末尾挂接：重建工具条 + 本地书组 */
+  var _renderShelfBase = renderShelf;
+  renderShelf = function(){ _renderShelfBase(); ensureShelfTools(); renderLocalShelf(); };
+  /* 测试/调试钩子（不参与功能逻辑） */
+  window.__readerLocal = { doImport: doImport, openLocalBook: openLocalBook };
 })();
 </script>
 </body>
