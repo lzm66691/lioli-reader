@@ -128,6 +128,11 @@ a{color:var(--teal);text-decoration:none}
 .tool-group:first-of-type{border-left:none;padding-left:0;margin-left:0}
 .tool-btn svg{width:15px;height:15px;flex-shrink:0}
 .tool-btn span{line-height:1}
+.guide-banner{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:9990;display:flex;align-items:center;gap:12px;max-width:720px;padding:10px 16px;border-radius:12px;background:rgba(255,255,255,.92);border:1px solid rgba(0,0,0,.08);box-shadow:0 8px 30px rgba(2,6,23,.16);font-size:13px;color:var(--ink);backdrop-filter:blur(14px)}
+.guide-banner b{color:var(--teal-dark)}
+.guide-banner button{border:none;border-radius:8px;padding:5px 14px;background:var(--teal);color:#fff;font-size:12px;cursor:pointer;flex-shrink:0}
+body.dark .guide-banner{background:rgba(42,42,42,.95);border-color:rgba(255,255,255,.12)}
+#markBtn.active{background:var(--teal-light);color:var(--teal-dark);border-color:var(--teal-light)}
 
 .page-jump{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
 
@@ -482,7 +487,13 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <body>
 
+  <div class="guide-banner" id="guideBanner" style="display:none">
 
+    <span>新功能：<b>选中 PDF 文字</b>即可划词标注（三色高亮 + 笔记）· 搜索已移入左栏第 4 个 Tab · 标注列表在「收藏夹」</span>
+
+    <button id="guideClose" title="关闭">知道了</button>
+
+  </div>
 
 <!-- ===== 顶栏 ===== -->
 
@@ -505,6 +516,8 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
     <button class="tool-btn" id="sidebarBtn" title="目录（侧栏）"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 4h12M2 8h12M2 12h7"/></svg><span>目录</span></button>
 
     <button class="tool-btn" id="noteBtn" title="笔记与书签"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M3 2h10v11l-2-1.5L9 13V2"/></svg><span>笔记</span></button>
+
+    <button class="tool-btn" id="markBtn" title="划词标注：选中 PDF 文字即可高亮/记笔记，标注列表在收藏夹"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l6-6 2 2-6 6-2 2zM9 7l3-3 2 2-3 3z"/></svg><span>标注</span></button>
 
   </div>
 
@@ -554,7 +567,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
     <div class="side-body" id="bmBody" style="display:none">
 
-      <div class="empty-tip" id="bmEmpty">还没有收藏。阅读时点右侧「收藏本页」，之后在这里点条目就能跳回对应页。</div>
+      <div class="empty-tip" id="bmEmpty">还没有收藏/标注。阅读时：右侧「收藏本页」存书签；<b>选中 PDF 文字</b>划词标注（三色高亮 + 笔记）。</div>
 
     </div>
 
@@ -1584,6 +1597,44 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
     renderShelf();
 
   });
+
+  var markBtn = document.getElementById("markBtn");
+
+  if (markBtn) markBtn.addEventListener("click", function(){
+
+    document.getElementById("tabBookmarks").click();
+
+    var mm = document.getElementById("bmMarks");
+
+    if (mm) mm.scrollIntoView({behavior:"smooth", block:"nearest"});
+
+    markBtn.classList.add("active");
+
+    setTimeout(function(){ markBtn.classList.remove("active"); }, 1500);
+
+  });
+
+  /* 首次引导横幅 */
+
+  (function(){
+
+    var g = document.getElementById("guideBanner");
+
+    if (!g) return;
+
+    try { if (localStorage.getItem("reader-app-guide-seen")) return; } catch(e){}
+
+    g.style.display = "flex";
+
+    var closed = false;
+
+    function hide(){ if (!closed) { closed = true; g.style.display = "none"; try { localStorage.setItem("reader-app-guide-seen", "1"); } catch(e){} } }
+
+    document.getElementById("guideClose").addEventListener("click", hide);
+
+    setTimeout(hide, 9000);
+
+  })();
 
   document.getElementById("tabSearch").addEventListener("click", function(){
 
