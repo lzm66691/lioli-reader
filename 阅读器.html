@@ -216,7 +216,7 @@ body.dark .guide-banner{background:rgba(42,42,42,.95);border-color:rgba(255,255,
 .toc-chapter .arrow{display:inline-block;width:15px;text-align:center;color:var(--muted);font-size:11px;flex-shrink:0}
 .toc-chapter .toc-item{width:100%}
 .app-ver{margin-left:8px;font-size:11px;font-weight:600;color:var(--muted);padding:2px 7px;border:1px solid var(--line);border-radius:6px;background:var(--glass);letter-spacing:.3px}
-.drawing-active{touch-action:none!important}
+.drawing-active{touch-action:none!important;user-select:none!important;-webkit-user-select:none!important}
 #selModeBtn.active{background:var(--teal-light)!important;color:var(--teal-dark)!important;font-weight:700}
 #selTip{position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:2000;display:none;padding:9px 16px;font-size:13px;color:var(--teal-dark);background:rgba(255,255,255,.94);border:1px solid rgba(0,140,160,.35);border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.16);backdrop-filter:blur(8px);max-width:88vw;text-align:center}
 body.dark #selTip{background:rgba(40,40,40,.94);color:#8fd8e0}
@@ -510,7 +510,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v17</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v18</span></div>
 
   <div class="spacer"></div>
 
@@ -1616,6 +1616,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
     _selBtn.addEventListener("click", function(){
       window.__selMode = !window.__selMode;
       document.body.classList.toggle("sel-mode", window.__selMode);
+      try { var _f = document.getElementById("pdfFrame"); if (_f && _f.contentWindow && _f.contentWindow.setSelMode) _f.contentWindow.setSelMode(window.__selMode); } catch(e){}
       _selBtn.classList.toggle("active", window.__selMode);
       _selBtn.title = window.__selMode ? "框选模式已开启：拖动框选标注（点此退出）" : "框选模式：进入后直接拖动框选标注（平板友好）";
     });
@@ -1882,7 +1883,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
         var markCss = doc.createElement("style");
 
-        markCss.textContent = ".hl-marker{position:absolute;z-index:3;border-radius:2px;cursor:pointer;pointer-events:auto} .hl-marker.hl-1{background:rgba(251,218,131,.42)} .hl-marker.hl-2{background:rgba(228,147,142,.38)} .hl-marker.hl-3{background:rgba(141,187,255,.38)} .hl-marker:hover{outline:1px solid rgba(0,0,0,.25)} #hlBar{position:fixed;z-index:9999;display:none;gap:4px;background:rgba(255,255,255,.96);border:1px solid rgba(0,0,0,.12);border-radius:8px;padding:4px 6px;box-shadow:0 4px 14px rgba(0,0,0,.18);align-items:center} #hlBar button{width:20px;height:20px;border:none;border-radius:4px;cursor:pointer;border:1px solid rgba(0,0,0,.15);padding:0} #hlBar .hl-b1{background:#FBDA83} #hlBar .hl-b2{background:#E4938E} #hlBar .hl-b3{background:#8DBBFF} #hlBar .hl-note-btn{width:auto;padding:0 8px;font-size:12px;color:#333;background:#fff} body.dark #hlBar{background:rgba(42,42,42,.96);border-color:rgba(255,255,255,.15)} body.dark #hlBar .hl-note-btn{color:#ddd} body.dark #hlBar .hl-note-btn{background:rgba(60,60,60,.9)}";
+        markCss.textContent = ".hl-marker{position:absolute;z-index:3;border-radius:2px;cursor:pointer;pointer-events:auto} .hl-marker.hl-1{background:rgba(251,218,131,.42)} .hl-marker.hl-2{background:rgba(228,147,142,.38)} .hl-marker.hl-3{background:rgba(141,187,255,.38)} .hl-marker:hover{outline:1px solid rgba(0,0,0,.25)} #hlBar{position:fixed;z-index:9999;display:none;gap:4px;background:rgba(255,255,255,.96);border:1px solid rgba(0,0,0,.12);border-radius:8px;padding:4px 6px;box-shadow:0 4px 14px rgba(0,0,0,.18);align-items:center} #hlBar button{width:20px;height:20px;border:none;border-radius:4px;cursor:pointer;border:1px solid rgba(0,0,0,.15);padding:0} #hlBar .hl-b1{background:#FBDA83} #hlBar .hl-b2{background:#E4938E} #hlBar .hl-b3{background:#8DBBFF} #hlBar .hl-note-btn{width:auto;padding:0 8px;font-size:12px;color:#333;background:#fff} body.dark #hlBar{background:rgba(42,42,42,.96);border-color:rgba(255,255,255,.15)} body.dark #hlBar .hl-note-btn{color:#ddd} body.dark #hlBar .hl-note-btn{background:rgba(60,60,60,.9)} body.sel-disabled,body.sel-disabled *{user-select:none!important;-webkit-user-select:none!important}";
 
         doc.head.appendChild(markCss);
 
@@ -2051,6 +2052,9 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
           doc.addEventListener("mouseup", doHl);
 
           doc.addEventListener("selectionchange", doHl);
+
+          /* 框选模式文本选择禁用开关：平板原生选区会抢触摸事件，必须 user-select:none */
+          pdfFrame.contentWindow.setSelMode = function(on){ try{ var _d = pdfFrame.contentDocument; if (_d && _d.body) _d.body.classList.toggle("sel-disabled", !!on); }catch(e){} };
 
           /* 区域标注：长按 300ms 激活绘制，拖动画矩形，松手弹工具条（扫描版教材用） */
           (function(){
