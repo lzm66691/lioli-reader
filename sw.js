@@ -1,7 +1,7 @@
-/* PWA Service Worker — 莉萝阅读器 平板框选模式+触摸修复+质感升级+教程入口（2026-09-27）
-   外壳缓存 reader-p2-dg-v17（含 pdf.js 全套）；PDF 缓存 reader-pdf-v1（按需 cache-first）
+/* PWA Service Worker — 莉萝阅读器 真机框选根因修复：user-select:none 禁原生文本选择（2026-09-27）
+   外壳缓存 reader-p2-dg-v18（含 pdf.js 全套）；PDF 缓存 reader-pdf-v1（按需 cache-first）
    升级纪律：改外壳/pdf.js → 同时改缓存名 */
-var CACHE_SHELL = "reader-p2-dg-v17";
+var CACHE_SHELL = "reader-p2-dg-v18";
 var CACHE_PDF   = "reader-pdf-v1";
 
 /* PWA 离线预缓存：公开 6 本 PDF（共约 4MB），安装后全部本地可用 */
