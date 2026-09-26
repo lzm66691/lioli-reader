@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>莉萝阅读器 · 使用教程</title>
+<style>
+  :root{
+    --bg:#f6f7fb; --card:#ffffff; --ink:#1f2430; --body:#3d4250;
+    --muted:#8a90a0; --teal:#0aa2a2; --teal-dark:#0b7d7d; --line:#e6e8f0;
+    --hl:#fff3c4;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:var(--bg);color:var(--body);line-height:1.75;padding-bottom:80px}
+  .wrap{max-width:860px;margin:0 auto;padding:0 20px}
+  header{background:linear-gradient(135deg,#0aa2a2 0%,#0b7d7d 60%,#0a5f6e 100%);color:#fff;padding:42px 0 34px;text-align:center;margin-bottom:8px}
+  header h1{font-size:26px;letter-spacing:.5px;font-weight:800}
+  header p{margin-top:8px;font-size:14px;opacity:.92}
+  .ver-tag{display:inline-block;margin-top:10px;padding:3px 12px;border:1px solid rgba(255,255,255,.5);border-radius:20px;font-size:12px;letter-spacing:.3px}
+  h2{font-size:20px;color:var(--ink);margin:46px 0 6px;padding-left:12px;border-left:5px solid var(--teal)}
+  h3{font-size:15.5px;color:var(--teal-dark);margin:26px 0 8px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:12px 0;box-shadow:0 2px 10px rgba(10,20,50,.05)}
+  ul,ol{margin:8px 0 8px 22px}
+  li{margin:5px 0}
+  code{background:#f0f2f8;border:1px solid var(--line);border-radius:5px;padding:1px 7px;font-size:13px;color:#205070}
+  .tip{background:#f0faf9;border:1px solid #bfe8e6;border-radius:10px;padding:12px 14px;font-size:13.5px;margin:10px 0}
+  .warn{background:#fff8ec;border:1px solid #f0ddb8;border-radius:10px;padding:12px 14px;font-size:13.5px;margin:10px 0}
+  .step{display:flex;gap:10px;margin:10px 0;align-items:flex-start}
+  .step .n{flex-shrink:0;width:24px;height:24px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;margin-top:3px}
+  img{max-width:100%;border-radius:10px;border:1px solid var(--line);margin:8px 0;display:block}
+  .cap{font-size:12.5px;color:var(--muted);text-align:center;margin-bottom:14px}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left}
+  th{background:#f4f6fb;color:var(--ink)}
+  footer{text-align:center;color:var(--muted);font-size:12.5px;margin-top:60px}
+  .toc-nav{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin:20px 0}
+  .toc-nav a{color:var(--teal-dark);text-decoration:none;margin-right:14px;font-size:13.5px;white-space:nowrap}
+  .toc-nav a:hover{text-decoration:underline}
+  @media(max-width:640px){header h1{font-size:21px}.toc-nav a{display:inline-block;margin:4px 10px 4px 0}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>莉萝阅读器 · 使用教程</h1>
+  <p>本地 PDF 阅读 · 目录树 · 划词/区域标注 · 笔记书签 · 平板离线</p>
+  <span class="ver-tag">当前版本 v16</span>
+</header>
+
+<div class="wrap">
+
+<div class="toc-nav">
+  <b>目录：</b>
+  <a href="#install">① 安装（平板）</a>
+  <a href="#shelf">② 书架与导入</a>
+  <a href="#toc">③ 目录</a>
+  <a href="#read">④ 阅读</a>
+  <a href="#mark">⑤ 标注</a>
+  <a href="#note">⑥ 笔记书签</a>
+  <a href="#theme">⑦ 主题</a>
+  <a href="#search">⑧ 搜索</a>
+  <a href="#faq">⑨ 常见问题</a>
+</div>
+
+<h2 id="install">① 安装到平板 / 手机（离线可用）</h2>
+<div class="card">
+  <div class="step"><span class="n">1</span><div>用平板浏览器（Edge / Chrome）打开阅读器网址：<code>lzm66691.github.io/lioli-reader/</code></div></div>
+  <div class="step"><span class="n">2</span><div>等待 15–30 秒，让页面后台预缓存（首次打开稍慢属正常）。</div></div>
+  <div class="step"><span class="n">3</span><div>点浏览器右上角菜单 <code>⋮</code> → <b>「添加到主屏幕」</b>（Chrome）或 <b>「安装应用」</b>（Edge）。</div></div>
+  <div class="step"><span class="n">4</span><div>桌面出现阅读器图标，之后<b>离线也能打开</b>（已下载的 PDF 仍可读）。</div></div>
+  <div class="tip">💡 安装后想更新：重新打开线上网址（有网时），顶栏版本号会变到最新；旧版本号说明缓存没刷新，强刷或重装一次即可。</div>
+  <img src="guide/版本号.png" alt="版本号位置">
+  <div class="cap">顶栏左上角显示版本号（v16），用它判断是否最新版</div>
+</div>
+
+<h2 id="shelf">② 书架与本地书导入</h2>
+<div class="card">
+  <h3>书架</h3>
+  <ul>
+    <li>左栏第 3 个 Tab 是<b>书架</b>：书按分组排列（C 语言讲义 / 本地书等），点分组标题可<b>折叠/展开</b>。</li>
+    <li>书卡片下方有<b>阅读进度</b>条，点任意书直接打开续读。</li>
+  </ul>
+  <h3>导入 PDF（本地书）</h3>
+  <div class="step"><span class="n">1</span><div>点书架顶部的<b>「导入 PDF」</b>按钮，选择平板/电脑里的 PDF 文件。</div></div>
+  <div class="step"><span class="n">2</span><div>导入后出现在「本地书」分组，点开即读；数据存在浏览器本地，<b>不会上传公网</b>。</div></div>
+  <div class="warn">⚠️ 扫描版教材（如高数/线代图片版）也能导入阅读；本地书若带 PDF 书签大纲，会自动生成目录。</div>
+</div>
+
+<h2 id="toc">③ 目录（章/节树形）</h2>
+<div class="card">
+  <ul>
+    <li>左栏第 1 个 Tab 是<b>目录</b>：有书签大纲的书自动生成<b>章→节树形目录</b>。</li>
+    <li>点<b>章标题</b>折叠/展开小节；点<b>节</b>直接跳转到对应页。</li>
+    <li>翻页后，目录会自动展开当前所在章并高亮当前节。</li>
+    <li>大纲只有章级的书会提示「本书大纲仅章级」；无大纲的书提示「没有内置书签大纲」。</li>
+  </ul>
+  <img src="guide/目录树.png" alt="树形目录">
+  <div class="cap">目录按章/节分层，可折叠跳转</div>
+</div>
+
+<h2 id="read">④ 阅读</h2>
+<div class="card">
+  <ul>
+    <li><b>翻页</b>：PDF 内滚动 / 滑动；顶栏输入页码直接跳转（如输入 15 回车）。</li>
+    <li><b>缩放</b>：PDF 内 Ctrl + 滚轮（触控板双指）。</li>
+    <li><b>全屏</b>：顶栏「全屏」按钮或按 <code>F</code>。</li>
+    <li><b>系统打开</b>：顶栏「系统打开」用系统阅读器打开当前 PDF（pdf.js 异常时兜底）。</li>
+  </ul>
+</div>
+
+<h2 id="mark">⑤ 标注（重点）</h2>
+<div class="card">
+  <p>阅读器支持两种标注方式，按 PDF 类型选择：</p>
+
+  <h3>方式一：划词标注（文字版 PDF）</h3>
+  <div class="step"><span class="n">1</span><div>用鼠标 / 手指<b>选中一段文字</b>（文字版 PDF 才能选中）。</div></div>
+  <div class="step"><span class="n">2</span><div>选区上方弹出<b>工具条</b>：三个颜色按钮（暖黄 / 淡粉 / 雾蓝）+「笔记」。</div></div>
+  <div class="step"><span class="n">3</span><div>点颜色 = 生成高亮；点「笔记」= 输入备注。</div></div>
+  <img src="guide/标注-划词.png" alt="划词标注">
+  <div class="cap">选中文字后自动弹出三色 + 笔记工具条</div>
+
+  <h3>方式二：区域标注（扫描版教材 / 图片版）</h3>
+  <div class="step"><span class="n">1</span><div>扫描版（高数/线代等）选不中文字，请点顶栏<b>「框选」按钮</b>进入框选模式（按钮变亮，屏幕顶部出现提示）。</div></div>
+  <div class="step"><span class="n">2</span><div><b>按住拖动</b>，画一个框把要标注的内容框住（出现蓝色虚线框）。</div></div>
+  <div class="step"><span class="n">3</span><div><b>松手</b>弹工具条 → 点颜色或「笔记」→ 生成区域标注。</div></div>
+  <div class="step"><span class="n">4</span><div>标注完成后点「框选」按钮退出（恢复翻页）。</div></div>
+  <div class="tip">💡 不点「框选」时，长按页面约 0.3 秒再拖动也能画框（适合偶尔标一处）。</div>
+  <img src="guide/标注-区域.png" alt="区域标注">
+  <div class="cap">框选模式下拖动画框，松手选色/写笔记</div>
+
+  <h3>标注管理</h3>
+  <ul>
+    <li>左栏第 2 个 Tab（收藏夹）里能看到<b>标注列表</b>：每条显示页码 + 颜色 + 内容，可<b>跳回</b>该页或<b>删除</b>。</li>
+    <li>点 PDF 页面上的<b>标注色块</b>可直接删除该条标注。</li>
+  </ul>
+</div>
+
+<h2 id="note">⑥ 笔记与书签</h2>
+<div class="card">
+  <ul>
+    <li>顶栏「笔记」打开笔记面板：给<b>当前页写笔记</b>，翻页自动切换。</li>
+    <li>「收藏本页」按钮把当前页加入<b>书签</b>，收藏夹列表里一键跳回。</li>
+  </ul>
+</div>
+
+<h2 id="theme">⑦ 主题切换</h2>
+<div class="card">
+  <ul>
+    <li>顶栏「日间 / 夜间」按钮切换<b>三套主题</b>：日间（白）、夜间（深色护眼）、米黄（纸质感）。</li>
+    <li>设置自动保存，下次打开保持。</li>
+  </ul>
+  <img src="guide/书架-主题.png" alt="书架与主题">
+  <div class="cap">书架分组 + 阅读进度，顶栏可切主题</div>
+</div>
+
+<h2 id="search">⑧ 搜索</h2>
+<div class="card">
+  <ul>
+    <li>左栏第 4 个 Tab 是<b>搜索</b>：输入关键词，在<b>目录标题</b>中即时过滤（书签/标注标题也可搜）。</li>
+    <li>点结果直接跳到对应页。</li>
+  </ul>
+</div>
+
+<h2 id="faq">⑨ 常见问题</h2>
+<div class="card">
+  <table>
+    <tr><th>问题</th><th>解决</th></tr>
+    <tr><td>PDF 加载不出来</td><td>校园网连 GitHub 慢：本机用 <code>localhost:8920</code>，平板同网用 <code>100.87.159.50:8920</code>（电脑端服务开启时）</td></tr>
+    <tr><td>扫描版选不中文字</td><td>正常现象：扫描版是图片，请用「框选」区域标注</td></tr>
+    <tr><td>本地书没有目录</td><td>PDF 无内置书签大纲则无法自动生成；有的大纲只有章级，会提示</td></tr>
+    <tr><td>版本号不是最新</td><td>强刷（Ctrl+F5）或重装 PWA 应用</td></tr>
+    <tr><td>标注怎么删除</td><td>点页面上的标注色块，或收藏夹标注列表点「删」</td></tr>
+  </table>
+</div>
+
+<footer>莉萝阅读器 · 由莉制作 · 有问题随时问哥哥身边的莉 ~</footer>
+
+</div>
+</body>
+</html>
