@@ -69,10 +69,10 @@ a{color:var(--teal);text-decoration:none}
 /* ===== 主体三栏 ===== */
 .main{flex:1;display:flex;overflow:hidden}
 .sidebar{
-  width:250px;flex-shrink:0;border-right:1px solid var(--glass-border);
+  width:var(--sw,250px);flex-shrink:0;border-right:1px solid var(--glass-border);
   background:var(--glass); backdrop-filter:var(--blur); -webkit-backdrop-filter:var(--blur);
   box-shadow:var(--glass-shadow);
-  display:flex;flex-direction:column;overflow:hidden;transition:width .2s;
+  display:flex;flex-direction:column;overflow:hidden;transition:width .15s;position:relative;
 }
 .sidebar.collapsed{width:0;border-right:none}
 .side-head{
@@ -116,6 +116,23 @@ a{color:var(--teal);text-decoration:none}
 .shelf-item:hover{background:var(--glass-hover)}
 .shelf-item.active{background:var(--teal-light);color:var(--teal-dark);font-weight:700}
 .shelf-item .sf-meta{font-size:11.5px;color:var(--muted);font-weight:400}
+.sidebar-resizer{position:absolute;right:-3px;top:0;bottom:0;width:7px;cursor:col-resize;z-index:30}
+.sidebar-resizer:hover{background:var(--teal-light);opacity:.6}
+.shelf-group-wrap{margin-bottom:2px}
+.shelf-group{cursor:pointer;display:flex;align-items:center;gap:6px;user-select:none}
+.sg-arrow{font-size:10px;color:var(--teal-dark);width:14px;text-align:center;flex-shrink:0}
+.shelf-group-list{overflow:hidden}
+.shelf-group-list.collapsed{display:none}
+.shelf-item{display:flex;flex-direction:row;align-items:center;gap:8px;cursor:pointer}
+.shelf-item .sf-expand{flex-shrink:0;width:16px;text-align:center;font-size:12px;color:var(--muted);cursor:pointer;border-radius:6px}
+.shelf-item .sf-expand:hover{color:var(--teal-dark);background:var(--teal-light)}
+.shelf-item .sf-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.shelf-item .sf-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.shelf-sections{display:none;padding:2px 6px 6px 26px}
+.shelf-sections.open{display:block}
+.sf-section{display:flex;align-items:center;gap:6px;width:100%;text-align:left;padding:5px 8px;border-radius:7px;font-size:12.5px;color:var(--body);margin-bottom:2px}
+.sf-section:hover{background:var(--glass-hover)}
+.sf-section .sf-sp{margin-left:auto;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;flex-shrink:0}
 /* PDF 区 */
 .pdf-wrap{flex:1;display:flex;flex-direction:column;background:var(--glass-input);min-width:0;backdrop-filter:blur(10px)}
 .pdf-frame{flex:1;border:none;width:100%;background:#fff}
@@ -212,12 +229,13 @@ body.dark .pdf-frame{background:#fff}
   <button class="tool-btn" id="fullBtn" title="全屏（F）">全屏</button>
   <button class="tool-btn" id="sidebarBtn" title="目录">目录</button>
   <button class="tool-btn" id="noteBtn" title="笔记与书签">笔记</button>
-  <a class="tool-btn" id="sysOpen" href="papers/c-ch4.pdf" target="_blank" rel="noopener" title="用系统阅读器打开当前 PDF（pdf.js 异常时的兜底）">系统打开</a>
+  <a class="tool-btn" id="sysOpen" href="papers/fvis.pdf" target="_blank" rel="noopener" title="用系统阅读器打开当前 PDF（pdf.js 异常时的兜底）">系统打开</a>
 </header>
 
 <div class="main">
   <!-- ===== 左栏：目录 / 书签 ===== -->
   <aside class="sidebar" id="sidebar">
+    <div class="sidebar-resizer" id="sidebarResizer" title="拖动调整侧栏宽度"></div>
     <div class="side-tab">
       <button id="tabToc" class="active">目录</button>
       <button id="tabBookmarks">收藏夹</button>
@@ -268,7 +286,22 @@ body.dark .pdf-frame{background:#fff}
 (function(){
   /* ===== BOOKS 书架模型（萝拍板：BOOKS 数据 + localStorage 按书隔离 + 换书整页重载）===== */
   var BOOKS = [
-        {
+    {
+      id:"fvis", title:"F-VIS 论文", meta:"机械工程论文 · 11 页", group:"论文", pdf:"papers/fvis.pdf", pages:11,
+      toc:[
+        { t:"标题 · 摘要", p:1 },
+        { t:"I. INTRODUCTION 引言", p:1 },
+        { t:"II. 传感器结构与工作原理", p:2 },
+        { t:"A. 结构设计（四大模块）", p:3, l2:true },
+        { t:"B. 成像原理", p:3, l2:true },
+        { t:"C. 接触力测量原理（FBG）", p:4, l2:true },
+        { t:"III. 标定与实验", p:5 },
+        { t:"A. 力性能标定", p:5, l2:true },
+        { t:"B. 随机力方向动态响应实验", p:6, l2:true },
+        { t:"其余章节（含结论）请向下滚动阅读", p:7 }
+      ]
+    },
+    {
       id:"c-ch4", title:"C 讲义 · Ch4 输入输出", meta:"C Primer Plus 伴读 · 样品章 · 4 页", group:"C 讲义", pdf:"papers/c-ch4.pdf", pages:4,
       toc:[
         { t:"4.1 先把程序框架摆正", p:1 },
@@ -382,10 +415,17 @@ body.dark .pdf-frame{background:#fff}
         { t:"第十二章 无穷级数", p:248 },
         { t:"部分习题参考答案与提示", p:322 }
       ]
-    }
+    },
+    { id:"dig-0920", title:"日报 · 09-20", meta:"每日前沿日报 · 8 页", group:"日报", pdf:"digests/dig-2026-09-20.pdf", pages:8 },
+    { id:"dig-0921", title:"日报 · 09-21", meta:"每日前沿日报 · 9 页", group:"日报", pdf:"digests/dig-2026-09-21.pdf", pages:9 },
+    { id:"dig-0922", title:"日报 · 09-22", meta:"每日前沿日报 · 8 页", group:"日报", pdf:"digests/dig-2026-09-22.pdf", pages:8 },
+    { id:"dig-0923", title:"日报 · 09-23", meta:"每日前沿日报 · 11 页", group:"日报", pdf:"digests/dig-2026-09-23.pdf", pages:11 },
+    { id:"dig-0924", title:"日报 · 09-24", meta:"每日前沿日报 · 10 页", group:"日报", pdf:"digests/dig-2026-09-24.pdf", pages:10 },
+    { id:"dig-0925", title:"日报 · 09-25", meta:"每日前沿日报 · 12 页", group:"日报", pdf:"digests/dig-2026-09-25.pdf", pages:12 },
+    { id:"dig-w38", title:"周报 · W38", meta:"本周回顾 · 1 页", group:"日报", pdf:"digests/dig-2026-W38.pdf", pages:1 }
   ];
   var LS_CUR = "reader-app-current";
-  var curId = localStorage.getItem(LS_CUR) || "c-ch4";
+  var curId = localStorage.getItem(LS_CUR) || "fvis";
   var BOOK = BOOKS.filter(function(b){ return b.id === curId; })[0] || BOOKS[0];
   curId = BOOK.id;
 
@@ -395,7 +435,7 @@ body.dark .pdf-frame{background:#fff}
   var VIEWER = "vendor/pdfjs/web/viewer.html";
   function pdfUrl(n){
     n = Math.max(1, Math.floor(n) || 1);
-    return VIEWER + "?file=" + encodeURIComponent("/lioli-reader/" + BOOK.pdf) +
+    return VIEWER + "?file=" + encodeURIComponent("/" + BOOK.pdf) +
       "#page=" + n + "&disableRange=true&disableStream=true&disableAutoFetch=true";
   }
   /* localStorage 按书隔离；旧 key（无后缀）首次自动迁移到 :fvis */
@@ -403,13 +443,27 @@ body.dark .pdf-frame{background:#fff}
   var LS_NOTES = "reader-app-notes:" + BOOK.id;
   var LS_BM   = "reader-app-bookmarks:" + BOOK.id;
   [["reader-app-state",LS_STATE],["reader-app-notes",LS_NOTES],["reader-app-bookmarks",LS_BM]].forEach(function(pair){
-    if (BOOK.id === "c-ch4" && !localStorage.getItem(pair[1]) && localStorage.getItem(pair[0])) {
+    if (BOOK.id === "fvis" && !localStorage.getItem(pair[1]) && localStorage.getItem(pair[0])) {
       localStorage.setItem(pair[1], localStorage.getItem(pair[0]));
     }
   });
 
   var state = { page: 1, dark: false, sidebar: true, note: true };
   try { var s = JSON.parse(localStorage.getItem(LS_STATE) || "null"); if (s) state = Object.assign(state, s); } catch(e){}
+  /* 书架章节直达：跨书跳页（reload 后定位） */
+  try {
+    var gt = sessionStorage.getItem("reader-app-goto");
+    if (gt) {
+      sessionStorage.removeItem("reader-app-goto");
+      var gp = gt.split(":");
+      if (gp[0] === BOOK.id) state.page = Math.max(1, Math.floor(gp[1]) || 1);
+    }
+  } catch(e){}
+  /* 侧栏宽度恢复 */
+  try {
+    var sw = parseInt(localStorage.getItem("reader-app-sidebar-w") || "", 10);
+    if (sw >= 180 && sw <= 520) document.documentElement.style.setProperty("--sw", sw + "px");
+  } catch(e){}
   /* ?dark=1 深色直达（如分享/截图） */
   try { if (location.search.indexOf("dark=1") >= 0) state.dark = true; } catch(e){}
 
@@ -433,44 +487,80 @@ body.dark .pdf-frame{background:#fff}
   var bmEmpty = document.getElementById("bmEmpty");
   var shelfBody = document.getElementById("shelfBody");
 
-  function switchBook(id){
+  function switchBook(id, page){
     localStorage.setItem(LS_CUR, id);
+    if (page) { try { sessionStorage.setItem("reader-app-goto", id + ":" + page); } catch(e){} }
     location.reload();  /* 换书走完整重载（萝拍板：hash 对跨 PDF 无意义） */
   }
   var GROUP_ORDER = ["论文","C 讲义","C 练习册","数学教材","日报"];
   function renderShelf(){
     shelfBody.innerHTML = "";
-    /* 按 group 分组渲染（group 缺省归「其他」）*/
     var groups = {};
     BOOKS.forEach(function(b){ var g = b.group || "其他"; (groups[g] = groups[g] || []).push(b); });
-    GROUP_ORDER.forEach(function(g){
-      if (!groups[g]) return;
+    var collapsed = {};
+    try { collapsed = JSON.parse(localStorage.getItem("reader-app-shelf-collapse") || "{}") || {}; } catch(e){}
+    function renderGroup(g, books){
+      var wrap = document.createElement("div");
+      wrap.className = "shelf-group-wrap";
       var head = document.createElement("div");
       head.className = "shelf-group";
-      head.textContent = g + " · " + groups[g].length;
-      shelfBody.appendChild(head);
-      groups[g].forEach(function(b){
-        var btn = document.createElement("button");
-        btn.className = "shelf-item" + (b.id === BOOK.id ? " active" : "");
-        btn.innerHTML = "<span>" + esc(b.title) + "</span><span class=\"sf-meta\">" + esc(b.meta || "") + "</span>";
-        btn.onclick = function(){ if (b.id !== BOOK.id) switchBook(b.id); };
-        shelfBody.appendChild(btn);
+      var arrow = document.createElement("span");
+      arrow.className = "sg-arrow";
+      arrow.textContent = collapsed[g] ? "▸" : "▾";
+      head.appendChild(arrow);
+      var t = document.createElement("span");
+      t.textContent = g + " · " + books.length;
+      head.appendChild(t);
+      wrap.appendChild(head);
+      var list = document.createElement("div");
+      list.className = "shelf-group-list" + (collapsed[g] ? " collapsed" : "");
+      books.forEach(function(b){
+        var card = document.createElement("div");
+        card.className = "shelf-item" + (b.id === BOOK.id ? " active" : "");
+        var exp = document.createElement("span");
+        exp.className = "sf-expand";
+        exp.textContent = (b.toc && b.toc.length) ? "▸" : "";
+        var info = document.createElement("span");
+        info.className = "sf-info";
+        info.innerHTML = "<span class=\"sf-title\">" + esc(b.title) + "</span><span class=\"sf-meta\">" + esc(b.meta || "") + "</span>";
+        card.appendChild(exp);
+        card.appendChild(info);
+        card.title = b.meta || b.title;
+        card.onclick = function(){ if (b.id !== BOOK.id) switchBook(b.id); };
+        list.appendChild(card);
+        if (b.toc && b.toc.length) {
+          var secs = document.createElement("div");
+          secs.className = "shelf-sections";
+          b.toc.forEach(function(t){
+            var sb = document.createElement("button");
+            sb.className = "sf-section";
+            sb.innerHTML = "<span>" + esc(t.t) + "</span><span class=\"sf-sp\">p" + t.p + "</span>";
+            sb.onclick = function(ev){
+              ev.stopPropagation();
+              if (b.id === BOOK.id) { goPage(t.p); }
+              else { switchBook(b.id, t.p); }
+            };
+            secs.appendChild(sb);
+          });
+          list.appendChild(secs);
+          exp.onclick = function(ev){
+            ev.stopPropagation();
+            var open = secs.classList.toggle("open");
+            exp.textContent = open ? "▾" : "▸";
+          };
+        }
       });
-    });
-    Object.keys(groups).forEach(function(g){
-      if (GROUP_ORDER.indexOf(g) >= 0) return;
-      var head = document.createElement("div");
-      head.className = "shelf-group";
-      head.textContent = g + " · " + groups[g].length;
-      shelfBody.appendChild(head);
-      groups[g].forEach(function(b){
-        var btn = document.createElement("button");
-        btn.className = "shelf-item" + (b.id === BOOK.id ? " active" : "");
-        btn.innerHTML = "<span>" + esc(b.title) + "</span><span class=\"sf-meta\">" + esc(b.meta || "") + "</span>";
-        btn.onclick = function(){ if (b.id !== BOOK.id) switchBook(b.id); };
-        shelfBody.appendChild(btn);
-      });
-    });
+      wrap.appendChild(list);
+      head.onclick = function(){
+        collapsed[g] = !collapsed[g];
+        try { localStorage.setItem("reader-app-shelf-collapse", JSON.stringify(collapsed)); } catch(e){}
+        list.classList.toggle("collapsed", collapsed[g]);
+        arrow.textContent = collapsed[g] ? "▸" : "▾";
+      };
+      shelfBody.appendChild(wrap);
+    }
+    GROUP_ORDER.forEach(function(g){ if (groups[g]) renderGroup(g, groups[g]); });
+    Object.keys(groups).forEach(function(g){ if (GROUP_ORDER.indexOf(g) >= 0) return; renderGroup(g, groups[g]); });
   }
 
   pageTotal.textContent = BOOK.pages ? String(BOOK.pages) : "—";
@@ -630,6 +720,27 @@ body.dark .pdf-frame{background:#fff}
     state.note = !state.note; save();
     document.getElementById("notePanel").classList.toggle("collapsed", !state.note);
   });
+  /* 侧栏宽度拖拽 */
+  (function(){
+    var sidebar = document.getElementById("sidebar");
+    var resizer = document.getElementById("sidebarResizer");
+    if (!resizer) return;
+    resizer.addEventListener("mousedown", function(e){
+      e.preventDefault();
+      var startX = e.clientX, startW = sidebar.offsetWidth;
+      function move(ev){
+        var w = Math.max(200, Math.min(460, startW + ev.clientX - startX));
+        document.documentElement.style.setProperty("--sw", w + "px");
+        try { localStorage.setItem("reader-app-sidebar-w", String(w)); } catch(err){}
+      }
+      function up(){
+        document.removeEventListener("mousemove", move);
+        document.removeEventListener("mouseup", up);
+      }
+      document.addEventListener("mousemove", move);
+      document.addEventListener("mouseup", up);
+    });
+  })();
   document.getElementById("tabToc").addEventListener("click", function(){
     this.classList.add("active"); document.getElementById("tabBookmarks").classList.remove("active"); document.getElementById("tabShelf").classList.remove("active");
     tocBody.style.display = ""; bmBody.style.display = "none"; shelfBody.style.display = "none"; searchBody.classList.remove("open");
