@@ -211,6 +211,10 @@ body.dark .guide-banner{background:rgba(42,42,42,.95);border-color:rgba(255,255,
 .toc-item .pg{margin-left:auto;font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
 
 .toc-item.l2{padding-left:26px;font-size:13px}
+.toc-children{padding-left:12px;border-left:1px solid var(--line);margin-left:11px;margin-top:2px;margin-bottom:2px}
+.toc-chapter{margin:1px 0}
+.toc-chapter .arrow{display:inline-block;width:15px;text-align:center;color:var(--muted);font-size:11px;flex-shrink:0}
+.toc-chapter .toc-item{width:100%}
 
 /* 收藏夹列表 */
 
@@ -1220,23 +1224,79 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
     }
 
+    var curWrap = null, curList = null;
+
     TOC.forEach(function(item){
 
       var ok = !q || item.t.toLowerCase().indexOf(q) >= 0;
 
       if (q && ok) hits.push(item);
 
-      var div = document.createElement("button");
+      if (item.l2) {
 
-      div.className = "toc-item" + (item.l2 ? " l2" : "");
+        if (!curList) {
 
-      if (!ok) { div.style.display = "none"; }
+          curList = document.createElement("div");
 
-      div.innerHTML = "<span>" + esc(item.t) + "</span><span class=\"pg\">p" + item.p + "</span>";
+          curList.className = "toc-children";
 
-      div.onclick = function(){ goPage(item.p); };
+          (curWrap || tocBody).appendChild(curList);
 
-      tocBody.appendChild(div);
+        }
+
+        var s = document.createElement("button");
+
+        s.className = "toc-item l2";
+
+        if (!ok) { s.style.display = "none"; }
+
+        s.innerHTML = "<span>" + esc(item.t) + "</span><span class=\"pg\">p" + item.p + "</span>";
+
+        s.onclick = function(){ goPage(item.p); };
+
+        curList.appendChild(s);
+
+      } else {
+
+        curWrap = document.createElement("div");
+
+        curWrap.className = "toc-chapter";
+
+        var h = document.createElement("button");
+
+        h.className = "toc-item";
+
+        if (!ok) { h.style.display = "none"; }
+
+        h.innerHTML = "<span class=\"arrow\">▾</span><span>" + esc(item.t) + "</span><span class=\"pg\">p" + item.p + "</span>";
+
+        h.onclick = function(){
+
+          var kids = curWrap.querySelector(".toc-children");
+
+          if (kids) {
+
+            var open = kids.style.display !== "none";
+
+            kids.style.display = open ? "none" : "";
+
+            h.querySelector(".arrow").textContent = open ? "▸" : "▾";
+
+          } else {
+
+            goPage(item.p);
+
+          }
+
+        };
+
+        curWrap.appendChild(h);
+
+        tocBody.appendChild(curWrap);
+
+        curList = null;
+
+      }
 
     });
 
@@ -1252,7 +1312,23 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
       el.classList.remove("active");
 
-      if (parseInt(el.querySelector(".pg").textContent.replace("p","")) === n) el.classList.add("active");
+      if (parseInt(el.querySelector(".pg").textContent.replace("p","")) === n) {
+
+        el.classList.add("active");
+
+        var par = el.closest(".toc-children");
+
+        if (par && par.style.display === "none") {
+
+          par.style.display = "";
+
+          var ch = par.closest(".toc-chapter");
+
+          if (ch) { var ar = ch.querySelector(".arrow"); if (ar) ar.textContent = "▾"; }
+
+        }
+
+      }
 
     });
 
@@ -1730,6 +1806,22 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
         var _pgMo = new MutationObserver(function(){ _applyPageUI(); renderAnnotations(); });
         _pgMo.observe(doc.body, {childList:true, subtree:true});
 
+        /* 本地书总页数：PDF 解析完成后更新页码（BOOK.pages 未知时） */
+        (function(){
+          var tries = 0;
+          var iv = setInterval(function(){
+            try {
+              var app = pdfFrame.contentWindow.PDFViewerApplication;
+              if (app && app.pdfDocument) {
+                pageTotal.textContent = app.pdfDocument.numPages;
+                clearInterval(iv);
+                return;
+              }
+            } catch(e){}
+            if (++tries > 30) clearInterval(iv);
+          }, 500);
+        })();
+
         /* ---- P3a：标注渲染 + 划词工具条（不依赖外层，闭包内完成） ---- */
 
         var markCss = doc.createElement("style");
@@ -2120,6 +2212,29 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
   }
 
+  /* 本地书目录：用 pdf.js 提取 PDF 书签大纲 → [{t,p,l2}]（章/节两级） */
+  function extractTocFromPdf(url){
+    return import("./vendor/pdfjs/build/pdf.mjs").then(function(mod){
+      try { mod.GlobalWorkerOptions.workerSrc = "./vendor/pdfjs/build/pdf.worker.mjs"; } catch(e){}
+      return mod.getDocument({ url: url, disableRange: true, disableStream: true, disableAutoFetch: true }).promise.then(function(pdf){
+        function walk(items, depth, out){
+          var q = [];
+          (items || []).forEach(function(it){
+            q.push(pdf.getPageIndex(it.dest[0]).then(function(pi){
+              out.push({ t: it.title, p: pi + 1, l2: depth > 0 });
+              return walk(it.items, depth + 1, out);
+            }).catch(function(){ out.push({ t: it.title, p: 1, l2: depth > 0 }); return null; }));
+          });
+          return Promise.all(q);
+        }
+        return pdf.getOutline().then(function(outline){
+          var out = [];
+          return walk(outline, 0, out).then(function(){ return out; });
+        });
+      });
+    });
+  }
+
   function openLocalBook(b){
 
     localStorage.setItem(LS_CUR, b.id);
@@ -2154,7 +2269,27 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
         document.title = BOOK.title;
 
-        if (tocBody) tocBody.innerHTML = '<div class="empty-tip">本地书暂无目录（章节提取随 P3 提供）。</div>';
+        if (tocBody) tocBody.innerHTML = '<div class="empty-tip">正在提取本地书目录…</div>';
+
+        extractTocFromPdf(BOOK.pdf).then(function(items){
+
+          if (items && items.length) {
+
+            TOC = items;
+
+            renderToc();
+
+          } else {
+
+            if (tocBody) tocBody.innerHTML = '<div class="empty-tip">这本书没有内置书签大纲，暂无法生成目录。</div>';
+
+          }
+
+        }).catch(function(e){
+
+          if (tocBody) tocBody.innerHTML = '<div class="empty-tip">目录提取失败，可翻页阅读。</div>';
+
+        });
 
         pdfFrame.src = pdfUrl(state.page);
 
