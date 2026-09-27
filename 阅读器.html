@@ -524,7 +524,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v25</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v26</span></div>
 
   <div class="spacer"></div>
 
@@ -2687,6 +2687,11 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
       }
       _check();
       setInterval(_check, 4 * 60 * 1000); /* 每 4 分钟检查一次 */
+      /* 从后台恢复/切回前台时立即检查（平板恢复标签页/切回阅读器秒升新版） */
+      document.addEventListener("visibilitychange", function(){
+        if (!document.hidden) _check();
+      });
+      window.addEventListener("focus", function(){ _check(); });
     })();
   }
 
