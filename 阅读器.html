@@ -529,7 +529,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v30</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v31</span></div>
 
   <div class="spacer"></div>
 
@@ -1669,6 +1669,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
       + '<button class="toolbox-item" data-act="sel"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2.2 1.6"><rect x="2.5" y="2.5" width="11" height="11" rx="1.5"/></svg></span>框选模式</button>'
       + '<button class="toolbox-item" data-act="mark"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l6-6 2 2-6 6-2 2zM9 7l3-3 2 2-3 3z"/></svg></span>划词标注</button>'
       + '<button class="toolbox-item" data-act="note"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M3 2h10v11l-2-1.5L9 13V2"/></svg></span>笔记</button>'
+      + '<button class="toolbox-item" data-act="pen"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 2-8.5 8.5L3 13l.5-2.5z"/></svg></span>画笔</button>'
       + '<div class="toolbox-grp">外观</div>'
       + '<button class="toolbox-item" data-act="theme"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.2 3.2l1.4 1.4M11.4 11.4l1.4 1.4M12.8 3.2l-1.4 1.4M4.6 11.4l-1.4 1.4"/></svg></span>主题切换</button>'
       + '<button class="toolbox-item" data-act="full"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4"/></svg></span>全屏</button>'
@@ -1709,6 +1710,13 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
       sidebar: function(){ var b = document.getElementById("sidebarBtn"); if (b) b.click(); },
       note: function(){ var b = document.getElementById("noteBtn"); if (b) b.click(); },
       mark: function(){ var b = document.getElementById("markBtn"); if (b) b.click(); },
+      pen: function(){
+        try {
+          window.__penMode = !window.__penMode;
+          var f = document.getElementById("pdfFrame");
+          if (f && f.contentWindow && f.contentWindow.setPenMode) f.contentWindow.setPenMode(window.__penMode);
+        } catch(e){}
+      },
       rotate: function(){
         try { var f = document.getElementById("pdfFrame"); if (f && f.contentWindow && f.contentWindow.PDFViewerApplication) f.contentWindow.PDFViewerApplication.rotatePages(90); } catch(e){}
       },
@@ -2027,7 +2035,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
         var markCss = doc.createElement("style");
 
-        markCss.textContent = ".hl-marker{position:absolute;z-index:3;border-radius:2px;cursor:pointer;pointer-events:auto} .hl-marker.hl-1{background:rgba(251,218,131,.42)} .hl-marker.hl-2{background:rgba(228,147,142,.38)} .hl-marker.hl-3{background:rgba(141,187,255,.38)} .hl-marker:hover{outline:1px solid rgba(0,0,0,.25)} #hlBar{position:fixed;z-index:9999;display:none;gap:4px;background:rgba(255,255,255,.96);border:1px solid rgba(0,0,0,.12);border-radius:8px;padding:4px 6px;box-shadow:0 4px 14px rgba(0,0,0,.18);align-items:center} #hlBar button{width:20px;height:20px;border:none;border-radius:4px;cursor:pointer;border:1px solid rgba(0,0,0,.15);padding:0} #hlBar .hl-b1{background:#FBDA83} #hlBar .hl-b2{background:#E4938E} #hlBar .hl-b3{background:#8DBBFF} #hlBar .hl-note-btn{width:auto;padding:0 8px;font-size:12px;color:#333;background:#fff} body.dark #hlBar{background:rgba(42,42,42,.96);border-color:rgba(255,255,255,.15)} body.dark #hlBar .hl-note-btn{color:#ddd} body.dark #hlBar .hl-note-btn{background:rgba(60,60,60,.9)} body.sel-disabled,body.sel-disabled *,body.sel-disabled .textLayer,body.sel-disabled .textLayer span,body.sel-disabled .textLayer ::selection{user-select:none!important;-webkit-user-select:none!important;-webkit-touch-callout:none!important} body.sel-disabled #viewer .textLayer{display:none!important} body.sel-disabled #viewer{touch-action:none!important}";
+        markCss.textContent = ".hl-marker{position:absolute;z-index:5;border-radius:2px;cursor:pointer;pointer-events:auto} .hl-marker.hl-1{background:rgba(251,218,131,.42)} .hl-marker.hl-2{background:rgba(228,147,142,.38)} .hl-marker.hl-3{background:rgba(141,187,255,.38)} .hl-marker:hover{outline:1px solid rgba(0,0,0,.25)} #hlBar{position:fixed;z-index:9999;display:none;gap:4px;background:rgba(255,255,255,.96);border:1px solid rgba(0,0,0,.12);border-radius:8px;padding:4px 6px;box-shadow:0 4px 14px rgba(0,0,0,.18);align-items:center} #hlBar button{width:20px;height:20px;border:none;border-radius:4px;cursor:pointer;border:1px solid rgba(0,0,0,.15);padding:0} #hlBar .hl-b1{background:#FBDA83} #hlBar .hl-b2{background:#E4938E} #hlBar .hl-b3{background:#8DBBFF} #hlBar .hl-note-btn{width:auto;padding:0 8px;font-size:12px;color:#333;background:#fff} body.dark #hlBar{background:rgba(42,42,42,.96);border-color:rgba(255,255,255,.15)} body.dark #hlBar .hl-note-btn{color:#ddd} body.dark #hlBar .hl-note-btn{background:rgba(60,60,60,.9)} body.sel-disabled,body.sel-disabled *,body.sel-disabled .textLayer,body.sel-disabled .textLayer span,body.sel-disabled .textLayer ::selection{user-select:none!important;-webkit-user-select:none!important;-webkit-touch-callout:none!important} body.sel-disabled #viewer .textLayer{display:none!important} body.sel-disabled #viewer{touch-action:none!important}";
 
         doc.head.appendChild(markCss);
 
@@ -2091,19 +2099,19 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
           doc.body.appendChild(bar);
 
-          var cur = null;
+          window.__hlCur = null;
 
-          function hide(){ bar.style.display = "none"; cur = null; }
+          function hide(){ bar.style.display = "none"; window.__hlCur = null; }
 
           bar.onclick = function(ev){
 
             var b = ev.target;
 
-            if (!cur || !b || !b.dataset) return;
+            if (!window.__hlCur || !b || !b.dataset) return;
 
             if (b.dataset.c) {
 
-              marks.push({id: "m" + Date.now() + Math.random().toString(36).slice(2,6), page: cur.page, color: Number(b.dataset.c), x: cur.rect.x, y: cur.rect.y, w: cur.rect.w, h: cur.rect.h, text: "", created: Date.now()});
+              marks.push({id: "m" + Date.now() + Math.random().toString(36).slice(2,6), page: window.__hlCur.page, color: Number(b.dataset.c), x: window.__hlCur.rect.x, y: window.__hlCur.rect.y, w: window.__hlCur.rect.w, h: window.__hlCur.rect.h, text: "", created: Date.now()});
 
               saveMarks(); renderAnnotations();
 
@@ -2117,7 +2125,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
               if (t !== null && t.trim()) {
 
-                marks.push({id: "m" + Date.now() + Math.random().toString(36).slice(2,6), page: cur.page, color: 1, x: cur.rect.x, y: cur.rect.y, w: cur.rect.w, h: cur.rect.h, text: t.trim().slice(0, 500), created: Date.now()});
+                marks.push({id: "m" + Date.now() + Math.random().toString(36).slice(2,6), page: window.__hlCur.page, color: 1, x: window.__hlCur.rect.x, y: window.__hlCur.rect.y, w: window.__hlCur.rect.w, h: window.__hlCur.rect.h, text: t.trim().slice(0, 500), created: Date.now()});
 
                 saveMarks(); renderAnnotations();
 
@@ -2171,7 +2179,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
               var yp = Math.max(0, Math.min(100, (rect.top - pr.top) / pr.height * 100));
 
-              cur = { page: Number(pe.getAttribute("data-page-number")), rect: {
+              window.__hlCur = { page: Number(pe.getAttribute("data-page-number")), rect: {
 
                 x: xp, y: yp,
 
@@ -2200,6 +2208,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
           /* 框选模式文本选择禁用开关：平板原生选区会抢触摸事件，必须 user-select:none */
           pdfFrame.contentWindow.setSelMode = function(on){ try{ var _d = pdfFrame.contentDocument; if (_d && _d.body) _d.body.classList.toggle("sel-disabled", !!on); }catch(e){} };
           try { pdfFrame.contentWindow.setSelMode(window.__selMode); } catch(e){}   /* load 后同步当前框选状态 */
+          try { if (pdfFrame.contentWindow.setPenMode) pdfFrame.contentWindow.setPenMode(!!window.__penMode); } catch(e){}   /* load 后同步画笔状态 */
 
           /* 区域标注：长按 300ms 激活绘制，拖动画矩形，松手弹工具条（扫描版教材用） */
           (function(){
@@ -2305,7 +2314,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
               var hp = Math.max(3, Math.min(100 - yp, h / pr.height * 100));
 
-              cur = { page: Number(pg.getAttribute("data-page-number")), rect: { x: xp, y: yp, w: wp, h: hp } };
+              window.__hlCur = { page: Number(pg.getAttribute("data-page-number")), rect: { x: xp, y: yp, w: wp, h: hp } };
 
               var vx = pr.left + l + w / 2;
 
@@ -2326,6 +2335,174 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
             /* 长按菜单拦截（绘制期间禁止系统菜单抢事件） */
             doc.addEventListener("contextmenu", function(ev){ if (pd) { ev.preventDefault(); } });
 
+
+          })();
+
+          /* ===== 画笔模式（希沃白板式手写笔）：双 canvas + PDF用户空间坐标 + IndexedDB ===== */
+          (function(){
+            var PAPP = pdfFrame.contentWindow.PDFViewerApplication;
+            var pv = PAPP && PAPP.pdfViewer ? PAPP.pdfViewer : null;
+            var vc = doc.getElementById("viewerContainer") || (doc.getElementById("viewer") ? doc.getElementById("viewer").parentElement : null);
+            var ov = doc.createElement("div");
+            var bg = doc.createElement("canvas"), fg = doc.createElement("canvas"), evL = doc.createElement("div");
+            var tb = doc.createElement("div");
+            var enabled = false, color = "#E05C4F", size = 3, eraser = false;
+            var drawing = false, curPage = null, curPts = [], strokes = [];
+            var idb = null, dpr = window.devicePixelRatio || 1;
+            function cvStyle(cv){ cv.style.cssText = "position:absolute;inset:0;pointer-events:none;width:100%;height:100%"; }
+            cvStyle(bg); cvStyle(fg);
+            evL.style.cssText = "position:absolute;inset:0;z-index:2;pointer-events:auto;touch-action:none;cursor:crosshair;display:none";
+            ov.style.cssText = "position:absolute;inset:0;z-index:1000;pointer-events:none;display:none";
+            ov.appendChild(bg); ov.appendChild(fg); ov.appendChild(evL);
+            if (vc) vc.appendChild(ov);
+            /* IndexedDB 立库（萝：先立库再存数据） */
+            var _req = indexedDB.open("lioli-reader-ink", 1);
+            _req.onupgradeneeded = function(e){ var db = e.target.result; if (!db.objectStoreNames.contains("strokes")) db.createObjectStore("strokes", { keyPath: "id" }); };
+            _req.onsuccess = function(e){ idb = e.target.result; loadAll(); };
+            _req.onerror = function(){ idb = null; };
+            function loadAll(){
+              if (!idb) return;
+              var t = idb.transaction("strokes", "readonly").objectStore("strokes").getAll();
+              t.onsuccess = function(){ strokes = (t.result || []).filter(function(s){ return s.book === BOOK.id; }); redrawAll(); };
+            }
+            function saveStroke(st){ if (idb) { try { idb.transaction("strokes", "readwrite").objectStore("strokes").put(st); } catch(e){} } }
+            function delStroke(id){
+              strokes = strokes.filter(function(s){ return s.id !== id; });
+              if (idb) { try { idb.transaction("strokes", "readwrite").objectStore("strokes").delete(id); } catch(e){} }
+              redrawAll();
+            }
+            /* 工具条（希沃风格：色板 + 粗细 + 橡皮 + 撤销 + 完成） */
+            tb.id = "penBar";
+            tb.style.cssText = "position:fixed;top:50px;left:50%;transform:translateX(-50%);z-index:4000;display:none;gap:6px;align-items:center;background:rgba(255,255,255,.92);border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:6px 10px;box-shadow:0 4px 14px rgba(0,0,0,.16)";
+            var COLORS = ["#E05C4F","#2F6FEB","#0E9F6E","#D97706","#111827","#8B5CF6"];
+            COLORS.forEach(function(cv){
+              var b = doc.createElement("button");
+              b.style.cssText = "width:22px;height:22px;border-radius:50%;border:2px solid transparent;background:" + cv + ";cursor:pointer;padding:0";
+              b.dataset.c = cv; b.title = cv;
+              b.onclick = function(){ color = cv; eraser = false; paintBar(); };
+              tb.appendChild(b);
+            });
+            var szSel = doc.createElement("select");
+            szSel.style.cssText = "height:24px;font-size:12px;border-radius:6px;border:1px solid rgba(0,0,0,.15);background:#fff";
+            [2,3,5,8].forEach(function(s){ var o = doc.createElement("option"); o.value = s; o.textContent = s + "px"; if (s === size) o.selected = true; szSel.appendChild(o); });
+            szSel.onchange = function(){ size = Number(szSel.value); };
+            tb.appendChild(szSel);
+            var erB = doc.createElement("button"); erB.textContent = "橡皮";
+            erB.style.cssText = "height:24px;padding:0 10px;font-size:12px;border-radius:6px;border:1px solid rgba(0,0,0,.15);background:#fff;cursor:pointer";
+            erB.onclick = function(){ eraser = !eraser; erB.style.background = eraser ? "#ffe0d6" : "#fff"; };
+            tb.appendChild(erB);
+            var undoB = doc.createElement("button"); undoB.textContent = "撤销";
+            undoB.style.cssText = "height:24px;padding:0 10px;font-size:12px;border-radius:6px;border:1px solid rgba(0,0,0,.15);background:#fff;cursor:pointer";
+            undoB.onclick = function(){ if (strokes.length) delStroke(strokes[strokes.length - 1].id); };
+            tb.appendChild(undoB);
+            var doneB = doc.createElement("button"); doneB.textContent = "完成";
+            doneB.style.cssText = "height:24px;padding:0 12px;font-size:12px;border-radius:6px;border:none;background:#2F6FEB;color:#fff;cursor:pointer;font-weight:700";
+            doneB.onclick = function(){ setPen(false); };
+            tb.appendChild(doneB);
+            doc.body.appendChild(tb);
+            function paintBar(){ Array.prototype.forEach.call(tb.children, function(b){ if (b.dataset && b.dataset.c) b.style.borderColor = b.dataset.c === color ? "#111" : "transparent"; }); }
+            /* 坐标：视口 → PDF 用户空间（萝：不存像素/视口坐标，缩放旋转不错位） */
+            function pageAt(x, y){
+              var el = doc.elementFromPoint(x, y);
+              while (el && !(el.classList && el.classList.contains("page"))) el = el.parentElement;
+              return el;
+            }
+            function toPdfPt(pageEl, cx, cy){
+              var n = Number(pageEl.getAttribute("data-page-number"));
+              var pv2 = pv && pv.getPageView(n - 1);
+              if (!pv2 || !pv2.viewport) return null;
+              var r = pageEl.getBoundingClientRect();
+              return { page: n, x: cx - r.left, y: cy - r.top, viewport: pv2.viewport };
+            }
+            /* 重绘背景层：每页笔画按当前视口/缩放位置画（滚动/缩放后重取 rect，天然对齐） */
+            function redrawAll(){
+              if (!pv || !ov.clientWidth) return;
+              bg.width = ov.clientWidth * dpr; bg.height = ov.clientHeight * dpr;
+              var ctx = bg.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, ov.clientWidth, ov.clientHeight);
+              var ovR = ov.getBoundingClientRect();
+              strokes.forEach(function(st){
+                var pe = doc.querySelector('.page[data-page-number="' + st.page + '"]');
+                if (!pe) return;
+                var pv2 = pv.getPageView(st.page - 1); if (!pv2 || !pv2.viewport) return;
+                var pr = pe.getBoundingClientRect(); if (!pr.width) return;
+                ctx.strokeStyle = st.color; ctx.lineWidth = st.size; ctx.lineCap = "round"; ctx.lineJoin = "round";
+                ctx.beginPath();
+                st.pts.forEach(function(pt, i){
+                  var v = pv2.viewport.convertToViewportPoint(pt.x, pt.y);
+                  var x = v[0] + pr.left - ovR.left, y = v[1] + pr.top - ovR.top;
+                  if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                });
+                ctx.stroke();
+              });
+            }
+            /* 橡皮命中：按笔画 bbox（萝：按笔画擦，天然可撤销） */
+            function hitStroke(pe, cx, cy){
+              var p = toPdfPt(pe, cx, cy); if (!p) return null;
+              for (var i = strokes.length - 1; i >= 0; i--) {
+                var st = strokes[i]; if (Number(st.page) !== p.page) continue;
+                var mnx = 1e9, mny = 1e9, mxx = -1e9, mxy = -1e9;
+                st.pts.forEach(function(pt){ mnx = Math.min(mnx, pt.x); mxx = Math.max(mxx, pt.x); mny = Math.min(mny, pt.y); mxy = Math.max(mxy, pt.y); });
+                var pad = st.size + 6;
+                if (p.x >= mnx - pad && p.x <= mxx + pad && p.y >= mny - pad && p.y <= mxy + pad) return st;
+              }
+              return null;
+            }
+            /* 绘制事件 */
+            evL.addEventListener("pointerdown", function(ev){
+              if (!enabled) return;
+              ev.preventDefault();
+              try { if (ev.target && ev.target.setPointerCapture) ev.target.setPointerCapture(ev.pointerId); } catch(e){}
+              var pe = pageAt(ev.clientX, ev.clientY); if (!pe) return;
+              if (eraser) { var h = hitStroke(pe, ev.clientX, ev.clientY); if (h) { delStroke(h.id); return; } return; }
+              drawing = true; curPage = pe; curPts = [];
+              var p = toPdfPt(pe, ev.clientX, ev.clientY);
+              if (p) curPts.push({ x: p.x, y: p.y });
+              fg.width = ov.clientWidth * dpr; fg.height = ov.clientHeight * dpr;
+              fg.getContext("2d").setTransform(dpr, 0, 0, dpr, 0, 0);
+            });
+            evL.addEventListener("pointermove", function(ev){
+              if (!enabled || !drawing || !curPage) return;
+              ev.preventDefault();
+              var p = toPdfPt(curPage, ev.clientX, ev.clientY); if (!p) return;
+              var prev = curPts[curPts.length - 1];
+              if (prev && Math.abs(p.x - prev.x) < 0.5 && Math.abs(p.y - prev.y) < 0.5) return;
+              curPts.push({ x: p.x, y: p.y });
+              var ctx = fg.getContext("2d");
+              var ovR = ov.getBoundingClientRect();
+              ctx.strokeStyle = color; ctx.lineWidth = size; ctx.lineCap = "round"; ctx.lineJoin = "round";
+              ctx.beginPath();
+              var v = p.viewport.convertToViewportPoint(p.x, p.y);
+              ctx.moveTo(v[0] + curPage.getBoundingClientRect().left - ovR.left, v[1] + curPage.getBoundingClientRect().top - ovR.top);
+              var vp = p.viewport.convertToViewportPoint(prev.x, prev.y);
+              ctx.lineTo(vp[0] + curPage.getBoundingClientRect().left - ovR.left, vp[1] + curPage.getBoundingClientRect().top - ovR.top);
+              ctx.stroke();
+            });
+            evL.addEventListener("pointerup", function(ev){
+              if (!enabled || !drawing) return;
+              drawing = false;
+              if (curPts.length >= 3 && curPage) {
+                var st = { id: "ink" + Date.now() + Math.random().toString(36).slice(2,6), book: BOOK.id, page: Number(curPage.getAttribute("data-page-number")), color: color, size: size, pts: curPts, created: Date.now() };
+                strokes.push(st); saveStroke(st);
+              }
+              curPts = []; curPage = null;
+              var c2 = fg.getContext("2d"); c2.setTransform(dpr, 0, 0, dpr, 0, 0); c2.clearRect(0, 0, ov.clientWidth, ov.clientHeight);
+              redrawAll();
+            });
+            evL.addEventListener("pointercancel", function(){ if (drawing) { drawing = false; curPts = []; curPage = null; var c2 = fg.getContext("2d"); c2.setTransform(dpr, 0, 0, dpr, 0, 0); c2.clearRect(0, 0, ov.clientWidth, ov.clientHeight); } });
+            doc.addEventListener("touchstart", function(ev){ if (enabled) { try { ev.preventDefault(); } catch(e){} } }, { passive: false });
+            doc.addEventListener("contextmenu", function(ev){ if (enabled) { ev.preventDefault(); } });
+            /* 缩放/滚动后重绘对齐 */
+            if (vc) vc.addEventListener("scroll", function(){ if (enabled) { clearTimeout(vc._rt); vc._rt = setTimeout(redrawAll, 120); } });
+            try { if (PAPP && PAPP.eventBus) PAPP.eventBus.on("update", function(){ if (enabled) setTimeout(redrawAll, 80); }); } catch(e){}
+            function setPen(on){
+              enabled = !!on;
+              ov.style.display = enabled ? "block" : "none";
+              evL.style.display = enabled ? "block" : "none";
+              tb.style.display = enabled ? "flex" : "none";
+              if (doc.body) doc.body.classList.toggle("pen-active", enabled);
+              if (enabled) { setTimeout(redrawAll, 60); }
+            }
+            pdfFrame.contentWindow.setPenMode = setPen;
           })();
 
           doc.addEventListener("mousedown", function(ev){
