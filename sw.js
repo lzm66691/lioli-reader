@@ -1,7 +1,7 @@
-/* PWA Service Worker — 莉萝阅读器 画笔加高亮框工具（拖拽半透明黄矩形高亮，存IDB可擦可撤销）（2026-09-27）
-   外壳缓存 reader-p2-dg-v34（含 pdf.js 全套）；PDF 缓存 reader-pdf-v1（按需 cache-first）
+/* PWA Service Worker — 莉萝阅读器 画笔图层z-index提到最高（真机被页面层压住修复）（2026-09-27）
+   外壳缓存 reader-p2-dg-v35（含 pdf.js 全套）；PDF 缓存 reader-pdf-v1（按需 cache-first）
    升级纪律：改外壳/pdf.js → 同时改缓存名 */
-var CACHE_SHELL = "reader-p2-dg-v34";
+var CACHE_SHELL = "reader-p2-dg-v35";
 var CACHE_PDF   = "reader-pdf-v1";
 
 /* PWA 离线预缓存：公开 6 本 PDF（共约 4MB），安装后全部本地可用 */
