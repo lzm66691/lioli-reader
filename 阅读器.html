@@ -529,7 +529,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v33</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v34</span></div>
 
   <div class="spacer"></div>
 
@@ -2097,8 +2097,9 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
             var ov = doc.createElement("div");
             var bg = doc.createElement("canvas"), fg = doc.createElement("canvas"), evL = doc.createElement("div");
             var tb = doc.createElement("div");
-            var enabled = false, color = "#E05C4F", size = 3, eraser = false, hlMode = false, prevC = color, prevS = size;
+            var enabled = false, color = "#E05C4F", size = 3, eraser = false, hlMode = false, prevC = color, prevS = size, hlRectMode = false;
             var drawing = false, curPage = null, curPts = [], strokes = [];
+            var hlDrag = false, hlStart = null, hlCur = null;
             var idb = null, dpr = window.devicePixelRatio || 1;
             function cvStyle(cv){ cv.style.cssText = "position:absolute;inset:0;pointer-events:none;width:100%;height:100%"; }
             cvStyle(bg); cvStyle(fg);
@@ -2130,7 +2131,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
               var b = doc.createElement("button");
               b.style.cssText = "width:22px;height:22px;border-radius:50%;border:2px solid transparent;background:" + cv + ";cursor:pointer;padding:0";
               b.dataset.c = cv; b.title = cv;
-              b.onpointerdown = function(ev){ if (ev.stopPropagation) ev.stopPropagation(); color = cv; eraser = false; if (hlMode) { hlMode = false; fluB.style.background = "#fff"; fluB.style.borderColor = "rgba(0,0,0,.15)"; } paintBar(); };
+              b.onpointerdown = function(ev){ if (ev.stopPropagation) ev.stopPropagation(); color = cv; eraser = false; if (hlMode) { hlMode = false; fluB.style.background = "#fff"; fluB.style.borderColor = "rgba(0,0,0,.15)"; } if (hlRectMode) { hlRectMode = false; hrB.style.background = "#fff"; hrB.style.borderColor = "rgba(0,0,0,.15)"; } paintBar(); };
               tb.appendChild(b);
             });
             var szSel = doc.createElement("select");
@@ -2146,11 +2147,19 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
             fluB.style.cssText = "height:24px;padding:0 10px;font-size:12px;border-radius:6px;border:1px solid rgba(0,0,0,.15);background:#fff;cursor:pointer";
             fluB.onclick = function(){
               hlMode = !hlMode;
-              if (hlMode) { prevC = color; prevS = size; color = "#FFC93C"; size = 8; fluB.style.background = "#fff3b8"; fluB.style.borderColor = "#e6c200"; }
+              if (hlMode) { prevC = color; prevS = size; color = "#FFC93C"; size = 8; fluB.style.background = "#fff3b8"; fluB.style.borderColor = "#e6c200"; if (hlRectMode) { hlRectMode = false; hrB.style.background = "#fff"; hrB.style.borderColor = "rgba(0,0,0,.15)"; } }
               else { color = prevC; size = prevS; fluB.style.background = "#fff"; fluB.style.borderColor = "rgba(0,0,0,.15)"; }
               paintBar();
             };
             tb.appendChild(fluB);
+            var hrB = doc.createElement("button"); hrB.textContent = "高亮框";
+            hrB.style.cssText = "height:24px;padding:0 10px;font-size:12px;border-radius:6px;border:1px solid rgba(0,0,0,.15);background:#fff;cursor:pointer";
+            hrB.onclick = function(){
+              hlRectMode = !hlRectMode;
+              if (hlRectMode) { eraser = false; hrB.style.background = "#fff3b8"; hrB.style.borderColor = "#e6c200"; }
+              else { hrB.style.background = "#fff"; hrB.style.borderColor = "rgba(0,0,0,.15)"; }
+            };
+            tb.appendChild(hrB);
             var undoB = doc.createElement("button"); undoB.textContent = "撤销";
             undoB.style.cssText = "height:24px;padding:0 10px;font-size:12px;border-radius:6px;border:1px solid rgba(0,0,0,.15);background:#fff;cursor:pointer";
             undoB.onclick = function(){ if (strokes.length) delStroke(strokes[strokes.length - 1].id); };
@@ -2190,6 +2199,15 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
                 if (!pe) return;
                 var pv2 = pv.getPageView(st.page - 1); if (!pv2 || !pv2.viewport) return;
                 var pr = pe.getBoundingClientRect(); if (!pr.width) return;
+                if (st.rect) {
+                  var q1 = pv2.viewport.convertToViewportPoint(st.rect.x1, st.rect.y1);
+                  var q2 = pv2.viewport.convertToViewportPoint(st.rect.x2, st.rect.y2);
+                  var rx1 = q1[0] + pr.left - ovR.left, ry1 = q1[1] + pr.top - ovR.top;
+                  var rx2 = q2[0] + pr.left - ovR.left, ry2 = q2[1] + pr.top - ovR.top;
+                  ctx.fillStyle = "rgba(255,201,60,.38)";
+                  ctx.fillRect(Math.min(rx1,rx2), Math.min(ry1,ry2), Math.abs(rx2-rx1), Math.abs(ry2-ry1));
+                  return;
+                }
                 ctx.strokeStyle = st.color; ctx.lineWidth = st.size; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.globalAlpha = st.hl ? 0.35 : 1;
                 ctx.beginPath();
                 st.pts.forEach(function(pt, i){
@@ -2200,14 +2218,32 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
                 ctx.stroke();
               });
             }
+            /* 高亮框拖拽预览 */
+            function drawHlPreview(){
+              if (!hlStart || !hlCur || hlStart.page !== hlCur.page) return;
+              var pe = doc.querySelector('.page[data-page-number="' + hlStart.page + '"]');
+              if (!pe) return;
+              var pv2 = pv.getPageView(hlStart.page - 1); if (!pv2 || !pv2.viewport) return;
+              var pr = pe.getBoundingClientRect(); if (!pr.width) return;
+              var ovR = ov.getBoundingClientRect();
+              var q1 = pv2.viewport.convertToViewportPoint(hlStart.x, hlStart.y);
+              var q2 = pv2.viewport.convertToViewportPoint(hlCur.x, hlCur.y);
+              var x1 = q1[0] + pr.left - ovR.left, y1 = q1[1] + pr.top - ovR.top;
+              var x2 = q2[0] + pr.left - ovR.left, y2 = q2[1] + pr.top - ovR.top;
+              fg.width = ov.clientWidth * dpr; fg.height = ov.clientHeight * dpr;
+              var ctx = fg.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+              ctx.fillStyle = "rgba(255,201,60,.38)";
+              ctx.fillRect(Math.min(x1,x2), Math.min(y1,y2), Math.abs(x2-x1), Math.abs(y2-y1));
+            }
             /* 橡皮命中：按笔画 bbox（萝：按笔画擦，天然可撤销） */
             function hitStroke(pe, cx, cy){
               var p = toPdfPt(pe, cx, cy); if (!p) return null;
               for (var i = strokes.length - 1; i >= 0; i--) {
                 var st = strokes[i]; if (Number(st.page) !== p.page) continue;
-                var mnx = 1e9, mny = 1e9, mxx = -1e9, mxy = -1e9;
-                st.pts.forEach(function(pt){ mnx = Math.min(mnx, pt.x); mxx = Math.max(mxx, pt.x); mny = Math.min(mny, pt.y); mxy = Math.max(mxy, pt.y); });
-                var pad = st.size + 6;
+                var mnx, mny, mxx, mxy;
+                if (st.rect) { mnx = st.rect.x1; mny = st.rect.y1; mxx = st.rect.x2; mxy = st.rect.y2; }
+                else { mnx = 1e9; mny = 1e9; mxx = -1e9; mxy = -1e9; st.pts.forEach(function(pt){ mnx = Math.min(mnx, pt.x); mxx = Math.max(mxx, pt.x); mny = Math.min(mny, pt.y); mxy = Math.max(mxy, pt.y); }); }
+                var pad = (st.rect ? 8 : st.size + 6);
                 if (p.x >= mnx - pad && p.x <= mxx + pad && p.y >= mny - pad && p.y <= mxy + pad) return st;
               }
               return null;
@@ -2218,6 +2254,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
               ev.preventDefault();
               try { if (ev.target && ev.target.setPointerCapture) ev.target.setPointerCapture(ev.pointerId); } catch(e){}
               var pe = pageAt(ev.clientX, ev.clientY); if (!pe) return;
+              if (hlRectMode) { hlDrag = true; hlStart = toPdfPt(pe, ev.clientX, ev.clientY); hlCur = hlStart; return; }
               if (eraser) { var h = hitStroke(pe, ev.clientX, ev.clientY); if (h) { delStroke(h.id); return; } return; }
               drawing = true; curPage = pe; curPts = [];
               var p = toPdfPt(pe, ev.clientX, ev.clientY);
@@ -2226,8 +2263,16 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
               fg.getContext("2d").setTransform(dpr, 0, 0, dpr, 0, 0);
             });
             evL.addEventListener("pointermove", function(ev){
-              if (!enabled || !drawing || !curPage) return;
+              if (!enabled) return;
               ev.preventDefault();
+              if (hlRectMode) {
+                if (hlDrag && hlStart) {
+                  var pe2 = pageAt(ev.clientX, ev.clientY);
+                  if (pe2) { hlCur = toPdfPt(pe2, ev.clientX, ev.clientY); if (hlCur) drawHlPreview(); }
+                }
+                return;
+              }
+              if (!drawing || !curPage) return;
               var p = toPdfPt(curPage, ev.clientX, ev.clientY); if (!p) return;
               var prev = curPts[curPts.length - 1];
               if (prev && Math.abs(p.x - prev.x) < 0.5 && Math.abs(p.y - prev.y) < 0.5) return;
@@ -2243,7 +2288,21 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
               ctx.stroke();
             });
             evL.addEventListener("pointerup", function(ev){
-              if (!enabled || !drawing) return;
+              if (!enabled) return;
+              if (hlRectMode) {
+                if (hlDrag && hlStart && hlCur && hlStart.page === hlCur.page) {
+                  var pe = doc.querySelector('.page[data-page-number="' + hlStart.page + '"]');
+                  if (pe) {
+                    var st = { id: "hl" + Date.now() + Math.random().toString(36).slice(2,6), book: BOOK.id, page: hlStart.page, color: "#FFC93C", size: 0, pts: [], rect: { x1: Math.min(hlStart.x, hlCur.x), y1: Math.min(hlStart.y, hlCur.y), x2: Math.max(hlStart.x, hlCur.x), y2: Math.max(hlStart.y, hlCur.y) }, created: Date.now(), hl: true };
+                    strokes.push(st); saveStroke(st);
+                  }
+                }
+                hlDrag = false; hlStart = null; hlCur = null;
+                var c3 = fg.getContext("2d"); c3.setTransform(dpr, 0, 0, dpr, 0, 0); c3.clearRect(0, 0, ov.clientWidth, ov.clientHeight);
+                redrawAll();
+                return;
+              }
+              if (!drawing) return;
               drawing = false;
               if (curPts.length >= 2 && curPage) {
                 var st = { id: "ink" + Date.now() + Math.random().toString(36).slice(2,6), book: BOOK.id, page: Number(curPage.getAttribute("data-page-number")), color: color, size: size, pts: curPts, created: Date.now(), hl: hlMode };
@@ -2253,7 +2312,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
               var c2 = fg.getContext("2d"); c2.setTransform(dpr, 0, 0, dpr, 0, 0); c2.clearRect(0, 0, ov.clientWidth, ov.clientHeight);
               redrawAll();
             });
-            evL.addEventListener("pointercancel", function(){ if (drawing) { drawing = false; curPts = []; curPage = null; var c2 = fg.getContext("2d"); c2.setTransform(dpr, 0, 0, dpr, 0, 0); c2.clearRect(0, 0, ov.clientWidth, ov.clientHeight); } });
+            evL.addEventListener("pointercancel", function(){ hlDrag = false; hlStart = null; hlCur = null; if (drawing) { drawing = false; curPts = []; curPage = null; var c2 = fg.getContext("2d"); c2.setTransform(dpr, 0, 0, dpr, 0, 0); c2.clearRect(0, 0, ov.clientWidth, ov.clientHeight); } });
             doc.addEventListener("touchstart", function(ev){ if (enabled && !(ev.target && ev.target.closest && ev.target.closest("#penBar"))) { try { ev.preventDefault(); } catch(e){} } }, { passive: false });
             doc.addEventListener("contextmenu", function(ev){ if (enabled) { ev.preventDefault(); } });
             /* 缩放/滚动后重绘对齐 */
