@@ -524,7 +524,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v28</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v29</span></div>
 
   <div class="spacer"></div>
 
@@ -1952,7 +1952,8 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
   /* 初始化：pdf.js 渲染 + 注入 CSS 隐藏 viewer 自带按钮（不改 vendor 源文件）+ 兜底链接 + SW 注册 */
 
-  document.getElementById("brandTxt").textContent = "阅读器 · " + BOOK.title.replace("C 讲义 · ","");
+  /* 左上角固定品牌名，不显示当前书名（哥哥 2026-09-27 拍板去掉） */
+  document.getElementById("brandTxt").textContent = "莉萝阅读器";
 
   applyTheme();
 
