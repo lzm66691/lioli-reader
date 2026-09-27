@@ -1,0 +1,192 @@
+[
+ {
+  "page": 8,
+  "level": "section",
+  "title": "第一节向量及其线性运算"
+ },
+ {
+  "page": 9,
+  "level": "chapter",
+  "title": "第八章向量代数与空间解析几何"
+ },
+ {
+  "page": 22,
+  "level": "section",
+  "title": "第二节数量积向量积混合积"
+ },
+ {
+  "page": 30,
+  "level": "section",
+  "title": "第三节平面及其方程"
+ },
+ {
+  "page": 36,
+  "level": "section",
+  "title": "第四节空间直线及其方程"
+ },
+ {
+  "page": 44,
+  "level": "section",
+  "title": "第五节曲面及其方程"
+ },
+ {
+  "page": 52,
+  "level": "section",
+  "title": "第六节空间曲线及其方程"
+ },
+ {
+  "page": 60,
+  "level": "section",
+  "title": "第一节多元函数的基本概念"
+ },
+ {
+  "page": 61,
+  "level": "chapter",
+  "title": "第九章多元函数微分法及其应用"
+ },
+ {
+  "page": 70,
+  "level": "section",
+  "title": "第二节偏导数"
+ },
+ {
+  "page": 76,
+  "level": "section",
+  "title": "第三节全微分"
+ },
+ {
+  "page": 84,
+  "level": "section",
+  "title": "第四节多元复合函数的求导法则"
+ },
+ {
+  "page": 90,
+  "level": "section",
+  "title": "第五节隐函数的求导公式"
+ },
+ {
+  "page": 96,
+  "level": "section",
+  "title": "第六节多元函数微分学的几何应用"
+ },
+ {
+  "page": 108,
+  "level": "section",
+  "title": "第七节方向导数与梯度"
+ },
+ {
+  "page": 116,
+  "level": "section",
+  "title": "第八节多元函数的极值及其求法"
+ },
+ {
+  "page": 138,
+  "level": "section",
+  "title": "第一节二重积分的概念与性质"
+ },
+ {
+  "page": 139,
+  "level": "chapter",
+  "title": "第十章重积分"
+ },
+ {
+  "page": 144,
+  "level": "section",
+  "title": "第二节二重积分的计算法"
+ },
+ {
+  "page": 161,
+  "level": "section",
+  "title": "第三节三重积分"
+ },
+ {
+  "page": 168,
+  "level": "section",
+  "title": "第四节重积分的应用"
+ },
+ {
+  "page": 178,
+  "level": "section",
+  "title": "第五节·含参变量的积分"
+ },
+ {
+  "page": 188,
+  "level": "section",
+  "title": "第一节对弧长的曲线积分"
+ },
+ {
+  "page": 189,
+  "level": "chapter",
+  "title": "第十一章曲线积分与曲面积分"
+ },
+ {
+  "page": 194,
+  "level": "section",
+  "title": "第二节对坐标的曲线积分"
+ },
+ {
+  "page": 204,
+  "level": "section",
+  "title": "第三节格林公式及其应用"
+ },
+ {
+  "page": 216,
+  "level": "section",
+  "title": "第四节对面积的曲面积分"
+ },
+ {
+  "page": 220,
+  "level": "section",
+  "title": "第五节对坐标的曲面积分"
+ },
+ {
+  "page": 230,
+  "level": "section",
+  "title": "第六节高斯公式通量与散度"
+ },
+ {
+  "page": 238,
+  "level": "section",
+  "title": "第七节斯托克斯公式环流量与旋度"
+ },
+ {
+  "page": 249,
+  "level": "chapter",
+  "title": "第十二章无穷级数"
+ },
+ {
+  "page": 250,
+  "level": "section",
+  "title": "第一节常数项级数的概念和性质"
+ },
+ {
+  "page": 256,
+  "level": "section",
+  "title": "第二节常数项级数的审敛法"
+ },
+ {
+  "page": 270,
+  "level": "section",
+  "title": "第三节幂级数"
+ },
+ {
+  "page": 278,
+  "level": "section",
+  "title": "第四节函数展开成幂级数"
+ },
+ {
+  "page": 288,
+  "level": "section",
+  "title": "第五节函数的幂级数展开式的应用"
+ },
+ {
+  "page": 302,
+  "level": "section",
+  "title": "第七节傅里叶级数"
+ },
+ {
+  "page": 314,
+  "level": "section",
+  "title": "第八节一般周期函数的傅里叶级数"
+ }
+]
