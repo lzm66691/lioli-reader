@@ -2480,7 +2480,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
             evL.addEventListener("pointerup", function(ev){
               if (!enabled || !drawing) return;
               drawing = false;
-              if (curPts.length >= 3 && curPage) {
+              if (curPts.length >= 2 && curPage) {
                 var st = { id: "ink" + Date.now() + Math.random().toString(36).slice(2,6), book: BOOK.id, page: Number(curPage.getAttribute("data-page-number")), color: color, size: size, pts: curPts, created: Date.now() };
                 strokes.push(st); saveStroke(st);
               }
