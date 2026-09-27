@@ -524,7 +524,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v24</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v25</span></div>
 
   <div class="spacer"></div>
 
@@ -1632,7 +1632,14 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
     _selBtn.addEventListener("click", function(){
       window.__selMode = !window.__selMode;
       document.body.classList.toggle("sel-mode", window.__selMode);
-      try { var _f = document.getElementById("pdfFrame"); if (_f && _f.contentWindow && _f.contentWindow.setSelMode) _f.contentWindow.setSelMode(window.__selMode); } catch(e){}
+      try {
+        var _f = document.getElementById("pdfFrame");
+        var _trySync = function(n){
+          try { if (_f && _f.contentWindow && _f.contentWindow.setSelMode) { _f.contentWindow.setSelMode(window.__selMode); return; } } catch(e){}
+          if (n < 10) setTimeout(function(){ _trySync(n + 1); }, 300);
+        };
+        _trySync(0);
+      } catch(e){}
       _selBtn.classList.toggle("active", window.__selMode);
       _selBtn.title = window.__selMode ? "框选模式已开启：拖动框选标注（点此退出）" : "框选模式：进入后直接拖动框选标注（平板友好）";
     });
@@ -2129,6 +2136,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
           /* 框选模式文本选择禁用开关：平板原生选区会抢触摸事件，必须 user-select:none */
           pdfFrame.contentWindow.setSelMode = function(on){ try{ var _d = pdfFrame.contentDocument; if (_d && _d.body) _d.body.classList.toggle("sel-disabled", !!on); }catch(e){} };
+          try { pdfFrame.contentWindow.setSelMode(window.__selMode); } catch(e){}   /* load 后同步当前框选状态 */
 
           /* 区域标注：长按 300ms 激活绘制，拖动画矩形，松手弹工具条（扫描版教材用） */
           (function(){
@@ -2547,7 +2555,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
   /* OCR 目录：书名匹配 → 线上数据 → 章/节树（高数上册扫描版无大纲，用 OCR 目录） */
   function ocrTocKeyFor(title){
-    if (title.indexOf("高等数学") >= 0 && title.indexOf("上册") >= 0) return "ocr-gs-up";
+    if (title.indexOf("高等数学") >= 0 && title.indexOf("上册") >= 0) return "ocr-gs-up-toc";   /* 与线上数据文件名一致 */
     return null;
   }
   function loadOcrToc(key, cb){
@@ -2646,7 +2654,8 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
   /* 测试/调试钩子（不参与功能逻辑） */
 
-  window.__readerLocal = { doImport: doImport, openLocalBook: openLocalBook };
+  window.__readerLocal = { doImport: doImport, openLocalBook: openLocalBook,
+    ocr: { keyFor: ocrTocKeyFor, load: loadOcrToc, toToc: ocrToToc } };
 
   /* PWA 自动更新：平板/手机恢复标签页时不会自动检查 sw，这里主动定期检查，新版本就绪自动刷新 */
   if ('serviceWorker' in navigator) {
