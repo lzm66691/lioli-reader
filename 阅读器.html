@@ -508,7 +508,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 
 /* P16/v30：顶栏精简——隐藏收纳进工具箱的按钮（萝方案：顶栏留 目录/标注/搜索/工具箱+页码） */
-#noteBtn,#selModeBtn,#darkBtn,#fullBtn,#sysOpen,.tool-group a.tool-btn[href="guide.html"]{display:none!important}
+#markBtn,#noteBtn,#selModeBtn,#darkBtn,#fullBtn,#sysOpen,.tool-group a.tool-btn[href="guide.html"]{display:none!important}
 /* 工具箱面板：锚点避开顶栏 + 平板安全区（萝要求：第一组条目必可见） */
 .toolbox-panel{top:calc(58px + env(safe-area-inset-top,0px));max-height:calc(100vh - 74px - env(safe-area-inset-top,0px))}
 </style>
@@ -529,7 +529,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v32</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v33</span></div>
 
   <div class="spacer"></div>
 
@@ -1666,8 +1666,6 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
       + '<button class="toolbox-item" data-act="rotate"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 7a6 6 0 1 0-1.5 4.5M13 2v5H8"/></svg></span>旋转 90°</button>'
       + '<button class="toolbox-item" data-act="search"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="4"/><path d="M10 10l4 4"/></svg></span>PDF 搜索</button>'
       + '<div class="toolbox-grp">标注</div>'
-      + '<button class="toolbox-item" data-act="sel"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2.2 1.6"><rect x="2.5" y="2.5" width="11" height="11" rx="1.5"/></svg></span>框选模式</button>'
-      + '<button class="toolbox-item" data-act="mark"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l6-6 2 2-6 6-2 2zM9 7l3-3 2 2-3 3z"/></svg></span>划词标注</button>'
       + '<button class="toolbox-item" data-act="note"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M3 2h10v11l-2-1.5L9 13V2"/></svg></span>笔记</button>'
       + '<button class="toolbox-item" data-act="pen"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 2-8.5 8.5L3 13l.5-2.5z"/></svg></span>画笔</button>'
       + '<div class="toolbox-grp">外观</div>'
@@ -1704,12 +1702,10 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
     var _tbActs = {
       import: function(){ var i = document.getElementById("pdfFileInput"); if (i) i.click(); else alert("请先在书架页导入"); },
       export: function(){ try { exportLocal(); } catch(e){ alert("暂无可导出的本地书"); } },
-      sel: function(){ var b = document.getElementById("selModeBtn"); if (b) b.click(); },
       theme: function(){ var b = document.getElementById("darkBtn"); if (b) b.click(); },
       full: function(){ var b = document.getElementById("fullBtn"); if (b) b.click(); },
       sidebar: function(){ var b = document.getElementById("sidebarBtn"); if (b) b.click(); },
       note: function(){ var b = document.getElementById("noteBtn"); if (b) b.click(); },
-      mark: function(){ var b = document.getElementById("markBtn"); if (b) b.click(); },
       pen: function(){
         try {
           window.__penMode = !window.__penMode;
@@ -1992,7 +1988,9 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
         var st = doc.createElement("style");
 
-        st.textContent = "#download,#print,#openFile,#secondaryToolbarToggle{display:none!important} #viewer .page{box-shadow:0 4px 24px rgba(0,0,0,.13)!important;margin:18px auto!important;border-radius:2px;background:#fff} body.dark #viewer .page{box-shadow:0 4px 20px rgba(255,255,255,.08)!important} #viewerContainer{background:transparent!important}";
+        var st = doc.createElement("link");
+        st.rel = "stylesheet";
+        st.href = "/阅读器注入.css";   /* CSP style-src self: inline style blocked, use external css (annotation toolbar always-on, plan C) */
 
         doc.head.appendChild(st);
 
@@ -2033,11 +2031,11 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
         /* ---- P3a：标注渲染 + 划词工具条（不依赖外层，闭包内完成） ---- */
 
-        var markCss = doc.createElement("style");
+        /* P3a: mark css moved to external css (CSP) */
 
-        markCss.textContent = ".hl-marker{position:absolute;z-index:5;border-radius:2px;cursor:pointer;pointer-events:auto} .hl-marker.hl-1{background:rgba(251,218,131,.42)} .hl-marker.hl-2{background:rgba(228,147,142,.38)} .hl-marker.hl-3{background:rgba(141,187,255,.38)} .hl-marker:hover{outline:1px solid rgba(0,0,0,.25)} #hlBar{position:fixed;z-index:9999;display:none;gap:4px;background:rgba(255,255,255,.96);border:1px solid rgba(0,0,0,.12);border-radius:8px;padding:4px 6px;box-shadow:0 4px 14px rgba(0,0,0,.18);align-items:center} #hlBar button{width:20px;height:20px;border:none;border-radius:4px;cursor:pointer;border:1px solid rgba(0,0,0,.15);padding:0} #hlBar .hl-b1{background:#FBDA83} #hlBar .hl-b2{background:#E4938E} #hlBar .hl-b3{background:#8DBBFF} #hlBar .hl-note-btn{width:auto;padding:0 8px;font-size:12px;color:#333;background:#fff} body.dark #hlBar{background:rgba(42,42,42,.96);border-color:rgba(255,255,255,.15)} body.dark #hlBar .hl-note-btn{color:#ddd} body.dark #hlBar .hl-note-btn{background:rgba(60,60,60,.9)} body.sel-disabled,body.sel-disabled *,body.sel-disabled .textLayer,body.sel-disabled .textLayer span,body.sel-disabled .textLayer ::selection{user-select:none!important;-webkit-user-select:none!important;-webkit-touch-callout:none!important} body.sel-disabled #viewer .textLayer{display:none!important} body.sel-disabled #viewer{touch-action:none!important}";
+        /* P3a: mark css rules moved to external css */
 
-        doc.head.appendChild(markCss);
+        /* P3a: inline append removed */
 
         function renderAnnotations(){
 
@@ -2089,256 +2087,9 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
         renderAnnotations();
 
-        /* 划词浮动工具条 */
-
-        (function(){
-
-          var bar = doc.createElement("div"); bar.id = "hlBar";
-
-          bar.innerHTML = '<button class="hl-b1" data-c="1" title="暖黄高亮"></button><button class="hl-b2" data-c="2" title="淡粉高亮"></button><button class="hl-b3" data-c="3" title="雾蓝高亮"></button><button class="hl-note-btn" data-n="1">笔记</button>';
-
-          doc.body.appendChild(bar);
-
-          window.__hlCur = null;
-
-          function hide(){ bar.style.display = "none"; window.__hlCur = null; }
-
-          bar.onclick = function(ev){
-
-            var b = ev.target;
-
-            if (!window.__hlCur || !b || !b.dataset) return;
-
-            if (b.dataset.c) {
-
-              marks.push({id: "m" + Date.now() + Math.random().toString(36).slice(2,6), page: window.__hlCur.page, color: Number(b.dataset.c), x: window.__hlCur.rect.x, y: window.__hlCur.rect.y, w: window.__hlCur.rect.w, h: window.__hlCur.rect.h, text: "", created: Date.now()});
-
-              saveMarks(); renderAnnotations();
-
-              if (typeof renderNotes === "function") renderNotes();
-
-              hide();
-
-            } else if (b.dataset.n) {
-
-              var t = prompt("笔记内容：", "");
-
-              if (t !== null && t.trim()) {
-
-                marks.push({id: "m" + Date.now() + Math.random().toString(36).slice(2,6), page: window.__hlCur.page, color: 1, x: window.__hlCur.rect.x, y: window.__hlCur.rect.y, w: window.__hlCur.rect.w, h: window.__hlCur.rect.h, text: t.trim().slice(0, 500), created: Date.now()});
-
-                saveMarks(); renderAnnotations();
-
-                if (typeof renderNotes === "function") renderNotes();
-
-              }
-
-              hide();
-
-            }
-
-          };
-
-          var hlTimer = null;
-
-          function doHl(){
-
-            if (hlTimer) clearTimeout(hlTimer);
-
-            hlTimer = setTimeout(function(){
-
-              hlTimer = null;
-
-            try {
-
-              var sel = pdfFrame.contentWindow.getSelection();
-
-              if (!sel || sel.isCollapsed || !sel.rangeCount) { hide(); return; }
-
-              var range = sel.getRangeAt(0);
-
-              var rects = range.getClientRects();
-
-              var rect = rects && rects.length ? rects[0] : range.getBoundingClientRect();
-
-              if (!rect || rect.width < 2 || rect.height < 2) { hide(); return; }
-
-              var node = range.commonAncestorContainer;
-
-              var pe = node.nodeType === 1 ? node : node.parentElement;
-
-              while (pe && !(pe.classList && pe.classList.contains("page"))) pe = pe.parentElement;
-
-              if (!pe) { hide(); return; }
-
-              var pr = pe.getBoundingClientRect();
-
-              if (!pr.width || !pr.height) { hide(); return; }
-
-              var xp = Math.max(0, Math.min(100, (rect.left - pr.left) / pr.width * 100));
-
-              var yp = Math.max(0, Math.min(100, (rect.top - pr.top) / pr.height * 100));
-
-              window.__hlCur = { page: Number(pe.getAttribute("data-page-number")), rect: {
-
-                x: xp, y: yp,
-
-                w: Math.max(2, Math.min(100 - xp, rect.width / pr.width * 100)),
-
-                h: Math.max(2, Math.min(100 - yp, rect.height / pr.height * 100))
-
-              }};
-
-              bar.style.left = Math.max(8, Math.min(pdfFrame.contentWindow.innerWidth - 150, rect.left + rect.width / 2 - 60)) + "px";
-
-              bar.style.top = Math.max(8, rect.top - 36) + "px";
-
-              bar.style.display = "flex";
-
-            } catch(e){}
-
-            }, 80);
-
-          }
-
-          doc.addEventListener("mouseup", doHl);
-
-          doc.addEventListener("selectionchange", doHl);
-
-          /* 框选模式文本选择禁用开关：平板原生选区会抢触摸事件，必须 user-select:none */
-          pdfFrame.contentWindow.setSelMode = function(on){ try{ var _d = pdfFrame.contentDocument; if (_d && _d.body) _d.body.classList.toggle("sel-disabled", !!on); }catch(e){} };
-          try { pdfFrame.contentWindow.setSelMode(window.__selMode); } catch(e){}   /* load 后同步当前框选状态 */
           try { if (pdfFrame.contentWindow.setPenMode) pdfFrame.contentWindow.setPenMode(!!window.__penMode); } catch(e){}   /* load 后同步画笔状态 */
 
-          /* 区域标注：长按 300ms 激活绘制，拖动画矩形，松手弹工具条（扫描版教材用） */
-          (function(){
 
-            var pd = null, timer = null, active = false, preview = null;
-
-            function hidePreview(){ if (preview) { try { preview.remove(); } catch(e){} preview = null; } }
-
-            function pageOf(t){ var n = t; while (n && !(n.classList && n.classList.contains("page"))) n = n.parentElement; return n; }
-
-            function setDrawing(on){ if (pd && pd.page) { try { pd.page.classList.toggle("drawing-active", on); } catch(e){} } }
-
-            function cancel(){ clearTimeout(timer); timer = null; setDrawing(false); pd = null; active = false; hidePreview(); }
-
-            function beginPreview(p){
-
-              preview = doc.createElement("div");
-
-              preview.style.cssText = "position:fixed;z-index:3000;border:1.5px dashed rgba(80,140,220,.95);background:rgba(80,140,220,.12);pointer-events:none;display:none;border-radius:2px";
-
-              doc.body.appendChild(preview);
-
-            }
-
-            function selOn(){ try { return !!window.parent.__selMode; } catch(e){ return false; } }
-
-            doc.addEventListener("pointerdown", function(ev){
-
-              if (ev.button !== 0 && ev.pointerType === "mouse") return;
-
-              var p = pageOf(ev.target); if (!p) return;
-
-              if (pd) { if (pd.id !== ev.pointerId) cancel(); return; }
-
-              hidePreview();
-
-              pd = { id: ev.pointerId, x: ev.clientX, y: ev.clientY, page: p, pr: p.getBoundingClientRect() };
-
-              active = false;
-
-              clearTimeout(timer);
-
-              if (selOn()) {
-
-                /* 框选模式：立即激活绘制（平板无需长按）；preventDefault 阻止 Android 原生文本选择抢事件；pointer capture 保证拖拽不丢事件 */
-                try { ev.preventDefault(); } catch(e){}
-                try { if (ev.target && ev.target.setPointerCapture) ev.target.setPointerCapture(ev.pointerId); } catch(e){}
-                active = true; setDrawing(true); beginPreview(p);
-
-              } else {
-
-                timer = setTimeout(function(){ active = true; setDrawing(true); beginPreview(p); }, 300);
-
-              }
-
-            });
-
-            doc.addEventListener("pointermove", function(ev){
-
-              if (!pd) return;
-
-              var dx = ev.clientX - pd.x, dy = ev.clientY - pd.y;
-
-              if (!active) {
-
-                if (Math.abs(dx) > 8 || Math.abs(dy) > 8) { cancel(); }
-
-              } else if (preview) {
-
-                preview.style.left = Math.min(pd.x, ev.clientX) + "px"; preview.style.top = Math.min(pd.y, ev.clientY) + "px";
-
-                preview.style.width = Math.abs(dx) + "px"; preview.style.height = Math.abs(dy) + "px";
-
-                preview.style.display = "block";
-
-              }
-
-            });
-
-            doc.addEventListener("pointerup", function(ev){
-
-              if (!pd) return;
-
-              var x0 = pd.x, y0 = pd.y, pg = pd.page, wasActive = active;
-
-              var pr = pg.getBoundingClientRect();
-
-              var dx = ev.clientX - x0, dy = ev.clientY - y0;
-
-              cancel();
-
-              if (!wasActive || Math.abs(dx) < 12 || Math.abs(dy) < 12) return;
-
-              var l = Math.min(x0, ev.clientX) - pr.left, t = Math.min(y0, ev.clientY) - pr.top;
-
-              var w = Math.abs(dx), h = Math.abs(dy);
-
-              var xp = Math.max(0, Math.min(100, l / pr.width * 100));
-
-              var yp = Math.max(0, Math.min(100, t / pr.height * 100));
-
-              var wp = Math.max(3, Math.min(100 - xp, w / pr.width * 100));
-
-              var hp = Math.max(3, Math.min(100 - yp, h / pr.height * 100));
-
-              window.__hlCur = { page: Number(pg.getAttribute("data-page-number")), rect: { x: xp, y: yp, w: wp, h: hp } };
-
-              var vx = pr.left + l + w / 2;
-
-              bar.style.left = Math.max(8, Math.min(pdfFrame.contentWindow.innerWidth - 150, vx - 60)) + "px";
-
-              bar.style.top = Math.max(8, pr.top + t - 36) + "px";
-
-              bar.style.display = "flex";
-
-            });
-
-            /* 浏览器打断（长按菜单/滚动判定/多指）→ 干净清理 */
-            doc.addEventListener("pointercancel", function(){ cancel(); });
-
-            /* 触摸加固：框选/绘制期间禁止浏览器滚动判定抢事件（萝：touchstart 必须 passive:false + preventDefault） */
-            doc.addEventListener("touchstart", function(ev){ if (selOn() || pd) { try { ev.preventDefault(); } catch(e){} } }, { passive: false });
-
-            /* 长按菜单拦截（绘制期间禁止系统菜单抢事件） */
-            doc.addEventListener("contextmenu", function(ev){ if (pd) { ev.preventDefault(); } });
-
-
-          })();
-
-          /* ===== 画笔模式（希沃白板式手写笔）：双 canvas + PDF用户空间坐标 + IndexedDB ===== */
           (function(){
             var PAPP = pdfFrame.contentWindow.PDFViewerApplication;
             var pv = PAPP && PAPP.pdfViewer ? PAPP.pdfViewer : null;
@@ -2346,7 +2097,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
             var ov = doc.createElement("div");
             var bg = doc.createElement("canvas"), fg = doc.createElement("canvas"), evL = doc.createElement("div");
             var tb = doc.createElement("div");
-            var enabled = false, color = "#E05C4F", size = 3, eraser = false;
+            var enabled = false, color = "#E05C4F", size = 3, eraser = false, hlMode = false, prevC = color, prevS = size;
             var drawing = false, curPage = null, curPts = [], strokes = [];
             var idb = null, dpr = window.devicePixelRatio || 1;
             function cvStyle(cv){ cv.style.cssText = "position:absolute;inset:0;pointer-events:none;width:100%;height:100%"; }
@@ -2379,7 +2130,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
               var b = doc.createElement("button");
               b.style.cssText = "width:22px;height:22px;border-radius:50%;border:2px solid transparent;background:" + cv + ";cursor:pointer;padding:0";
               b.dataset.c = cv; b.title = cv;
-              b.onclick = function(){ color = cv; eraser = false; paintBar(); };
+              b.onpointerdown = function(ev){ if (ev.stopPropagation) ev.stopPropagation(); color = cv; eraser = false; if (hlMode) { hlMode = false; fluB.style.background = "#fff"; fluB.style.borderColor = "rgba(0,0,0,.15)"; } paintBar(); };
               tb.appendChild(b);
             });
             var szSel = doc.createElement("select");
@@ -2391,6 +2142,15 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
             erB.style.cssText = "height:24px;padding:0 10px;font-size:12px;border-radius:6px;border:1px solid rgba(0,0,0,.15);background:#fff;cursor:pointer";
             erB.onclick = function(){ eraser = !eraser; erB.style.background = eraser ? "#ffe0d6" : "#fff"; };
             tb.appendChild(erB);
+            var fluB = doc.createElement("button"); fluB.textContent = "荧光笔";
+            fluB.style.cssText = "height:24px;padding:0 10px;font-size:12px;border-radius:6px;border:1px solid rgba(0,0,0,.15);background:#fff;cursor:pointer";
+            fluB.onclick = function(){
+              hlMode = !hlMode;
+              if (hlMode) { prevC = color; prevS = size; color = "#FFC93C"; size = 8; fluB.style.background = "#fff3b8"; fluB.style.borderColor = "#e6c200"; }
+              else { color = prevC; size = prevS; fluB.style.background = "#fff"; fluB.style.borderColor = "rgba(0,0,0,.15)"; }
+              paintBar();
+            };
+            tb.appendChild(fluB);
             var undoB = doc.createElement("button"); undoB.textContent = "撤销";
             undoB.style.cssText = "height:24px;padding:0 10px;font-size:12px;border-radius:6px;border:1px solid rgba(0,0,0,.15);background:#fff;cursor:pointer";
             undoB.onclick = function(){ if (strokes.length) delStroke(strokes[strokes.length - 1].id); };
@@ -2430,7 +2190,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
                 if (!pe) return;
                 var pv2 = pv.getPageView(st.page - 1); if (!pv2 || !pv2.viewport) return;
                 var pr = pe.getBoundingClientRect(); if (!pr.width) return;
-                ctx.strokeStyle = st.color; ctx.lineWidth = st.size; ctx.lineCap = "round"; ctx.lineJoin = "round";
+                ctx.strokeStyle = st.color; ctx.lineWidth = st.size; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.globalAlpha = st.hl ? 0.35 : 1;
                 ctx.beginPath();
                 st.pts.forEach(function(pt, i){
                   var v = pv2.viewport.convertToViewportPoint(pt.x, pt.y);
@@ -2474,7 +2234,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
               curPts.push({ x: p.x, y: p.y });
               var ctx = fg.getContext("2d");
               var ovR = ov.getBoundingClientRect();
-              ctx.strokeStyle = color; ctx.lineWidth = size; ctx.lineCap = "round"; ctx.lineJoin = "round";
+              ctx.strokeStyle = color; ctx.lineWidth = size; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.globalAlpha = hlMode ? 0.35 : 1;
               ctx.beginPath();
               var v = p.viewport.convertToViewportPoint(p.x, p.y);
               ctx.moveTo(v[0] + curPage.getBoundingClientRect().left - ovR.left, v[1] + curPage.getBoundingClientRect().top - ovR.top);
@@ -2486,7 +2246,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
               if (!enabled || !drawing) return;
               drawing = false;
               if (curPts.length >= 2 && curPage) {
-                var st = { id: "ink" + Date.now() + Math.random().toString(36).slice(2,6), book: BOOK.id, page: Number(curPage.getAttribute("data-page-number")), color: color, size: size, pts: curPts, created: Date.now() };
+                var st = { id: "ink" + Date.now() + Math.random().toString(36).slice(2,6), book: BOOK.id, page: Number(curPage.getAttribute("data-page-number")), color: color, size: size, pts: curPts, created: Date.now(), hl: hlMode };
                 strokes.push(st); saveStroke(st);
               }
               curPts = []; curPage = null;
@@ -2494,7 +2254,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
               redrawAll();
             });
             evL.addEventListener("pointercancel", function(){ if (drawing) { drawing = false; curPts = []; curPage = null; var c2 = fg.getContext("2d"); c2.setTransform(dpr, 0, 0, dpr, 0, 0); c2.clearRect(0, 0, ov.clientWidth, ov.clientHeight); } });
-            doc.addEventListener("touchstart", function(ev){ if (enabled) { try { ev.preventDefault(); } catch(e){} } }, { passive: false });
+            doc.addEventListener("touchstart", function(ev){ if (enabled && !(ev.target && ev.target.closest && ev.target.closest("#penBar"))) { try { ev.preventDefault(); } catch(e){} } }, { passive: false });
             doc.addEventListener("contextmenu", function(ev){ if (enabled) { ev.preventDefault(); } });
             /* 缩放/滚动后重绘对齐 */
             if (vc) vc.addEventListener("scroll", function(){ if (enabled) { clearTimeout(vc._rt); vc._rt = setTimeout(redrawAll, 120); } });
@@ -2510,6 +2270,34 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
             pdfFrame.contentWindow.setPenMode = setPen;
           })();
 
+          /* ===== P3d: 手写笔翻页（方案C 笔滚动，哥哥 2026-09-27 拍板）===== */
+          (function(){
+            var PAPP = pdfFrame.contentWindow.PDFViewerApplication;
+            function _busy(){ try { return !!(window.parent && (window.parent.__penMode || window.parent.__selMode)); } catch(e){ return false; } }
+            function _page(dir){ try { if (PAPP && PAPP.eventBus) PAPP.eventBus.dispatch(dir > 0 ? "nextpage" : "previouspage"); } catch(e){} }
+            var _wAcc = 0;
+            doc.addEventListener("wheel", function(ev){
+              if (_busy()) return;                 /* 画笔/框选模式：不抢事件 */
+              if (ev.ctrlKey || ev.metaKey) return; /* Ctrl+滚轮缩放交给 pdf.js */
+              var t = ev.target;
+              if (!(t && t.closest && t.closest("#viewerContainer"))) return; /* 只在 PDF 区翻页（findbar 等不误触） */
+              _wAcc += ev.deltaY;
+              if (Math.abs(_wAcc) >= 120) { try { ev.preventDefault(); } catch(e){} _page(_wAcc); _wAcc = 0; }
+            }, { passive: false });
+            var _pDown = null;
+            doc.addEventListener("pointerdown", function(ev){
+              if (_busy()) return;
+              if (ev.pointerType === "pen" && !(ev.target && ev.target.closest && ev.target.closest(".textLayer"))) _pDown = { y: ev.clientY };
+            }, true);
+            doc.addEventListener("pointermove", function(ev){
+              if (!_pDown || _busy()) return;
+              if (ev.pointerType !== "pen") return;
+              var dy = ev.clientY - _pDown.y;
+              if (Math.abs(dy) >= 90) { try { ev.preventDefault(); } catch(e){} _page(dy); _pDown = { y: ev.clientY }; }
+            }, true);
+            doc.addEventListener("pointerup", function(){ _pDown = null; }, true);
+            doc.addEventListener("pointercancel", function(){ _pDown = null; }, true);
+          })();
           /* ?debug=1：pointer 事件探针（萝要求：真机复测失败时先区分「事件没来/来了看不见」） */
           if (window.location.search.indexOf("debug=1") >= 0) {
             (function(){
@@ -2525,19 +2313,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
             })();
           }
 
-          doc.addEventListener("mousedown", function(ev){
 
-            if (bar.contains(ev.target)) return;
-
-            setTimeout(function(){
-
-              try { var sel = pdfFrame.contentWindow.getSelection(); if (sel && sel.isCollapsed) hide(); } catch(e){}
-
-            }, 60);
-
-          });
-
-        })();
 
       }
 
