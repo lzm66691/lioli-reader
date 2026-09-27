@@ -2416,7 +2416,8 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
               var pv2 = pv && pv.getPageView(n - 1);
               if (!pv2 || !pv2.viewport) return null;
               var r = pageEl.getBoundingClientRect();
-              return { page: n, x: cx - r.left, y: cy - r.top, viewport: pv2.viewport };
+              var pdfPt = pv2.viewport.convertToPdfPoint(cx - r.left, cy - r.top);
+              return { page: n, x: pdfPt[0], y: pdfPt[1], viewport: pv2.viewport };
             }
             /* 重绘背景层：每页笔画按当前视口/缩放位置画（滚动/缩放后重取 rect，天然对齐） */
             function redrawAll(){
