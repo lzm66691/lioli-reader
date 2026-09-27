@@ -524,7 +524,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v22</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v23</span></div>
 
   <div class="spacer"></div>
 
@@ -2544,6 +2544,26 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
     }, 500);
   }
 
+  /* OCR 目录：书名匹配 → 线上数据 → 章/节树（高数上册扫描版无大纲，用 OCR 目录） */
+  function ocrTocKeyFor(title){
+    if (title.indexOf("高等数学") >= 0 && title.indexOf("上册") >= 0) return "ocr-gs-up";
+    return null;
+  }
+  function loadOcrToc(key, cb){
+    if (window.__ocrTocCache && window.__ocrTocCache[key]) { cb(window.__ocrTocCache[key]); return; }
+    fetch("ocr/" + key + ".json").then(function(r){ if (!r.ok) throw 0; return r.json(); }).then(function(data){
+      window.__ocrTocCache = window.__ocrTocCache || {}; window.__ocrTocCache[key] = data; cb(data);
+    }).catch(function(){ cb(null); });
+  }
+  function ocrToToc(data){
+    var out = [];
+    (data || []).forEach(function(e){
+      if (e && e.level === "chapter") out.push({ t: e.title, p: e.page, l2: false });
+      else if (e && e.level === "section") out.push({ t: e.title, p: e.page, l2: true });
+    });
+    return out;
+  }
+
   function openLocalBook(b){
 
     localStorage.setItem(LS_CUR, b.id);
@@ -2578,23 +2598,29 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
         document.title = BOOK.title;
 
-        if (tocBody) tocBody.innerHTML = '<div class="empty-tip">正在提取本地书目录…</div>';
-
-        extractTocForLocal(BOOK.pdf, function(items, err){
-
+        function _applyLocalToc(items, err){
           if (items && items.length) {
-
             TOC = items;
-
             renderToc();
-
           } else if (tocBody) {
-
             tocBody.innerHTML = '<div class="empty-tip">' + (err ? '目录提取失败（' + esc(err) + '），可翻页阅读。' : '这本书没有内置书签大纲，暂无法生成目录。') + '</div>';
-
           }
-
-        });
+        }
+        var _ocrKey = ocrTocKeyFor(BOOK.title);
+        if (_ocrKey) {
+          if (tocBody) tocBody.innerHTML = '<div class="empty-tip">正在加载 OCR 目录…</div>';
+          loadOcrToc(_ocrKey, function(data){
+            if (data && data.length) {
+              TOC = ocrToToc(data);
+              renderToc();
+            } else {
+              if (tocBody) tocBody.innerHTML = '<div class="empty-tip">正在提取本地书目录…</div>';
+              extractTocForLocal(BOOK.pdf, _applyLocalToc);
+            }
+          });
+        } else {
+          extractTocForLocal(BOOK.pdf, _applyLocalToc);
+        }
 
         pdfFrame.src = pdfUrl(state.page);
 
