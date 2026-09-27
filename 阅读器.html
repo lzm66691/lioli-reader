@@ -221,7 +221,7 @@ body.dark .guide-banner{background:rgba(42,42,42,.95);border-color:rgba(255,255,
 #selTip{position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:2000;display:none;padding:9px 16px;font-size:13px;color:var(--teal-dark);background:rgba(255,255,255,.94);border:1px solid rgba(0,140,160,.35);border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.16);backdrop-filter:blur(8px);max-width:88vw;text-align:center}
 body.dark #selTip{background:rgba(40,40,40,.94);color:#8fd8e0}
 
-.toolbox-panel{position:fixed;right:14px;top:58px;z-index:3000;width:236px;background:var(--glass-strong);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid var(--glass-border);border-radius:14px;box-shadow:var(--glass-shadow);padding:10px;display:flex;flex-direction:column;gap:3px;max-height:calc(100vh - 90px);overflow-y:auto}
+.toolbox-panel{position:fixed;right:14px;top:58px;z-index:3000;width:236px;background:var(--glass-strong);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid var(--glass-border);border-radius:14px;box-shadow:var(--glass-shadow);padding:10px;display:flex;flex-direction:column;gap:3px;max-height:calc(100vh - 90px);overflow-y:auto} .toolbox-panel[hidden]{display:none!important}
 .toolbox-title{font-size:13px;font-weight:700;color:var(--ink);padding:4px 6px 8px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--glass-border);margin-bottom:4px}
 .toolbox-title button{border:none;background:none;color:var(--muted);font-size:15px;cursor:pointer;line-height:1}
 .toolbox-title button:hover{color:var(--teal-dark)}
@@ -524,7 +524,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v23</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v24</span></div>
 
   <div class="spacer"></div>
 
@@ -1957,7 +1957,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
         var markCss = doc.createElement("style");
 
-        markCss.textContent = ".hl-marker{position:absolute;z-index:3;border-radius:2px;cursor:pointer;pointer-events:auto} .hl-marker.hl-1{background:rgba(251,218,131,.42)} .hl-marker.hl-2{background:rgba(228,147,142,.38)} .hl-marker.hl-3{background:rgba(141,187,255,.38)} .hl-marker:hover{outline:1px solid rgba(0,0,0,.25)} #hlBar{position:fixed;z-index:9999;display:none;gap:4px;background:rgba(255,255,255,.96);border:1px solid rgba(0,0,0,.12);border-radius:8px;padding:4px 6px;box-shadow:0 4px 14px rgba(0,0,0,.18);align-items:center} #hlBar button{width:20px;height:20px;border:none;border-radius:4px;cursor:pointer;border:1px solid rgba(0,0,0,.15);padding:0} #hlBar .hl-b1{background:#FBDA83} #hlBar .hl-b2{background:#E4938E} #hlBar .hl-b3{background:#8DBBFF} #hlBar .hl-note-btn{width:auto;padding:0 8px;font-size:12px;color:#333;background:#fff} body.dark #hlBar{background:rgba(42,42,42,.96);border-color:rgba(255,255,255,.15)} body.dark #hlBar .hl-note-btn{color:#ddd} body.dark #hlBar .hl-note-btn{background:rgba(60,60,60,.9)} body.sel-disabled,body.sel-disabled *,body.sel-disabled .textLayer,body.sel-disabled .textLayer span,body.sel-disabled .textLayer ::selection{user-select:none!important;-webkit-user-select:none!important} body.sel-disabled #viewer .textLayer{display:none!important}";
+        markCss.textContent = ".hl-marker{position:absolute;z-index:3;border-radius:2px;cursor:pointer;pointer-events:auto} .hl-marker.hl-1{background:rgba(251,218,131,.42)} .hl-marker.hl-2{background:rgba(228,147,142,.38)} .hl-marker.hl-3{background:rgba(141,187,255,.38)} .hl-marker:hover{outline:1px solid rgba(0,0,0,.25)} #hlBar{position:fixed;z-index:9999;display:none;gap:4px;background:rgba(255,255,255,.96);border:1px solid rgba(0,0,0,.12);border-radius:8px;padding:4px 6px;box-shadow:0 4px 14px rgba(0,0,0,.18);align-items:center} #hlBar button{width:20px;height:20px;border:none;border-radius:4px;cursor:pointer;border:1px solid rgba(0,0,0,.15);padding:0} #hlBar .hl-b1{background:#FBDA83} #hlBar .hl-b2{background:#E4938E} #hlBar .hl-b3{background:#8DBBFF} #hlBar .hl-note-btn{width:auto;padding:0 8px;font-size:12px;color:#333;background:#fff} body.dark #hlBar{background:rgba(42,42,42,.96);border-color:rgba(255,255,255,.15)} body.dark #hlBar .hl-note-btn{color:#ddd} body.dark #hlBar .hl-note-btn{background:rgba(60,60,60,.9)} body.sel-disabled,body.sel-disabled *,body.sel-disabled .textLayer,body.sel-disabled .textLayer span,body.sel-disabled .textLayer ::selection{user-select:none!important;-webkit-user-select:none!important} body.sel-disabled #viewer .textLayer{display:none!important} body.sel-disabled #viewer{touch-action:none!important}";
 
         doc.head.appendChild(markCss);
 
@@ -2173,8 +2173,9 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
               if (selOn()) {
 
-                /* 框选模式：立即激活绘制（平板无需长按）；preventDefault 阻止 Android 原生文本选择抢事件 */
+                /* 框选模式：立即激活绘制（平板无需长按）；preventDefault 阻止 Android 原生文本选择抢事件；pointer capture 保证拖拽不丢事件 */
                 try { ev.preventDefault(); } catch(e){}
+                try { if (ev.target && ev.target.setPointerCapture) ev.target.setPointerCapture(ev.pointerId); } catch(e){}
                 active = true; setDrawing(true); beginPreview(p);
 
               } else {
@@ -2550,10 +2551,10 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
     return null;
   }
   function loadOcrToc(key, cb){
-    if (window.__ocrTocCache && window.__ocrTocCache[key]) { cb(window.__ocrTocCache[key]); return; }
+    if (window.__ocrTocCache && window.__ocrTocCache[key]) { cb(window.__ocrTocCache[key], null); return; }
     fetch("ocr/" + key + ".json").then(function(r){ if (!r.ok) throw 0; return r.json(); }).then(function(data){
-      window.__ocrTocCache = window.__ocrTocCache || {}; window.__ocrTocCache[key] = data; cb(data);
-    }).catch(function(){ cb(null); });
+      window.__ocrTocCache = window.__ocrTocCache || {}; window.__ocrTocCache[key] = data; cb(data, null);
+    }).catch(function(){ cb(null, "OCR目录加载失败（网络或数据错误）"); });
   }
   function ocrToToc(data){
     var out = [];
@@ -2607,14 +2608,17 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
           }
         }
         var _ocrKey = ocrTocKeyFor(BOOK.title);
+        window.__ocrDbg = { bookTitle: BOOK.title, ocrKey: _ocrKey || null, status: _ocrKey ? "loading" : "no-match" };
         if (_ocrKey) {
           if (tocBody) tocBody.innerHTML = '<div class="empty-tip">正在加载 OCR 目录…</div>';
-          loadOcrToc(_ocrKey, function(data){
+          loadOcrToc(_ocrKey, function(data, err){
             if (data && data.length) {
+              window.__ocrDbg.status = "ok";
               TOC = ocrToToc(data);
               renderToc();
             } else {
-              if (tocBody) tocBody.innerHTML = '<div class="empty-tip">正在提取本地书目录…</div>';
+              window.__ocrDbg.status = "fail:" + (err || "empty");
+              if (tocBody) tocBody.innerHTML = '<div class="empty-tip">' + (err || 'OCR 目录数据为空') + '，改用 PDF 大纲…</div>';
               extractTocForLocal(BOOK.pdf, _applyLocalToc);
             }
           });
