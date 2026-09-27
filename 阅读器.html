@@ -524,7 +524,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v20</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v21</span></div>
 
   <div class="spacer"></div>
 
@@ -1655,11 +1655,21 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
       + '<a class="toolbox-item" id="sysOpen2" href="papers/c-ch4.pdf" target="_blank" rel="noopener"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3H3v10h10v-3M9 2h5v5M14 2l-7 7"/></svg></span>系统打开</a>'
       + '<div class="toolbox-about">莉萝阅读器 v' + (document.getElementById("appVer") ? document.getElementById("appVer").textContent.replace("v","") : "18") + ' · 数据仅存本机</div>';
     document.body.appendChild(_tbPanel);
-    _tbBtn.addEventListener("click", function(){ _tbPanel.hidden = !_tbPanel.hidden; });
+    var _tbOpen = false;
+    function _tbShow(on){
+      _tbOpen = !!on; _tbPanel.hidden = !_tbOpen;
+      _tbBtn.classList.toggle("active", _tbOpen);
+    }
+    _tbBtn.addEventListener("click", function(ev){
+      ev.stopPropagation(); _tbShow(!_tbOpen);
+    });
     var _tbClose = document.getElementById("toolboxClose");
-    if (_tbClose) _tbClose.addEventListener("click", function(){ _tbPanel.hidden = true; });
+    if (_tbClose) _tbClose.addEventListener("click", function(){ _tbShow(false); });
     document.addEventListener("click", function(ev){
-      if (!_tbPanel.hidden && !_tbPanel.contains(ev.target) && ev.target !== _tbBtn && !_tbBtn.contains(ev.target)) _tbPanel.hidden = true;
+      if (_tbOpen && !_tbPanel.contains(ev.target) && ev.target !== _tbBtn && !_tbBtn.contains(ev.target)) _tbShow(false);
+    });
+    document.addEventListener("keydown", function(ev){
+      if (ev.key === "Escape" && _tbOpen) _tbShow(false);
     });
     var _tbActs = {
       import: function(){ var i = document.getElementById("pdfFileInput"); if (i) i.click(); else alert("请先在书架页导入"); },
@@ -1671,7 +1681,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
     var _tbItems = _tbPanel.querySelectorAll(".toolbox-item[data-act]");
     for (var ti = 0; ti < _tbItems.length; ti++) (function(it){
       it.addEventListener("click", function(){
-        _tbPanel.hidden = true;
+        _tbShow(false);
         var fn = _tbActs[it.getAttribute("data-act")];
         if (fn) fn();
       });
@@ -1939,7 +1949,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
         var markCss = doc.createElement("style");
 
-        markCss.textContent = ".hl-marker{position:absolute;z-index:3;border-radius:2px;cursor:pointer;pointer-events:auto} .hl-marker.hl-1{background:rgba(251,218,131,.42)} .hl-marker.hl-2{background:rgba(228,147,142,.38)} .hl-marker.hl-3{background:rgba(141,187,255,.38)} .hl-marker:hover{outline:1px solid rgba(0,0,0,.25)} #hlBar{position:fixed;z-index:9999;display:none;gap:4px;background:rgba(255,255,255,.96);border:1px solid rgba(0,0,0,.12);border-radius:8px;padding:4px 6px;box-shadow:0 4px 14px rgba(0,0,0,.18);align-items:center} #hlBar button{width:20px;height:20px;border:none;border-radius:4px;cursor:pointer;border:1px solid rgba(0,0,0,.15);padding:0} #hlBar .hl-b1{background:#FBDA83} #hlBar .hl-b2{background:#E4938E} #hlBar .hl-b3{background:#8DBBFF} #hlBar .hl-note-btn{width:auto;padding:0 8px;font-size:12px;color:#333;background:#fff} body.dark #hlBar{background:rgba(42,42,42,.96);border-color:rgba(255,255,255,.15)} body.dark #hlBar .hl-note-btn{color:#ddd} body.dark #hlBar .hl-note-btn{background:rgba(60,60,60,.9)} body.sel-disabled,body.sel-disabled *{user-select:none!important;-webkit-user-select:none!important}";
+        markCss.textContent = ".hl-marker{position:absolute;z-index:3;border-radius:2px;cursor:pointer;pointer-events:auto} .hl-marker.hl-1{background:rgba(251,218,131,.42)} .hl-marker.hl-2{background:rgba(228,147,142,.38)} .hl-marker.hl-3{background:rgba(141,187,255,.38)} .hl-marker:hover{outline:1px solid rgba(0,0,0,.25)} #hlBar{position:fixed;z-index:9999;display:none;gap:4px;background:rgba(255,255,255,.96);border:1px solid rgba(0,0,0,.12);border-radius:8px;padding:4px 6px;box-shadow:0 4px 14px rgba(0,0,0,.18);align-items:center} #hlBar button{width:20px;height:20px;border:none;border-radius:4px;cursor:pointer;border:1px solid rgba(0,0,0,.15);padding:0} #hlBar .hl-b1{background:#FBDA83} #hlBar .hl-b2{background:#E4938E} #hlBar .hl-b3{background:#8DBBFF} #hlBar .hl-note-btn{width:auto;padding:0 8px;font-size:12px;color:#333;background:#fff} body.dark #hlBar{background:rgba(42,42,42,.96);border-color:rgba(255,255,255,.15)} body.dark #hlBar .hl-note-btn{color:#ddd} body.dark #hlBar .hl-note-btn{background:rgba(60,60,60,.9)} body.sel-disabled,body.sel-disabled *,body.sel-disabled .textLayer,body.sel-disabled .textLayer span,body.sel-disabled .textLayer ::selection{user-select:none!important;-webkit-user-select:none!important}";
 
         doc.head.appendChild(markCss);
 
@@ -2155,7 +2165,8 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
               if (selOn()) {
 
-                /* 框选模式：立即激活绘制（平板无需长按） */
+                /* 框选模式：立即激活绘制（平板无需长按）；preventDefault 阻止 Android 原生文本选择抢事件 */
+                try { ev.preventDefault(); } catch(e){}
                 active = true; setDrawing(true); beginPreview(p);
 
               } else {
