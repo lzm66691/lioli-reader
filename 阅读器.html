@@ -524,7 +524,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v27</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v28</span></div>
 
   <div class="spacer"></div>
 
@@ -1658,6 +1658,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
       + '<div class="tb-row"><input id="tbPage" type="number" min="1" placeholder="页码"><button class="tb-go" data-act="gopage">跳</button></div>'
       + '<div class="tb-row"><button class="tb-zoom" data-act="zoomOut" title="缩小">−</button><span class="tb-zoomv" id="tbZoom">100%</span><button class="tb-zoom" data-act="zoomIn" title="放大">＋</button></div>'
       + '<button class="toolbox-item" data-act="rotate"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 7a6 6 0 1 0-1.5 4.5M13 2v5H8"/></svg></span>旋转 90°</button>'
+      + '<button class="toolbox-item" data-act="search"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="4"/><path d="M10 10l4 4"/></svg></span>PDF 搜索</button>'
       + '<div class="toolbox-grp">标注</div>'
       + '<button class="toolbox-item" data-act="sel"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2.2 1.6"><rect x="2.5" y="2.5" width="11" height="11" rx="1.5"/></svg></span>框选模式</button>'
       + '<button class="toolbox-item" data-act="mark"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l6-6 2 2-6 6-2 2zM9 7l3-3 2 2-3 3z"/></svg></span>划词标注</button>'
@@ -1667,6 +1668,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
       + '<div class="toolbox-grp">书籍</div>'
       + '<button class="toolbox-item" data-act="import"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M8 3v7M5 7l3 3 3-3M3 12.5h10"/></svg></span>导入 PDF</button>'
       + '<button class="toolbox-item" data-act="export"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M8 10V3M5 6l3-3 3 3M3 12.5h10"/></svg></span>导出本地书</button>'
+      + '<button class="toolbox-item" data-act="backup"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a5 5 0 1 1 8.5 3.6M13 13v-3h-3"/><path d="M2.5 2.5v4h4"/></svg></span>备份书架</button>'
       + '<div class="toolbox-grp">帮助</div>'
       + '<a class="toolbox-item" href="guide.html" target="_blank" rel="noopener"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3.5A2 2 0 0 1 4 2h9v11H4.5A2.5 2.5 0 0 0 2 15.5z"/><path d="M2 13.5A2.5 2.5 0 0 1 4.5 11H13"/></svg></span>使用教程</a>'
       + '<a class="toolbox-item" id="sysOpen2" href="papers/c-ch4.pdf" target="_blank" rel="noopener"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3H3v10h10v-3M9 2h5v5M14 2l-7 7"/></svg></span>系统打开</a>'
@@ -1709,6 +1711,24 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
         var el = document.getElementById("tbPage"); if (!el) return;
         var n = parseInt(el.value, 10);
         if (n > 0) { try { goPage(n); } catch(e){} }
+      },
+      search: function(){
+        try {
+          var f = document.getElementById("pdfFrame");
+          if (!f || !f.contentDocument) return;
+          var d = f.contentDocument;
+          var fb = d.getElementById("findbar");
+          if (fb) {
+            fb.classList.remove("hidden");
+            var fi = d.getElementById("findInput");
+            if (fi) { try { fi.focus(); } catch(e){} }
+          }
+        } catch(e){}
+      },
+      backup: function(){ try { exportBackup(); } catch(e){ alert("备份失败：" + e); } },
+      shelfsearch: function(){
+        var s = document.getElementById("shelfSearch");
+        if (s) { try { s.focus(); s.scrollIntoView({ block: "center" }); } catch(e){} }
       }
     };
     function _tbZoom(fac){
@@ -2379,6 +2399,22 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
   }
 
+  function exportBackup(){
+    idbLocalAll().then(function(list){
+      var data = {
+        app: "lioli-reader", version: "backup-v1", time: new Date().toISOString(),
+        cur: (function(){ try { return localStorage.getItem("reader-app-cur") || null; } catch(e){ return null; } })(),
+        books: list.map(function(b){ return { title: b.title, meta: b.meta || null, group: b.group || "本地书" }; })
+      };
+      var blob = new Blob([JSON.stringify(data, null, 1)], { type: "application/json" });
+      var u = URL.createObjectURL(blob);
+      var a = document.createElement("a"); a.href = u; a.download = "lioli-书架备份.json";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(u); }, 10000);
+      if (list.length) alert("已导出书架备份：包含 " + list.length + " 本本地书清单（PDF 文件可另用「导出本地书」下载）");
+    });
+  }
+
   function exportLocal(){
 
     idbLocalAll().then(function(list){
@@ -2417,7 +2453,20 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
     var inp = document.createElement("input"); inp.id = "pdfFileInput"; inp.type = "file"; inp.accept = "application/pdf"; inp.multiple = true; inp.style.display = "none";
 
-    t.appendChild(btn1); t.appendChild(btn2); t.appendChild(inp);
+    var sbx = document.createElement("input"); sbx.id = "shelfSearch"; sbx.type = "search"; sbx.placeholder = "搜书架（书名）";
+    sbx.style.cssText = "flex:1;min-width:110px;padding:6px 10px;border:1px solid var(--glass-border);border-radius:8px;background:rgba(255,255,255,.72);color:var(--body);font-size:13px";
+
+    t.appendChild(btn1); t.appendChild(btn2); t.appendChild(sbx); t.appendChild(inp);
+
+    sbx.addEventListener("input", function(){
+      var q = sbx.value.trim().toLowerCase();
+      var cards = shelfBody.querySelectorAll(".shelf-item");
+      for (var ci = 0; ci < cards.length; ci++) {
+        var cd = cards[ci];
+        var txt = (cd.textContent || "").toLowerCase();
+        cd.style.display = (!q || txt.indexOf(q) >= 0) ? "" : "none";
+      }
+    });
 
     shelfBody.appendChild(t);
 
