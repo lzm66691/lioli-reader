@@ -529,7 +529,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v34</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v35</span></div>
 
   <div class="spacer"></div>
 
@@ -2104,7 +2104,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
             function cvStyle(cv){ cv.style.cssText = "position:absolute;inset:0;pointer-events:none;width:100%;height:100%"; }
             cvStyle(bg); cvStyle(fg);
             evL.style.cssText = "position:absolute;inset:0;z-index:2;pointer-events:auto;touch-action:none;cursor:crosshair;display:none";
-            ov.style.cssText = "position:absolute;inset:0;z-index:1000;pointer-events:none;display:none";
+            ov.style.cssText = "position:absolute;inset:0;z-index:2147483647;pointer-events:none;display:none";
             ov.appendChild(bg); ov.appendChild(fg); ov.appendChild(evL);
             if (vc) vc.appendChild(ov);
             /* IndexedDB 立库（萝：先立库再存数据） */
@@ -2125,7 +2125,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
             }
             /* 工具条（希沃风格：色板 + 粗细 + 橡皮 + 撤销 + 完成） */
             tb.id = "penBar";
-            tb.style.cssText = "position:fixed;top:50px;left:50%;transform:translateX(-50%);z-index:4000;display:none;gap:6px;align-items:center;background:rgba(255,255,255,.92);border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:6px 10px;box-shadow:0 4px 14px rgba(0,0,0,.16)";
+            tb.style.cssText = "position:fixed;top:50px;left:50%;transform:translateX(-50%);z-index:2147483647;display:none;gap:6px;align-items:center;background:rgba(255,255,255,.92);border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:6px 10px;box-shadow:0 4px 14px rgba(0,0,0,.16)";
             var COLORS = ["#E05C4F","#2F6FEB","#0E9F6E","#D97706","#111827","#8B5CF6"];
             COLORS.forEach(function(cv){
               var b = doc.createElement("button");
