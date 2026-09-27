@@ -230,6 +230,10 @@ body.dark #selTip{background:rgba(40,40,40,.94);color:#8fd8e0}
 .toolbox-item.active{background:var(--teal-light);color:var(--teal-dark);font-weight:700}
 .toolbox-item .tb-ic{width:18px;height:18px;flex-shrink:0;color:var(--teal-dark);display:flex;align-items:center;justify-content:center}
 .toolbox-about{font-size:11px;color:var(--muted);padding:8px 6px 2px;border-top:1px solid var(--glass-border);margin-top:6px}
+
+#upToast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:4000;padding:10px 18px;font-size:13px;color:var(--teal-dark);background:rgba(255,255,255,.95);border:1px solid rgba(0,140,160,.35);border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.16);backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .3s}
+#upToast.show{opacity:1}
+body.dark #upToast{background:rgba(40,40,40,.95);color:#8fd8e0}
 body.sel-mode #selTip{display:block}
 .toc-note{margin:4px 8px 6px;padding:6px 8px;font-size:12px;color:var(--muted);background:var(--glass);border-radius:8px;border:1px dashed var(--line)}
 
@@ -520,7 +524,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v19</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v20</span></div>
 
   <div class="spacer"></div>
 
@@ -2594,6 +2598,39 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
   /* 测试/调试钩子（不参与功能逻辑） */
 
   window.__readerLocal = { doImport: doImport, openLocalBook: openLocalBook };
+
+  /* PWA 自动更新：平板/手机恢复标签页时不会自动检查 sw，这里主动定期检查，新版本就绪自动刷新 */
+  if ('serviceWorker' in navigator) {
+    (function(){
+      var _busy = false, _hooked = false, _toast = null;
+      function _upToast(msg){
+        try {
+          if (!_toast) { _toast = document.createElement("div"); _toast.id = "upToast"; _toast.textContent = msg; document.body.appendChild(_toast); }
+          else _toast.textContent = msg;
+          _toast.classList.add("show");
+          setTimeout(function(){ if (_toast) _toast.classList.remove("show"); }, 4000);
+        } catch(e){}
+      }
+      function _check(){
+        if (_busy) return; _busy = true;
+        navigator.serviceWorker.getRegistration().then(function(reg){
+          if (reg) {
+            reg.update().catch(function(){});
+            if (!_hooked) {
+              _hooked = true;
+              navigator.serviceWorker.addEventListener("controllerchange", function(){
+                _upToast("发现新版本，正在刷新…");
+                setTimeout(function(){ try { location.reload(); } catch(e){} }, 800);
+              });
+            }
+          }
+          _busy = false;
+        }).catch(function(){ _busy = false; });
+      }
+      _check();
+      setInterval(_check, 4 * 60 * 1000); /* 每 4 分钟检查一次 */
+    })();
+  }
 
 })();
 
