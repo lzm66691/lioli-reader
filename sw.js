@@ -1,7 +1,7 @@
-/* PWA Service Worker — 莉萝阅读器 自动更新加强：前台恢复立即检查sw（平板秒升新版，2026-09-27）
-   外壳缓存 reader-p2-dg-v26（含 pdf.js 全套）；PDF 缓存 reader-pdf-v1（按需 cache-first）
+/* PWA Service Worker — 莉萝阅读器 工具箱v2：分组收纳目录/标注/外观/书籍/帮助+跳页/缩放/旋转（2026-09-27）
+   外壳缓存 reader-p2-dg-v27（含 pdf.js 全套）；PDF 缓存 reader-pdf-v1（按需 cache-first）
    升级纪律：改外壳/pdf.js → 同时改缓存名 */
-var CACHE_SHELL = "reader-p2-dg-v26";
+var CACHE_SHELL = "reader-p2-dg-v27";
 var CACHE_PDF   = "reader-pdf-v1";
 
 /* PWA 离线预缓存：公开 6 本 PDF（共约 4MB），安装后全部本地可用 */
