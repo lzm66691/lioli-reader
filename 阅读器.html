@@ -117,7 +117,7 @@ a{color:var(--teal);text-decoration:none}
 
   display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:8px;
 
-  font-size:13px;color:var(--body);border:1px solid transparent;
+  font-size:13px;color:var(--body);border:1px solid transparent;transition:background .18s ease,color .18s ease,border-color .18s ease,transform .12s ease;
 
 }
 
@@ -225,7 +225,7 @@ body.dark #selTip{background:rgba(40,40,40,.94);color:#8fd8e0}
 .toolbox-title{font-size:13px;font-weight:700;color:var(--ink);padding:4px 6px 8px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--glass-border);margin-bottom:4px}
 .toolbox-title button{border:none;background:none;color:var(--muted);font-size:15px;cursor:pointer;line-height:1}
 .toolbox-title button:hover{color:var(--teal-dark)}
-.toolbox-item{display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:9px 10px;border-radius:9px;font-size:13.5px;color:var(--body);border:1px solid transparent;background:transparent;cursor:pointer;text-decoration:none}
+.toolbox-item{display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:9px 10px;border-radius:9px;font-size:13.5px;color:var(--body);border:1px solid transparent;background:transparent;cursor:pointer;text-decoration:none;transition:background .15s ease,color .15s ease}
 .toolbox-item:hover{background:var(--glass-hover)}
 .toolbox-item.active{background:var(--teal-light);color:var(--teal-dark);font-weight:700}
 .toolbox-item .tb-ic{width:18px;height:18px;flex-shrink:0;color:var(--teal-dark);display:flex;align-items:center;justify-content:center}
@@ -418,7 +418,7 @@ body.dark .pdf-frame{filter:invert(0.92) hue-rotate(180deg)}
 
 body.dark{
 
-  --bg:#1E1E1E; --bg-soft:#262626; --surface:#262626; --line:#333333;
+  --bg:#16181D; --bg-soft:#1F2229; --surface:#22252E; --line:#2F3540;
 
   --ink:#E6E6E6; --body:#c9d1e0; --muted:#8b96ad; --teal-light:#23294a;
 
@@ -529,7 +529,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v39</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v40</span></div>
 
   <div class="spacer"></div>
 
@@ -592,7 +592,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
       <button id="tabShelf">书架</button>
 
-      <button id="tabSearch">搜索</button>
+
 
     </div>
 
@@ -1782,7 +1782,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
       }
     };
     var _sb = document.getElementById("searchBtn");
-    if (_sb) _sb.addEventListener("click", function(){ _tbActs.search(); });
+    if (_sb) _sb.addEventListener("click", function(){ try { showSearch(); } catch(e){ _tbActs.search(); } });
     function _tbZoom(fac){
       try {
         var f = document.getElementById("pdfFrame");
@@ -1888,7 +1888,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
   document.getElementById("tabToc").addEventListener("click", function(){
 
-    this.classList.add("active"); document.getElementById("tabBookmarks").classList.remove("active"); document.getElementById("tabShelf").classList.remove("active"); document.getElementById("tabSearch").classList.remove("active");
+    this.classList.add("active"); document.getElementById("tabBookmarks").classList.remove("active"); document.getElementById("tabShelf").classList.remove("active");
 
     tocBody.style.display = ""; bmBody.style.display = "none"; shelfBody.style.display = "none"; searchBody.classList.remove("open");
 
@@ -1896,7 +1896,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
   document.getElementById("tabBookmarks").addEventListener("click", function(){
 
-    this.classList.add("active"); document.getElementById("tabToc").classList.remove("active"); document.getElementById("tabShelf").classList.remove("active"); document.getElementById("tabSearch").classList.remove("active");
+    this.classList.add("active"); document.getElementById("tabToc").classList.remove("active"); document.getElementById("tabShelf").classList.remove("active");
 
     tocBody.style.display = "none"; bmBody.style.display = ""; shelfBody.style.display = "none"; searchBody.classList.remove("open");
 
@@ -1904,7 +1904,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
   document.getElementById("tabShelf").addEventListener("click", function(){
 
-    this.classList.add("active"); document.getElementById("tabToc").classList.remove("active"); document.getElementById("tabBookmarks").classList.remove("active"); document.getElementById("tabSearch").classList.remove("active");
+    this.classList.add("active"); document.getElementById("tabToc").classList.remove("active"); document.getElementById("tabBookmarks").classList.remove("active");
 
     tocBody.style.display = "none"; bmBody.style.display = "none"; shelfBody.style.display = ""; searchBody.classList.remove("open");
 
@@ -1950,17 +1950,17 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
   })();
 
-  document.getElementById("tabSearch").addEventListener("click", function(){
-
-    this.classList.add("active"); document.getElementById("tabToc").classList.remove("active"); document.getElementById("tabBookmarks").classList.remove("active"); document.getElementById("tabShelf").classList.remove("active");
+  function showSearch(){
+    document.getElementById("tabToc").classList.remove("active"); document.getElementById("tabBookmarks").classList.remove("active"); document.getElementById("tabShelf").classList.remove("active");
 
     tocBody.style.display = "none"; bmBody.style.display = "none"; shelfBody.style.display = "none"; searchBody.classList.add("open");
 
-    searchInput.focus();
+    try { searchInput.focus(); } catch(e){}
+  }
+  var _sb2 = document.getElementById("searchBtn");
+  if (_sb2) _sb2.addEventListener("click", showSearch);
 
-  });
-
-  searchInput.addEventListener("input", function(){ if (this.value) document.getElementById("tabSearch").click(); doSearch(this.value); });
+  searchInput.addEventListener("input", function(){ if (this.value) showSearch(); doSearch(this.value); });
 
 
 
