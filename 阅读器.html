@@ -529,7 +529,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v37</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v38</span></div>
 
   <div class="spacer"></div>
 
@@ -1698,7 +1698,9 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
       + '<div class="toolbox-grp">书籍</div>'
       + '<button class="toolbox-item" data-act="import"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M8 3v7M5 7l3 3 3-3M3 12.5h10"/></svg></span>导入 PDF</button>'
       + '<button class="toolbox-item" data-act="export"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M8 10V3M5 6l3-3 3 3M3 12.5h10"/></svg></span>导出本地书</button>'
-      + '<button class="toolbox-item" data-act="backup"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a5 5 0 1 1 8.5 3.6M13 13v-3h-3"/><path d="M2.5 2.5v4h4"/></svg></span>备份书架</button>'
+      + '<button class="toolbox-item" data-act="backup"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a5 5 0 1 1 8.5 3.6M13 13v-3h-3"/><path d="M2.5 2.5v4h4"/></svg></span>备份数据（含批注）</button>'
+      + '<button class="toolbox-item" data-act="restore"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V6M5 9l3-3 3 3M13 2.5v4h-4"/></svg></span>恢复备份</button>'
+      + '<input type="file" id="tbRestoreFile" accept="application/json,.json" style="display:none">'
       + '<div class="toolbox-grp">帮助</div>'
       + '<a class="toolbox-item" href="guide.html" target="_blank" rel="noopener"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3.5A2 2 0 0 1 4 2h9v11H4.5A2.5 2.5 0 0 0 2 15.5z"/><path d="M2 13.5A2.5 2.5 0 0 1 4.5 11H13"/></svg></span>使用教程</a>'
       + '<a class="toolbox-item" id="sysOpen2" href="papers/c-ch4.pdf" target="_blank" rel="noopener"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3H3v10h10v-3M9 2h5v5M14 2l-7 7"/></svg></span>系统打开</a>'
@@ -1761,6 +1763,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
         } catch(e){}
       },
       backup: function(){ try { exportBackup(); } catch(e){ alert("备份失败：" + e); } },
+      restore: function(){ try { importBackup(); } catch(e){ alert("恢复失败：" + e); } },
       shelfsearch: function(){
         var s = document.getElementById("shelfSearch");
         if (s) { try { s.focus(); s.scrollIntoView({ block: "center" }); } catch(e){} }
@@ -2468,20 +2471,48 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
   }
 
+  function inkAll(){ return new Promise(function(res){ var rq = indexedDB.open("lioli-reader-ink", 1); rq.onsuccess = function(e){ var db = e.target.result; try { var t = db.transaction("strokes","readonly").objectStore("strokes").getAll(); t.onsuccess = function(){ res(t.result || []); }; t.onerror = function(){ res([]); }; } catch(err){ res([]); } }; rq.onerror = function(){ res([]); }; }); }
   function exportBackup(){
     idbLocalAll().then(function(list){
-      var data = {
-        app: "lioli-reader", version: "backup-v1", time: new Date().toISOString(),
-        cur: (function(){ try { return localStorage.getItem("reader-app-cur") || null; } catch(e){ return null; } })(),
-        books: list.map(function(b){ return { title: b.title, meta: b.meta || null, group: b.group || "本地书" }; })
-      };
-      var blob = new Blob([JSON.stringify(data, null, 1)], { type: "application/json" });
-      var u = URL.createObjectURL(blob);
-      var a = document.createElement("a"); a.href = u; a.download = "lioli-书架备份.json";
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(function(){ URL.revokeObjectURL(u); }, 10000);
-      if (list.length) alert("已导出书架备份：包含 " + list.length + " 本本地书清单（PDF 文件可另用「导出本地书」下载）");
+      var ls = {};
+      try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k && k.indexOf("reader-app-") === 0) ls[k] = localStorage.getItem(k); } } catch(e){}
+      inkAll().then(function(ink){
+        var data = {
+          app: "lioli-reader", version: "backup-v2", time: new Date().toISOString(),
+          cur: (function(){ try { return localStorage.getItem("reader-app-cur") || null; } catch(e){ return null; } })(),
+          books: list.map(function(b){ return { title: b.title, meta: b.meta || null, group: b.group || "本地书" }; }),
+          ls: ls,
+          ink: ink
+        };
+        var blob = new Blob([JSON.stringify(data, null, 1)], { type: "application/json" });
+        var u = URL.createObjectURL(blob);
+        var a = document.createElement("a"); a.href = u; a.download = "lioli-阅读器备份-v2.json";
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function(){ URL.revokeObjectURL(u); }, 10000);
+        alert("已导出完整备份 v2：批注/笔记/收藏/进度/画笔 + " + list.length + " 本本地书清单");
+      });
     });
+  }
+  function importBackup(){
+    var inp = document.getElementById("tbRestoreFile");
+    if (!inp || !inp.files || !inp.files.length) return;
+    var rd = new FileReader();
+    rd.onload = function(){
+      try {
+        var data = JSON.parse(rd.result);
+        if (!data || data.app !== "lioli-reader") { alert("不是莉萝阅读器备份文件"); return; }
+        if (data.ls) { try { for (var k in data.ls) localStorage.setItem(k, data.ls[k]); } catch(e){} }
+        if (data.cur) { try { localStorage.setItem("reader-app-cur", data.cur); } catch(e){} }
+        var done = function(){ alert("恢复完成，正在刷新…"); location.reload(); };
+        if (data.ink && data.ink.length) {
+          var rq = indexedDB.open("lioli-reader-ink", 1);
+          rq.onsuccess = function(e){ var db = e.target.result; var tx = db.transaction("strokes","readwrite"); var st = tx.objectStore("strokes"); data.ink.forEach(function(s){ try { st.put(s); } catch(e){} }); tx.oncomplete = done; tx.onerror = done; };
+          rq.onerror = done;
+        } else { done(); }
+      } catch(e){ alert("恢复失败：" + e); }
+    };
+    rd.readAsText(inp.files[0]);
+    inp.value = "";
   }
 
   function exportLocal(){
