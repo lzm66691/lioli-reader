@@ -529,7 +529,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v41</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v42</span></div>
 
   <div class="spacer"></div>
 
@@ -537,7 +537,11 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
   <div class="page-jump">
 
+    <button class="tool-btn" id="prevPageBtn" title="上一页" style="padding:6px 10px;line-height:1">‹</button>
+
     页 <input id="pageInput" type="number" min="1" value="1" aria-label="页码"> / <span id="pageTotal">—</span>
+
+    <button class="tool-btn" id="nextPageBtn" title="下一页" style="padding:6px 10px;line-height:1">›</button>
 
   </div>
 
@@ -1643,6 +1647,11 @@ if (!BOOKS.length) {
   }
 
   pageInput.addEventListener("change", function(){ goPage(this.value); });
+
+  var _prevB = document.getElementById("prevPageBtn");
+  var _nextB = document.getElementById("nextPageBtn");
+  if (_prevB) _prevB.addEventListener("click", function(){ var v = parseInt(pageInput.value || "1", 10); goPage(Math.max(1, v - 1)); });
+  if (_nextB) _nextB.addEventListener("click", function(){ var v = parseInt(pageInput.value || "1", 10); goPage(v + 1); });
 
   document.getElementById("darkBtn").addEventListener("click", toggleDark);
 
