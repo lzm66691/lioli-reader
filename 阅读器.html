@@ -529,7 +529,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v38</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v39</span></div>
 
   <div class="spacer"></div>
 
@@ -856,7 +856,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
     { id:"dig-0925", title:"日报 · 09-25", meta:"每日前沿日报 · 12 页", group:"日报", pdf:"digests/dig-2026-09-25.pdf", pages:12 },
     { id:"dig-0927", title:"日报 · 09-27", meta:"每日前沿日报 · 自动生成", group:"日报", pdf:"digests/dig-2026-09-27.pdf" },
     { id:"dig-w38", title:"周报 · W38", meta:"本周回顾 · 1 页", group:"日报", pdf:"digests/dig-2026-W38.pdf", pages:1 },
-    { id:"dig-latest", title:"今日日报", meta:"每日前沿 · 自动更新", group:"日报", pdf:"digests/dig-latest.pdf" },
+    { id:"dig-latest", title:"今日日报", meta:"自动更新 · 别名跳转（不存批注）", group:"日报", pdf:"digests/dig-latest.pdf", volatile:true, alias:true },
 
     { id:"lzu-c-试题", title:"兰大 · C语言试题集", meta:"24/25春期中+17-18期末 · 扫描", group:"兰大·C语言", pdf:"papers/lzu-c-试题.pdf" },
     { id:"lzu-数分一", title:"数分一 · 历年试卷", meta:"期末 · 扫描", group:"兰大·数分", pdf:"papers/lzu-数分一-试卷.pdf" },
@@ -883,6 +883,13 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
   var BOOK = BOOKS.filter(function(b){ return b.id === curId; })[0] || BOOKS[0];
 
   curId = BOOK.id;
+
+  /* v39：日报别名跳转（dig-latest → 最新日期日报；别名不承载批注/进度） */
+  if (BOOK.alias) {
+    var _digs = BOOKS.filter(function(b){ return /^digests\/dig-\d{4}-\d{2}-\d{2}\.pdf$/.test(b.pdf || ""); });
+    _digs.sort(function(a, b){ var x = a.pdf || "", y = b.pdf || ""; return x < y ? 1 : x > y ? -1 : 0; });
+    if (_digs.length) switchBook(_digs[0].id);
+  }
 
 
 
@@ -929,6 +936,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
   var state = { page: 1, dark: false, theme: "", sidebar: true, note: true };
 
   try { var s = JSON.parse(localStorage.getItem(LS_STATE) || "null"); if (s) state = Object.assign(state, s); } catch(e){}
+  if (BOOK.volatile) state.page = 1;  /* v39：别名书不恢复进度 */
   if (state.dark && !state.theme) { state.theme = "dark"; }  /* 旧版 dark 迁移 */
 
   /* 书架章节直达：跨书跳页（reload 后定位） */
@@ -967,12 +975,12 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
   var notes = {};
 
-  try { notes = JSON.parse(localStorage.getItem(LS_NOTES) || "{}") || {}; } catch(e){}
+  if (BOOK.volatile) { notes = {}; } else { try { notes = JSON.parse(localStorage.getItem(LS_NOTES) || "{}") || {}; } catch(e){} }
 
   /* P3a 划词/区域标注（独立于页面笔记与书签） */
   var LS_MARKS = "reader-app-marks:" + BOOK.id;
   var marks = [];
-  try {
+  if (!BOOK.volatile) try {
     var _raw = localStorage.getItem(LS_MARKS);
     if (_raw) {
       var _p = JSON.parse(_raw);
@@ -980,6 +988,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
     }
   } catch(e){}
   function saveMarks(){
+    if (BOOK.volatile) return;
     try {
       localStorage.setItem(LS_MARKS, JSON.stringify({ v: 1, saved: Date.now(), list: marks }));
     } catch(e){
@@ -995,7 +1004,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
   var bookmarks = {};
 
-  try { bookmarks = JSON.parse(localStorage.getItem(LS_BM) || "{}") || {}; } catch(e){}
+  if (BOOK.volatile) { bookmarks = {}; } else { try { bookmarks = JSON.parse(localStorage.getItem(LS_BM) || "{}") || {}; } catch(e){} }
 
 
 
@@ -1237,7 +1246,10 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 
 
-  function save(){ localStorage.setItem(LS_STATE, JSON.stringify(state)); }
+  function save(){
+    if (BOOK.volatile) { var cp = {}; for (var k in state) if (k !== "page") cp[k] = state[k]; localStorage.setItem(LS_STATE, JSON.stringify(cp)); }
+    else localStorage.setItem(LS_STATE, JSON.stringify(state));
+  }
 
 
 
@@ -1495,7 +1507,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
     notes[p] = noteText.value;
 
-    localStorage.setItem(LS_NOTES, JSON.stringify(notes));
+    if (!BOOK.volatile) localStorage.setItem(LS_NOTES, JSON.stringify(notes));
 
     flashSave();
 
@@ -1507,7 +1519,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
     if (bookmarks[p]) { delete bookmarks[p]; } else { bookmarks[p] = true; }
 
-    localStorage.setItem(LS_BM, JSON.stringify(bookmarks));
+    if (!BOOK.volatile) localStorage.setItem(LS_BM, JSON.stringify(bookmarks));
 
     renderNotes(); flashSave();
 
@@ -2144,7 +2156,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
               var t = idb.transaction("strokes", "readonly").objectStore("strokes").getAll();
               t.onsuccess = function(){ strokes = (t.result || []).filter(function(s){ return s.book === BOOK.id; }); redrawAll(); };
             }
-            function saveStroke(st){ if (idb) { try { idb.transaction("strokes", "readwrite").objectStore("strokes").put(st); } catch(e){} } }
+            function saveStroke(st){ if (BOOK.volatile) return; if (idb) { try { idb.transaction("strokes", "readwrite").objectStore("strokes").put(st); } catch(e){} } }
             function delStroke(id){
               strokes = strokes.filter(function(s){ return s.id !== id; });
               if (idb) { try { idb.transaction("strokes", "readwrite").objectStore("strokes").delete(id); } catch(e){} }
@@ -2476,20 +2488,27 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
     idbLocalAll().then(function(list){
       var ls = {};
       try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k && k.indexOf("reader-app-") === 0) ls[k] = localStorage.getItem(k); } } catch(e){}
-      inkAll().then(function(ink){
-        var data = {
-          app: "lioli-reader", version: "backup-v2", time: new Date().toISOString(),
-          cur: (function(){ try { return localStorage.getItem("reader-app-cur") || null; } catch(e){ return null; } })(),
-          books: list.map(function(b){ return { title: b.title, meta: b.meta || null, group: b.group || "本地书" }; }),
-          ls: ls,
-          ink: ink
-        };
-        var blob = new Blob([JSON.stringify(data, null, 1)], { type: "application/json" });
-        var u = URL.createObjectURL(blob);
-        var a = document.createElement("a"); a.href = u; a.download = "lioli-阅读器备份-v2.json";
-        document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(function(){ URL.revokeObjectURL(u); }, 10000);
-        alert("已导出完整备份 v2：批注/笔记/收藏/进度/画笔 + " + list.length + " 本本地书清单");
+      var books = [];
+      BOOKS.forEach(function(b){ books.push({ id: b.id, title: b.title, fileName: b.pdf || "", pages: b.pages || 0, size: 0 }); });
+      list.forEach(function(b){ var ex = books.some(function(x){ return x.id === b.id; }); if (!ex) books.push({ id: b.id, title: b.title, fileName: b.title + ".pdf", pages: 0, size: (b.blob && b.blob.size) || 0 }); });
+      var HOST = "https://lzm66691.github.io/lioli-reader/";
+      function _headSize(u){ return new Promise(function(res){ var ctl = new AbortController(); var tm = setTimeout(function(){ ctl.abort(); }, 4000); fetch(u, { method: "HEAD", signal: ctl.signal }).then(function(r){ clearTimeout(tm); res(Number(r.headers.get("content-length") || 0)); }).catch(function(){ clearTimeout(tm); res(0); }); }); }
+      Promise.all(books.map(function(b){ if (b.size > 0 || !b.fileName) return Promise.resolve(b); return _headSize(HOST + b.fileName).then(function(sz){ b.size = sz; return b; }); })).then(function(){
+        inkAll().then(function(ink){
+          var data = {
+            app: "lioli-reader", version: "backup-v2", time: new Date().toISOString(),
+            cur: (function(){ try { return localStorage.getItem("reader-app-cur") || null; } catch(e){ return null; } })(),
+            books: books,
+            ls: ls,
+            ink: ink
+          };
+          var blob = new Blob([JSON.stringify(data, null, 1)], { type: "application/json" });
+          var u = URL.createObjectURL(blob);
+          var a = document.createElement("a"); a.href = u; a.download = "lioli-阅读器备份-v2.json";
+          document.body.appendChild(a); a.click(); a.remove();
+          setTimeout(function(){ URL.revokeObjectURL(u); }, 10000);
+          alert("已导出完整备份 v2：批注/笔记/收藏/进度/画笔 + 全部 " + books.length + " 本书指纹快照");
+        });
       });
     });
   }
