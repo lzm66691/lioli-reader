@@ -1,7 +1,7 @@
-/* PWA Service Worker — 莉萝阅读器 C课程落库：Ch1/Ch3讲义+练习册上架（萝审查通过）+toc+配置抽离（2026-09-28）
-   外壳缓存 reader-p2-dg-v43（含 pdf.js 全套）；PDF 缓存 reader-pdf-v1（按需 cache-first）
+/* PWA Service Worker — 莉萝阅读器 C课程第2/3批：Ch5运算符+Ch6循环+Ch7分支全套上架（先做后审，萝事后评价）（2026-09-28）
+   外壳缓存 reader-p2-dg-v44（含 pdf.js 全套）；PDF 缓存 reader-pdf-v1（按需 cache-first）
    升级纪律：改外壳/pdf.js → 同时改缓存名 */
-var CACHE_SHELL = "reader-p2-dg-v43";
+var CACHE_SHELL = "reader-p2-dg-v44";
 var CACHE_PDF   = "reader-pdf-v1";
 
 /* PWA 离线预缓存：公开 6 本 PDF（共约 4MB），安装后全部本地可用 */
