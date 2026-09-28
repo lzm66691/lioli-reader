@@ -1,7 +1,7 @@
-/* PWA Service Worker — 莉萝阅读器 书架配置抽离：BOOKS+GROUP_ORDER 移至 config.json（加书不改源码）（2026-09-28）
-   外壳缓存 reader-p2-dg-v41（含 pdf.js 全套）；PDF 缓存 reader-pdf-v1（按需 cache-first）
+/* PWA Service Worker — 莉萝阅读器 工具栏重组·第一步：顶栏高频露出翻页按钮（上一页/下一页）（2026-09-28）
+   外壳缓存 reader-p2-dg-v42（含 pdf.js 全套）；PDF 缓存 reader-pdf-v1（按需 cache-first）
    升级纪律：改外壳/pdf.js → 同时改缓存名 */
-var CACHE_SHELL = "reader-p2-dg-v41";
+var CACHE_SHELL = "reader-p2-dg-v42";
 var CACHE_PDF   = "reader-pdf-v1";
 
 /* PWA 离线预缓存：公开 6 本 PDF（共约 4MB），安装后全部本地可用 */
