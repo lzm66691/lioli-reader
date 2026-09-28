@@ -529,7 +529,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v40</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v41</span></div>
 
   <div class="spacer"></div>
 
@@ -696,183 +696,19 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
   /* ===== BOOKS 书架模型（萝拍板：BOOKS 数据 + localStorage 按书隔离 + 换书整页重载）===== */
 
-  var BOOKS = [
-
-    {
-
-      id:"c-ch4", title:"C 讲义 · Ch4 输入输出", meta:"C Primer Plus 伴读 · 样品章 · 4 页", group:"C 讲义", pdf:"papers/c-ch4.pdf", pages:4,
-
-      toc:[
-
-        { t:"4.1 先把程序框架摆正", p:1 },
-
-        { t:"4.2 printf：把东西“打印”到屏幕上", p:1 },
-
-        { t:"4.3 scanf：让程序“读”你输入的东西", p:2 },
-
-        { t:"4.4 字符串：其实就是字符数组", p:3 },
-
-        { t:"4.5 新手坑集中营（本章最容易错的 4 件事）", p:3 },
-
-        { t:"4.6 一分钟自测（答案见练习册）", p:3 },
-
-        { t:"4.7 练习指引", p:4 }
-
-      ]
-
-    },
-
-    {
-
-      id:"c-ch4-ex", title:"练习册 · Ch4", meta:"填空/改错/编程/场景 · 5 页", group:"C 练习册", pdf:"papers/c-ch4-ex.pdf", pages:5,
-
-      toc:[
-
-        { t:"4-1 填空（★）", p:1 },
-
-        { t:"4-2 改错（★★，最有价值的一题）", p:1 },
-
-        { t:"4-3 编程（★★）", p:2 },
-
-        { t:"4-4 编程（★★★）", p:2 },
-
-        { t:"4-5 专业场景拓展（★★，不需要硬件知识）", p:2 },
-
-        { t:"4-6 复习题索引", p:3 },
-
-        { t:"4-7 一分钟自测答案", p:3 },
-
-        { t:"4-8 参考答案（先自己写，再看思路与常见错法）", p:3 }
-
-      ]
-
-    },
-
-    {
-
-      id:"c-ch10", title:"C 讲义 · Ch10 数组和指针", meta:"重点章 · 4 页", group:"C 讲义", pdf:"papers/c-ch10.pdf", pages:4,
-
-      toc:[
-
-        { t:"10.1 数组：同一类数据的集合", p:1 },
-
-        { t:"10.2 数组名就是地址（Ch4 伏笔兑现）", p:1 },
-
-        { t:"10.3 指针：专门存地址的变量", p:2 },
-
-        { t:"10.4 数组和指针的等价关系：a[i] 就是 *(a+i)", p:2 },
-
-        { t:"10.5 函数传数组：传的是地址，不是副本", p:3 },
-
-        { t:"10.6 常见坑集中营", p:3 },
-
-        { t:"10.7 一分钟自测（答案见练习册）", p:4 },
-
-        { t:"10.8 练习指引", p:4 }
-
-      ]
-
-    },
-
-    {
-
-      id:"c-ch10-ex", title:"练习册 · Ch10", meta:"重点章 6 题 · 6 页", group:"C 练习册", pdf:"papers/c-ch10-ex.pdf", pages:6,
-
-      toc:[
-
-        { t:"10-1 填空（★）", p:1 },
-
-        { t:"10-2 改错（★★，先自己找再对答案）", p:1 },
-
-        { t:"10-3 编程（★★）", p:2 },
-
-        { t:"10-4 编程（★★★）", p:2 },
-
-        { t:"10-5 编程（★★★）", p:3 },
-
-        { t:"10-6 专业场景拓展（★★★，不需要硬件知识）", p:3 },
-
-        { t:"10-7 复习题索引", p:3 },
-
-        { t:"10-8 参考答案（先自己写，再看思路与常见错法）", p:3 }
-
-      ]
-
-    },
-
-    {
-
-      id:"c-ch12", title:"C 讲义 · Ch12 存储与内存", meta:"重点章 · 4 页", group:"C 讲义", pdf:"papers/c-ch12.pdf", pages:4,
-
-      toc:[
-
-        { t:"12.1 两个问题：变量「管到哪」和「活多久」", p:1 },
-
-        { t:"12.2 static：让局部变量「记住」上一次的值", p:1 },
-
-        { t:"12.3 extern：使用别处定义的全局变量", p:2 },
-
-        { t:"12.4 动态内存：malloc 和 free", p:2 },
-
-        { t:"12.5 常见坑集中营", p:3 },
-
-        { t:"12.6 一分钟自测（答案见练习册）", p:3 },
-
-        { t:"12.7 练习指引", p:4 }
-
-      ]
-
-    },
-
-    {
-
-      id:"c-ch12-ex", title:"练习册 · Ch12", meta:"重点章 5 题 · 5 页", group:"C 练习册", pdf:"papers/c-ch12-ex.pdf", pages:5,
-
-      toc:[
-
-        { t:"12-1 填空（★）", p:1 },
-
-        { t:"12-2 改错（★★，先自己找再对答案）", p:1 },
-
-        { t:"12-3 编程（★★）", p:2 },
-
-        { t:"12-4 编程（★★★）", p:2 },
-
-        { t:"12-5 专业场景拓展（★★★，不需要硬件知识）", p:2 },
-
-        { t:"12-6 复习题索引", p:2 },
-
-        { t:"12-7 参考答案（先自己写，再看思路与常见错法）", p:3 }
-
-      ]
-
-    },
-
-    { id:"dig-0920", title:"日报 · 09-20", meta:"每日前沿日报 · 8 页", group:"日报", pdf:"digests/dig-2026-09-20.pdf", pages:8 },
-    { id:"dig-0921", title:"日报 · 09-21", meta:"每日前沿日报 · 9 页", group:"日报", pdf:"digests/dig-2026-09-21.pdf", pages:9 },
-    { id:"dig-0922", title:"日报 · 09-22", meta:"每日前沿日报 · 8 页", group:"日报", pdf:"digests/dig-2026-09-22.pdf", pages:8 },
-    { id:"dig-0923", title:"日报 · 09-23", meta:"每日前沿日报 · 11 页", group:"日报", pdf:"digests/dig-2026-09-23.pdf", pages:11 },
-    { id:"dig-0924", title:"日报 · 09-24", meta:"每日前沿日报 · 10 页", group:"日报", pdf:"digests/dig-2026-09-24.pdf", pages:10 },
-    { id:"dig-0925", title:"日报 · 09-25", meta:"每日前沿日报 · 12 页", group:"日报", pdf:"digests/dig-2026-09-25.pdf", pages:12 },
-    { id:"dig-0927", title:"日报 · 09-27", meta:"每日前沿日报 · 自动生成", group:"日报", pdf:"digests/dig-2026-09-27.pdf" },
-    { id:"dig-w38", title:"周报 · W38", meta:"本周回顾 · 1 页", group:"日报", pdf:"digests/dig-2026-W38.pdf", pages:1 },
-    { id:"dig-latest", title:"今日日报", meta:"自动更新 · 别名跳转（不存批注）", group:"日报", pdf:"digests/dig-latest.pdf", volatile:true, alias:true },
-
-    { id:"lzu-c-试题", title:"兰大 · C语言试题集", meta:"24/25春期中+17-18期末 · 扫描", group:"兰大·C语言", pdf:"papers/lzu-c-试题.pdf" },
-    { id:"lzu-数分一", title:"数分一 · 历年试卷", meta:"期末 · 扫描", group:"兰大·数分", pdf:"papers/lzu-数分一-试卷.pdf" },
-    { id:"lzu-数分二", title:"数分二 · 试卷集", meta:"期末/月考 · 扫描", group:"兰大·数分", pdf:"papers/lzu-数分二-试卷.pdf" },
-    { id:"lzu-数分三", title:"数分三 · 历年试卷", meta:"期末/期中 · 扫描", group:"兰大·数分", pdf:"papers/lzu-数分三-试卷.pdf" },
-    { id:"lzu-数分二-25", title:"数分二 25-26 期末", meta:"PDF 原卷", group:"兰大·数分", pdf:"papers/25-26数分二期末.pdf" },
-    { id:"lzu-数分-期中25", title:"数分 25 期中", meta:"PDF 原卷", group:"兰大·数分", pdf:"papers/25数学分析期中考试题.pdf" },
-    { id:"lzu-数分-月考", title:"数分月考 I", meta:"PDF 原卷", group:"兰大·数分", pdf:"papers/数学分析月考I.pdf" },
-    { id:"lzu-数分三-卷集", title:"数分三试卷集", meta:"PDF 原卷", group:"兰大·数分", pdf:"papers/数分三试卷集.pdf" },
-    { id:"lzu-高代", title:"高代 · 历年试卷", meta:"期末/期中/月考 · 扫描", group:"兰大·高代", pdf:"papers/lzu-高代-试卷.pdf" },
-    { id:"lzu-高代二-25", title:"高代二 25-26 期末", meta:"PDF 原卷", group:"兰大·高代", pdf:"papers/25-26高代二期末.pdf" },
-    { id:"lzu-高代-月考", title:"高代月考 I", meta:"PDF 原卷", group:"兰大·高代", pdf:"papers/高等代数月考I.pdf" },
-    { id:"lzu-高代-参考", title:"高代教程参考答案", meta:"兰大数协", group:"兰大·高代", pdf:"papers/高等代数教程参考答案--兰大数协.pdf" },
-    { id:"lzu-大物上-1", title:"大物上 · 课件（上）", meta:"第1-6章", group:"兰大·大物", pdf:"papers/lzu-大物上-课件上.pdf" },
-    { id:"lzu-大物上-2", title:"大物上 · 课件（下）", meta:"第7-11章", group:"兰大·大物", pdf:"papers/lzu-大物上-课件下.pdf" }
-  ];
+  var BOOKS = [];
+try {
+  var _cfgx = new XMLHttpRequest();
+  _cfgx.open("GET", "config.json", false);
+  _cfgx.send();
+  if (_cfgx.status === 200 || _cfgx.status === 0) {
+    var _cfgo = JSON.parse(_cfgx.responseText);
+    if (_cfgo && Array.isArray(_cfgo.books) && _cfgo.books.length) { BOOKS = _cfgo.books; window.__LIOLI_CFG = _cfgo; }
+  }
+} catch(e){}
+if (!BOOKS.length) {
+  BOOKS = [ { id:"c-ch4", title:"C 讲义 · Ch4 输入输出", meta:"C Primer Plus 伴读 · 样品章 · 4 页", group:"C 讲义", pdf:"papers/c-ch4.pdf", pages:4, toc:[{ t:"4.1 先把程序框架摆正", p:1 }] } ];
+};
 
   var LS_CUR = "reader-app-current";
 
@@ -1048,7 +884,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
   }
 
-  var GROUP_ORDER = ["C 讲义","C 练习册","兰大·C语言","兰大·数分","兰大·高代","兰大·大物","日报"];
+  var GROUP_ORDER = (window.__LIOLI_CFG && window.__LIOLI_CFG.groupOrder) || ["C 讲义","C 练习册","兰大·C语言","兰大·数分","兰大·高代","兰大·大物","日报"];
 
   function renderShelf(){
 
