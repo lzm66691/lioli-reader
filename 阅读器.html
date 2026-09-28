@@ -529,7 +529,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v46</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v47</span></div>
 
   <div class="spacer"></div>
 
@@ -2348,26 +2348,35 @@ if (!BOOKS.length) {
   }
 
   function inkAll(){ return new Promise(function(res){ var rq = indexedDB.open("lioli-reader-ink", 1); rq.onsuccess = function(e){ var db = e.target.result; try { var t = db.transaction("strokes","readonly").objectStore("strokes").getAll(); t.onsuccess = function(){ res(t.result || []); }; t.onerror = function(){ res([]); }; } catch(err){ res([]); } }; rq.onerror = function(){ res([]); }; }); }
-  /* v46：PDF 指纹（pdf.js fingerprint，基于文件内容）绑定批注 */
+  /* v46：PDF 指纹绑定批注（URL + 文件大小 + 页数 + Last-Modified；pdf.js v6 无顶层 fingerprint 故不用） */
   function ensureFingerprint(){
     if (BOOK.volatile) return;   /* 日报别名等不存指纹 */
     var tries = 0;
     var iv = setInterval(function(){
-      var fp = null;
+      var pages = 0;
       try {
         var w = pdfFrame.contentWindow;
-        if (w && w.PDFViewerApplication && w.PDFViewerApplication.pdfDocument) {
-          fp = w.PDFViewerApplication.pdfDocument.fingerprint || null;
-        }
+        var app = w.PDFViewerApplication;
+        if (app && app.pdfDocument) pages = app.pdfDocument.numPages || 0;
       } catch(e){}
-      if (fp) {
+      if (pages > 0) {
         clearInterval(iv);
-        var prev = null;
-        try { prev = localStorage.getItem("reader-app-fp:" + BOOK.id); } catch(e){}
-        try { localStorage.setItem("reader-app-fp:" + BOOK.id, fp); } catch(e){}
-        if (prev && prev !== fp) {
-          try { alert("检测到《" + BOOK.title + "》的 PDF 已更新（指纹变化），原有批注/荧光笔/画笔的页码可能错位。\n\n建议：先用「工具箱 → 备份数据」备份笔记，再检查旧批注。" ); } catch(e){}
-        }
+        var _apply = function(sz, lm){
+          var fp = BOOK.pdf + "|" + (sz || 0) + "|" + pages + "|" + (lm || "");
+          var prev = null;
+          try { prev = localStorage.getItem("reader-app-fp:" + BOOK.id); } catch(e){}
+          try { localStorage.setItem("reader-app-fp:" + BOOK.id, fp); } catch(e){}
+          if (prev && prev !== fp) {
+            try { alert("检测到《" + BOOK.title + "》的 PDF 已更新（指纹变化），原有批注/荧光笔/画笔的页码可能错位。\n\n建议：先用「工具箱 → 备份数据」备份笔记，再检查旧批注。" ); } catch(e){}
+          }
+        };
+        try {
+          var _ctl = new AbortController(); var _tm = setTimeout(function(){ _ctl.abort(); }, 5000);
+          fetch(BOOK.pdf, { method: "HEAD", signal: _ctl.signal }).then(function(r){
+            clearTimeout(_tm);
+            _apply(Number(r.headers.get("content-length") || 0), r.headers.get("last-modified") || "");
+          }).catch(function(){ clearTimeout(_tm); _apply(0, ""); });
+        } catch(e){ _apply(0, ""); }
         return;
       }
       if (++tries > 40) clearInterval(iv);
