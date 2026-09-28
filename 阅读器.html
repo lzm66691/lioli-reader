@@ -529,7 +529,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v44</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v45</span></div>
 
   <div class="spacer"></div>
 
@@ -569,6 +569,8 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
   </div>
 
   <div class="tool-group">
+
+    <button class="tool-btn" id="pairJumpBtn" title="一键跳转到对应的练习册/讲义" style="display:none"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h8M13 4l-3-3M13 4l-3 3M11 12H3M3 12l3-3M3 12l3 3"/></svg><span id="pairJumpLabel">练习册</span></button>
 
     <a class="tool-btn" id="sysOpen" href="papers/c-ch4.pdf" target="_blank" rel="noopener" title="用系统阅读器打开当前 PDF（pdf.js 异常时的兜底）"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3H3v10h10v-3M9 2h5v5M14 2l-7 7"/></svg><span>系统打开</span></button></a>
 
@@ -723,6 +725,20 @@ if (!BOOKS.length) {
   var BOOK = BOOKS.filter(function(b){ return b.id === curId; })[0] || BOOKS[0];
 
   curId = BOOK.id;
+
+  /* v45：讲义<->练习册一键跳转（豆包评审建议：减少来回切书架） */
+  (function(){
+    var m = /^c-ch(\d+)(-ex)?$/.exec(BOOK.id);
+    var btn = document.getElementById("pairJumpBtn");
+    if (!m || !btn) return;
+    var pairId = m[2] ? ("c-ch" + m[1]) : ("c-ch" + m[1] + "-ex");
+    var target = BOOKS.filter(function(b){ return b.id === pairId; })[0];
+    if (!target) return;
+    btn.style.display = "";
+    btn.title = "一键跳到「" + target.title + "」";
+    document.getElementById("pairJumpLabel").textContent = m[2] ? "讲义" : "练习册";
+    btn.onclick = function(){ switchBook(pairId); };
+  })();
 
   /* v39：日报别名跳转（dig-latest → 最新日期日报；别名不承载批注/进度） */
   if (BOOK.alias) {
