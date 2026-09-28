@@ -529,7 +529,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v35</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v36</span></div>
 
   <div class="spacer"></div>
 
@@ -848,6 +848,21 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
     },
 
+
+    { id:"lzu-c-试题", title:"兰大 · C语言试题集", meta:"24/25春期中+17-18期末 · 扫描", group:"兰大·C语言", pdf:"papers/lzu-c-试题.pdf" },
+    { id:"lzu-数分一", title:"数分一 · 历年试卷", meta:"期末 · 扫描", group:"兰大·数分", pdf:"papers/lzu-数分一-试卷.pdf" },
+    { id:"lzu-数分二", title:"数分二 · 试卷集", meta:"期末/月考 · 扫描", group:"兰大·数分", pdf:"papers/lzu-数分二-试卷.pdf" },
+    { id:"lzu-数分三", title:"数分三 · 历年试卷", meta:"期末/期中 · 扫描", group:"兰大·数分", pdf:"papers/lzu-数分三-试卷.pdf" },
+    { id:"lzu-数分二-25", title:"数分二 25-26 期末", meta:"PDF 原卷", group:"兰大·数分", pdf:"papers/25-26数分二期末.pdf" },
+    { id:"lzu-数分-期中25", title:"数分 25 期中", meta:"PDF 原卷", group:"兰大·数分", pdf:"papers/25数学分析期中考试题.pdf" },
+    { id:"lzu-数分-月考", title:"数分月考 I", meta:"PDF 原卷", group:"兰大·数分", pdf:"papers/数学分析月考I.pdf" },
+    { id:"lzu-数分三-卷集", title:"数分三试卷集", meta:"PDF 原卷", group:"兰大·数分", pdf:"papers/数分三试卷集.pdf" },
+    { id:"lzu-高代", title:"高代 · 历年试卷", meta:"期末/期中/月考 · 扫描", group:"兰大·高代", pdf:"papers/lzu-高代-试卷.pdf" },
+    { id:"lzu-高代二-25", title:"高代二 25-26 期末", meta:"PDF 原卷", group:"兰大·高代", pdf:"papers/25-26高代二期末.pdf" },
+    { id:"lzu-高代-月考", title:"高代月考 I", meta:"PDF 原卷", group:"兰大·高代", pdf:"papers/高等代数月考I.pdf" },
+    { id:"lzu-高代-参考", title:"高代教程参考答案", meta:"兰大数协", group:"兰大·高代", pdf:"papers/高等代数教程参考答案--兰大数协.pdf" },
+    { id:"lzu-大物上-1", title:"大物上 · 课件（上）", meta:"第1-6章", group:"兰大·大物", pdf:"papers/lzu-大物上-课件上.pdf" },
+    { id:"lzu-大物上-2", title:"大物上 · 课件（下）", meta:"第7-11章", group:"兰大·大物", pdf:"papers/lzu-大物上-课件下.pdf" }
   ];
 
   var LS_CUR = "reader-app-current";
@@ -1015,7 +1030,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
   }
 
-  var GROUP_ORDER = ["C 讲义","C 练习册"];
+  var GROUP_ORDER = ["C 讲义","C 练习册","兰大·C语言","兰大·数分","兰大·高代","兰大·大物","日报"];
 
   function renderShelf(){
 
