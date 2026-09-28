@@ -1,7 +1,7 @@
-/* PWA Service Worker — 莉萝阅读器 兰大课程资料入书架（C试题/数分/高代/大物课件 15册）（2026-09-28）
-   外壳缓存 reader-p2-dg-v36（含 pdf.js 全套）；PDF 缓存 reader-pdf-v1（按需 cache-first）
+/* PWA Service Worker — 莉萝阅读器 日报上公网+每日自动更新（历史9/20-27+W38共9册）（2026-09-28）
+   外壳缓存 reader-p2-dg-v37（含 pdf.js 全套）；PDF 缓存 reader-pdf-v1（按需 cache-first）
    升级纪律：改外壳/pdf.js → 同时改缓存名 */
-var CACHE_SHELL = "reader-p2-dg-v36";
+var CACHE_SHELL = "reader-p2-dg-v37";
 var CACHE_PDF   = "reader-pdf-v1";
 
 /* PWA 离线预缓存：公开 6 本 PDF（共约 4MB），安装后全部本地可用 */
