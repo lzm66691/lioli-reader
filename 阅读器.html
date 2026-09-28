@@ -529,7 +529,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v45</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v46</span></div>
 
   <div class="spacer"></div>
 
@@ -1929,6 +1929,9 @@ if (!BOOKS.length) {
           }, 500);
         })();
 
+        /* v46：PDF 指纹绑定批注（豆包评审🔴）——加载完成后记录指纹，若与上次不同提示错位风险 */
+        ensureFingerprint();
+
         /* ---- P3a：标注渲染 + 划词工具条（不依赖外层，闭包内完成） ---- */
 
         /* P3a: mark css moved to external css (CSP) */
@@ -2345,13 +2348,39 @@ if (!BOOKS.length) {
   }
 
   function inkAll(){ return new Promise(function(res){ var rq = indexedDB.open("lioli-reader-ink", 1); rq.onsuccess = function(e){ var db = e.target.result; try { var t = db.transaction("strokes","readonly").objectStore("strokes").getAll(); t.onsuccess = function(){ res(t.result || []); }; t.onerror = function(){ res([]); }; } catch(err){ res([]); } }; rq.onerror = function(){ res([]); }; }); }
+  /* v46：PDF 指纹（pdf.js fingerprint，基于文件内容）绑定批注 */
+  function ensureFingerprint(){
+    if (BOOK.volatile) return;   /* 日报别名等不存指纹 */
+    var tries = 0;
+    var iv = setInterval(function(){
+      var fp = null;
+      try {
+        var w = pdfFrame.contentWindow;
+        if (w && w.PDFViewerApplication && w.PDFViewerApplication.pdfDocument) {
+          fp = w.PDFViewerApplication.pdfDocument.fingerprint || null;
+        }
+      } catch(e){}
+      if (fp) {
+        clearInterval(iv);
+        var prev = null;
+        try { prev = localStorage.getItem("reader-app-fp:" + BOOK.id); } catch(e){}
+        try { localStorage.setItem("reader-app-fp:" + BOOK.id, fp); } catch(e){}
+        if (prev && prev !== fp) {
+          try { alert("检测到《" + BOOK.title + "》的 PDF 已更新（指纹变化），原有批注/荧光笔/画笔的页码可能错位。\n\n建议：先用「工具箱 → 备份数据」备份笔记，再检查旧批注。" ); } catch(e){}
+        }
+        return;
+      }
+      if (++tries > 40) clearInterval(iv);
+    }, 400);
+  }
+
   function exportBackup(){
     idbLocalAll().then(function(list){
       var ls = {};
       try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k && k.indexOf("reader-app-") === 0) ls[k] = localStorage.getItem(k); } } catch(e){}
       var books = [];
-      BOOKS.forEach(function(b){ books.push({ id: b.id, title: b.title, fileName: b.pdf || "", pages: b.pages || 0, size: 0 }); });
-      list.forEach(function(b){ var ex = books.some(function(x){ return x.id === b.id; }); if (!ex) books.push({ id: b.id, title: b.title, fileName: b.title + ".pdf", pages: 0, size: (b.blob && b.blob.size) || 0 }); });
+      BOOKS.forEach(function(b){ books.push({ id: b.id, title: b.title, fileName: b.pdf || "", pages: b.pages || 0, size: 0, fingerprint: (function(){ try { return localStorage.getItem("reader-app-fp:" + b.id) || ""; } catch(e){ return ""; } })() }); });
+      list.forEach(function(b){ var ex = books.some(function(x){ return x.id === b.id; }); if (!ex) books.push({ id: b.id, title: b.title, fileName: b.title + ".pdf", pages: 0, size: (b.blob && b.blob.size) || 0, fingerprint: "" }); });
       var HOST = "https://lzm66691.github.io/lioli-reader/";
       function _headSize(u){ return new Promise(function(res){ var ctl = new AbortController(); var tm = setTimeout(function(){ ctl.abort(); }, 4000); fetch(u, { method: "HEAD", signal: ctl.signal }).then(function(r){ clearTimeout(tm); res(Number(r.headers.get("content-length") || 0)); }).catch(function(){ clearTimeout(tm); res(0); }); }); }
       Promise.all(books.map(function(b){ if (b.size > 0 || !b.fileName) return Promise.resolve(b); return _headSize(HOST + b.fileName).then(function(sz){ b.size = sz; return b; }); })).then(function(){
@@ -2383,7 +2412,18 @@ if (!BOOKS.length) {
         if (!data || data.app !== "lioli-reader") { alert("不是莉萝阅读器备份文件"); return; }
         if (data.ls) { try { for (var k in data.ls) localStorage.setItem(k, data.ls[k]); } catch(e){} }
         if (data.cur) { try { localStorage.setItem("reader-app-cur", data.cur); } catch(e){} }
-        var done = function(){ alert("恢复完成，正在刷新…"); location.reload(); };
+        var done = function(){
+          var fpWarn = "";
+          if (data.books && data.books.length) {
+            var warns = data.books.filter(function(b){ return b.fingerprint; }).filter(function(b){
+              var cur = null; try { cur = localStorage.getItem("reader-app-fp:" + b.id); } catch(e){}
+              return cur && cur !== b.fingerprint;
+            });
+            if (warns.length) fpWarn = "\n\n⚠ " + warns.length + " 本书的 PDF 指纹与备份时不同（可能已更新），其批注页码可能错位，建议打开对应书核对。";
+          }
+          alert("恢复完成，正在刷新…" + fpWarn);
+          location.reload();
+        };
         if (data.ink && data.ink.length) {
           var rq = indexedDB.open("lioli-reader-ink", 1);
           rq.onsuccess = function(e){ var db = e.target.result; var tx = db.transaction("strokes","readwrite"); var st = tx.objectStore("strokes"); data.ink.forEach(function(s){ try { st.put(s); } catch(e){} }); tx.oncomplete = done; tx.onerror = done; };
