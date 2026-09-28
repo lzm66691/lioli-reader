@@ -529,7 +529,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v47</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v48</span></div>
 
   <div class="spacer"></div>
 
@@ -1563,6 +1563,7 @@ if (!BOOKS.length) {
       + '<div class="toolbox-grp">外观</div>'
       + '<button class="toolbox-item" data-act="theme"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.2 3.2l1.4 1.4M11.4 11.4l1.4 1.4M12.8 3.2l-1.4 1.4M4.6 11.4l-1.4 1.4"/></svg></span>主题切换</button>'
       + '<button class="toolbox-item" data-act="full"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4"/></svg></span>全屏</button>'
+      + '<button class="toolbox-item" data-act="readset"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 3h12v10H2zM5 6h6M5 9h6"/></svg></span>阅读设置</button>'
       + '<div class="toolbox-grp">书籍</div>'
       + '<button class="toolbox-item" data-act="import"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M8 3v7M5 7l3 3 3-3M3 12.5h10"/></svg></span>导入 PDF</button>'
       + '<button class="toolbox-item" data-act="export"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M8 10V3M5 6l3-3 3 3M3 12.5h10"/></svg></span>导出本地书</button>'
@@ -1572,6 +1573,13 @@ if (!BOOKS.length) {
       + '<div class="toolbox-grp">帮助</div>'
       + '<a class="toolbox-item" href="guide.html" target="_blank" rel="noopener"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3.5A2 2 0 0 1 4 2h9v11H4.5A2.5 2.5 0 0 0 2 15.5z"/><path d="M2 13.5A2.5 2.5 0 0 1 4.5 11H13"/></svg></span>使用教程</a>'
       + '<a class="toolbox-item" id="sysOpen2" href="papers/c-ch4.pdf" target="_blank" rel="noopener"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3H3v10h10v-3M9 2h5v5M14 2l-7 7"/></svg></span>系统打开</a>'
+      + '<div id="tbReadset" class="tb-readset" hidden>'
+      + '<div class="toolbox-grp">阅读设置（PDF 滤镜）</div>'
+      + '<div class="tb-row"><label>亮度</label><input id="rsBright" type="range" min="50" max="150" value="100" style="flex:1"></div>'
+      + '<div class="tb-row"><label>对比度</label><input id="rsContrast" type="range" min="50" max="150" value="100" style="flex:1"></div>'
+      + '<div class="tb-row"><label>夜间强化</label><input id="rsNight" type="checkbox" style="width:auto"></div>'
+      + '<div class="tb-row"><button id="rsReset" class="tb-go" style="width:100%">重置滤镜</button></div>'
+      + '</div>'
       + '<button class="toolbox-item" id="toolboxHideBtn" style="margin-top:6px;background:var(--teal-light);color:var(--teal-dark);font-weight:700;text-align:center">收起工具箱</button>'
       + '<div class="toolbox-about">莉萝阅读器 v' + (document.getElementById("appVer") ? document.getElementById("appVer").textContent.replace("v","") : "18") + ' · 数据仅存本机</div>';
     document.body.appendChild(_tbPanel);
@@ -1598,6 +1606,7 @@ if (!BOOKS.length) {
       export: function(){ try { exportLocal(); } catch(e){ alert("暂无可导出的本地书"); } },
       theme: function(){ var b = document.getElementById("darkBtn"); if (b) b.click(); },
       full: function(){ var b = document.getElementById("fullBtn"); if (b) b.click(); },
+      readset: function(){ var r = document.getElementById("tbReadset"); if (r) r.hidden = !r.hidden; },
       sidebar: function(){ var b = document.getElementById("sidebarBtn"); if (b) b.click(); },
       note: function(){ var b = document.getElementById("noteBtn"); if (b) b.click(); },
       pen: function(){
@@ -1639,6 +1648,44 @@ if (!BOOKS.length) {
     };
     var _sb = document.getElementById("searchBtn");
     if (_sb) _sb.addEventListener("click", function(){ try { showSearch(); } catch(e){ _tbActs.search(); } });
+    function _applyReadFilter(){
+      var f = document.getElementById("pdfFrame");
+      var cfg = { night: false, bright: 100, contrast: 100 };
+      try { var _r = JSON.parse(localStorage.getItem("reader-app-readset") || "null"); if (_r) cfg = _r; } catch(e){}
+      var parts = [];
+      if (cfg.night) parts.push("invert(1) hue-rotate(180deg)");
+      if (cfg.bright !== 100) parts.push("brightness(" + (cfg.bright / 100) + ")");
+      if (cfg.contrast !== 100) parts.push("contrast(" + (cfg.contrast / 100) + ")");
+      if (f) f.style.filter = parts.join(" ") || "";
+    }
+    function _bindReadset(){
+      var r = document.getElementById("tbReadset"); if (!r) return;
+      var load = function(){
+        var cfg = { night:false, bright:100, contrast:100 };
+        try { var _r = JSON.parse(localStorage.getItem("reader-app-readset") || "null"); if (_r) cfg = _r; } catch(e){}
+        var b = document.getElementById("rsBright"); if (b) b.value = cfg.bright;
+        var c = document.getElementById("rsContrast"); if (c) c.value = cfg.contrast;
+        var n = document.getElementById("rsNight"); if (n) n.checked = !!cfg.night;
+      };
+      var save = function(){
+        var cfg = { night:false, bright:100, contrast:100 };
+        var b = document.getElementById("rsBright"), c = document.getElementById("rsContrast"), n = document.getElementById("rsNight");
+        if (b) cfg.bright = parseInt(b.value,10) || 100;
+        if (c) cfg.contrast = parseInt(c.value,10) || 100;
+        if (n) cfg.night = n.checked;
+        try { localStorage.setItem("reader-app-readset", JSON.stringify(cfg)); } catch(e){}
+        _applyReadFilter();
+      };
+      var b = document.getElementById("rsBright"); if (b) b.addEventListener("input", save);
+      var c = document.getElementById("rsContrast"); if (c) c.addEventListener("input", save);
+      var n = document.getElementById("rsNight"); if (n) n.addEventListener("change", save);
+      var rr = document.getElementById("rsReset"); if (rr) rr.addEventListener("click", function(){
+        var _d = { night:false, bright:100, contrast:100 };
+        try { localStorage.setItem("reader-app-readset", JSON.stringify(_d)); } catch(e){}
+        load(); _applyReadFilter();
+      });
+      load(); _applyReadFilter();
+    }
     function _tbZoom(fac){
       try {
         var f = document.getElementById("pdfFrame");
@@ -1657,6 +1704,7 @@ if (!BOOKS.length) {
         if (fn) fn();
       });
     })(_tbItems[ti]);
+    _bindReadset();
     /* 系统打开：与顶栏 #sysOpen 指向当前 PDF 同步 */
     var _sysO2 = document.getElementById("sysOpen2");
     if (_sysO2) { try { _sysO2.href = document.getElementById("sysOpen").href; } catch(e){} }
