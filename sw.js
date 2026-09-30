@@ -1,8 +1,8 @@
-/* PWA Service Worker — 莉萝阅读器 v49：C 讲义 ch10 教案 v2 样板（矢量内存图/推导层/先答后揭自测）+ 重打 ch5/ch6/ch7 六份脏 PDF（2026-09-30）
-   外壳缓存 reader-p2-dg-v50（含 pdf.js 全套）；PDF 缓存 reader-pdf-v2（按需 cache-first）
+/* PWA Service Worker — 莉萝阅读器 v51：修练习模块线上 404（build 补 c-course/c-practice.js + vendor/c-runner）+ ch10 练习册补一分钟自测答案（2026-09-30）
+   外壳缓存 reader-p2-dg-v51（含 pdf.js 全套）；PDF 缓存 reader-pdf-v3（按需 cache-first）
    升级纪律：改外壳/pdf.js → 同时改缓存名 */
-var CACHE_SHELL = "reader-p2-dg-v50";
-var CACHE_PDF   = "reader-pdf-v2";
+var CACHE_SHELL = "reader-p2-dg-v51";
+var CACHE_PDF   = "reader-pdf-v3";
 var CACHE_CRUNNER = "reader-crun-v1";
 
 /* PWA 离线预缓存：公开 6 本 PDF（共约 4MB），安装后全部本地可用 */
