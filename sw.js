@@ -1,8 +1,9 @@
-/* PWA Service Worker — 莉萝阅读器 v47：PDF指纹绑定批注v2（URL+大小+页数+Last-Modified，pdf.js v6无顶层fingerprint）+备份/恢复检测错位（2026-09-28）
-   外壳缓存 reader-p2-dg-v48（含 pdf.js 全套）；PDF 缓存 reader-pdf-v1（按需 cache-first）
+/* PWA Service Worker — 莉萝阅读器 v49：C 讲义 ch10 教案 v2 样板（矢量内存图/推导层/先答后揭自测）+ 重打 ch5/ch6/ch7 六份脏 PDF（2026-09-30）
+   外壳缓存 reader-p2-dg-v50（含 pdf.js 全套）；PDF 缓存 reader-pdf-v2（按需 cache-first）
    升级纪律：改外壳/pdf.js → 同时改缓存名 */
-var CACHE_SHELL = "reader-p2-dg-v48";
-var CACHE_PDF   = "reader-pdf-v1";
+var CACHE_SHELL = "reader-p2-dg-v50";
+var CACHE_PDF   = "reader-pdf-v2";
+var CACHE_CRUNNER = "reader-crun-v1";
 
 /* PWA 离线预缓存：公开 6 本 PDF（共约 4MB），安装后全部本地可用 */
 var PDF_URLS = [
@@ -19,6 +20,7 @@ var SHELL_URLS = [
   "./阅读器.html",
   "./阅读器注入.css",
   "./config.json",
+  "./c-course/c-practice.js",
   "./manifest.json",
   "./vendor/pdfjs/LICENSE",
   "./vendor/pdfjs/build/pdf.mjs",
@@ -153,7 +155,7 @@ self.addEventListener("install", function(ev){
 self.addEventListener("activate", function(ev){
   ev.waitUntil((async function(){
     var keys = await caches.keys();
-    await Promise.all(keys.filter(function(k){ return k !== CACHE_SHELL && k !== CACHE_PDF; }).map(function(k){ return caches.delete(k); }));
+    await Promise.all(keys.filter(function(k){ return k !== CACHE_SHELL && k !== CACHE_PDF && k !== CACHE_CRUNNER; }).map(function(k){ return caches.delete(k); }));
     await self.clients.claim();
   })());
 });
@@ -163,6 +165,19 @@ self.addEventListener("fetch", function(ev){
   if (req.method !== "GET") return;
   var url = new URL(req.url);
   if (url.origin !== location.origin) return;
+  /* C practice kernel: separate cache (cache-first), survives shell upgrades */
+  if (url.pathname.indexOf("/vendor/c-runner/") >= 0) {
+    ev.respondWith((async function(){
+      var c = await caches.open(CACHE_CRUNNER);
+      var hit = await c.match(req);
+      if (hit) return hit;
+      var res = await fetch(req);
+      if (res && res.ok) c.put(req, res.clone());
+      return res;
+    })());
+    return;
+  }
+
   /* PDF：单独缓存，cache-first + 回源入缓存（不混进外壳，更新外壳不清 PDF）*/
   if (url.pathname.indexOf("/papers/") >= 0) {
     ev.respondWith((async function(){

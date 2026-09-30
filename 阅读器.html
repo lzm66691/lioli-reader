@@ -529,7 +529,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v48</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v50</span></div>
 
   <div class="spacer"></div>
 
@@ -1557,6 +1557,7 @@ if (!BOOKS.length) {
       + '<div class="tb-row"><button class="tb-zoom" data-act="zoomOut" title="缩小">−</button><span class="tb-zoomv" id="tbZoom">100%</span><button class="tb-zoom" data-act="zoomIn" title="放大">＋</button></div>'
       + '<button class="toolbox-item" data-act="rotate"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 7a6 6 0 1 0-1.5 4.5M13 2v5H8"/></svg></span>旋转 90°</button>'
       + '<button class="toolbox-item" data-act="search"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="4"/><path d="M10 10l4 4"/></svg></span>PDF 搜索</button>'
+      + '<button class="toolbox-item" data-act="cpractice"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2h8v12H4zM4 5.5h8M7 2v3.5M9 2v3.5M5.5 9h5M5.5 11.5h3"/></svg></span>C 练习</button>'
       + '<div class="toolbox-grp">标注</div>'
       + '<button class="toolbox-item" data-act="note"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M3 2h10v11l-2-1.5L9 13V2"/></svg></span>笔记</button>'
       + '<button class="toolbox-item" data-act="pen"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 2-8.5 8.5L3 13l.5-2.5z"/></svg></span>画笔</button>'
@@ -1641,6 +1642,7 @@ if (!BOOKS.length) {
       },
       backup: function(){ try { exportBackup(); } catch(e){ alert("备份失败：" + e); } },
       restore: function(){ try { importBackup(); } catch(e){ alert("恢复失败：" + e); } },
+      cpractice: function(){ if (window.initCPractice) window.initCPractice(); },
       shelfsearch: function(){
         var s = document.getElementById("shelfSearch");
         if (s) { try { s.focus(); s.scrollIntoView({ block: "center" }); } catch(e){} }
@@ -2858,6 +2860,8 @@ if (!BOOKS.length) {
 })();
 
 </script>
+
+<script src="c-course/c-practice.js" data-base="."></script>
 
 </body>
 
