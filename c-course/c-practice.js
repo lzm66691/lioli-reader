@@ -1472,11 +1472,16 @@ int main(void){
       }
       out.scrollTop = 0;
     } catch (e) {
-      var msg = e && e.message ? e.message : String(e);
-      out.innerHTML = '<div class="err">运行失败：</div>' + escHtml(msg)
-        + (msg === "Failed to fetch"
-            ? '<div class="meta">（网络波动或 CDN 未就绪，已自动重试 3 次。请稍后再点「▶ 运行」）</div>'
-            : '');
+      /* v52e: 编译内核不可用（网络/CDN）时切模拟输出模式——显示参考答案输出 */
+      var q = curQ();
+      if (q && q.refOut) {
+        out.innerHTML = '<div class="meta">⚠ 编译内核暂不可用（网络/CDN 问题），已切换到「模拟输出」模式——显示本题参考答案输出：</div>'
+          + '<div class="ok">' + escHtml(q.refOut).replace(/\n/g, "<br>") + '</div>'
+          + '<div class="meta">（网络恢复后刷新页面即可使用真实编译内核）</div>';
+      } else {
+        var msg = e && e.message ? e.message : String(e);
+        out.innerHTML = '<div class="err">运行失败：</div>' + escHtml(msg);
+      }
     } finally {
       btn.disabled = false;
       btn.textContent = "▶ 运行";
