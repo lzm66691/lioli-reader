@@ -1380,7 +1380,7 @@ int main(void){
     loadEl.hidden = false;
     cpLoading = new Promise((resolve, reject) => {
       const base = document.currentScript && document.currentScript.getAttribute("data-base");
-      const baseUrl = (base || ".") + "/vendor/c-runner/assets/";
+      const baseUrl = "https://cdn.jsdelivr.net/gh/lzm66691/lioli-reader@main/vendor/c-runner/assets/"; /* GitHub Pages 直发 36KB/s，改 jsDelivr CDN 加速（实测 1.7MB/s） */
       const script = document.createElement("script");
       script.src = (base || ".") + "/vendor/c-runner/clang-wasm.global.js";
       script.onload = async () => {
