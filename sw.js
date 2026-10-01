@@ -1,7 +1,7 @@
 /* PWA Service Worker — 莉萝阅读器 v51：修练习模块线上 404（build 补 c-course/c-practice.js + vendor/c-runner）+ ch10 练习册补一分钟自测答案（2026-09-30）
-   外壳缓存 reader-p2-dg-v52（含 pdf.js 全套）；PDF 缓存 reader-pdf-v3（按需 cache-first）
+   外壳缓存 reader-p2-dg-v53（含 pdf.js 全套）；PDF 缓存 reader-pdf-v3（按需 cache-first）
    升级纪律：改外壳/pdf.js → 同时改缓存名 */
-var CACHE_SHELL = "reader-p2-dg-v52";
+var CACHE_SHELL = "reader-p2-dg-v53";
 var CACHE_PDF   = "reader-pdf-v3";
 var CACHE_CRUNNER = "reader-crun-v1";
 
