@@ -1,5 +1,5 @@
 /* ============================================================
- * c-practice.js · 莉萝阅读器「C 语言练习」扩展面板
+ * c-practice.js · 莉萝阅读器「C 语言练习」扩展面板  [v53]
  * ------------------------------------------------------------
  * 功能：在阅读器内嵌一个 C 练习面板 —— 从题库选题 →
  *       代码编辑器（语法高亮）→ 浏览器内 WASM 编译运行（Clang）→
@@ -1372,7 +1372,7 @@ int main(void){
   function save(id, code) { try { localStorage.setItem(CP_KEY + id, code); } catch (e) {} }
 
   /* ---------------- 编译内核加载 ---------------- */
-  function loadCompiler() {
+  function loadCompiler(forceDirect) {
     if (cpComp) return Promise.resolve(cpComp);
     if (cpLoading) return cpLoading;
     const loadEl = cpRoot.querySelector(".cp-load");
@@ -1387,10 +1387,10 @@ int main(void){
         try {
           if (!window.clangWasm) throw new Error("clangWasm 未加载");
           var fallbackUrl = (base || ".") + "/vendor/c-runner/assets/";
-          var sources = [
-            { label: "CDN", url: baseUrl },
-            { label: "直连", url: fallbackUrl }
-          ];
+          /* v53: forceDirect=true 仅走直连（重试按钮）；默认仅走 CDN，快速失败进入模拟输出 */
+          var sources = forceDirect
+            ? [{ label: "直连", url: fallbackUrl }]
+            : [{ label: "CDN", url: baseUrl }];
           var lastErr = null;
           var done = false;
           var withTimeout = function(promise, ms, label) {
@@ -1398,8 +1398,8 @@ int main(void){
           };
           for (var si = 0; si < sources.length && !done; si++) {
             var src = sources[si];
-            var timeoutMs = (si === 0 ? 45000 : 600000);
-            for (var attempt = 1; attempt <= (si === 0 ? 3 : 1); attempt++) {
+            var timeoutMs = (src.label === "直连" ? 600000 : 45000);
+            for (var attempt = 1; attempt <= (src.label === "CDN" ? 3 : 1); attempt++) {
               try {
                 cpComp = await withTimeout(window.clangWasm.createCompiler("c", {
                   baseUrl: new URL(src.url, location.href),
@@ -1412,10 +1412,10 @@ int main(void){
                 return;
               } catch (e) {
                 lastErr = e;
-                if (src.label === "CDN" && attempt === 1 && si === 0) {
-                  if (loadEl) loadEl.querySelector(".meta") && (loadEl.querySelector(".meta").textContent = "CDN 下载失败或超时，正在切换直连下载（首次约 5-10 分钟，完成后缓存，下次秒开）…");
+                if (src.label === "CDN" && attempt === 1) {
+                  if (loadEl) loadEl.querySelector(".meta") && (loadEl.querySelector(".meta").textContent = "CDN 下载失败或超时，即将进入模拟输出模式。可点输出区「直连重试」按钮尝试真实编译（首次约 10 分钟）…");
                 }
-                if (!(si === 0 && attempt < 3)) break;
+                if (!(src.label === "CDN" && attempt < 3)) break;
                 if (fill) fill.style.width = "0%";
                 await new Promise((r) => setTimeout(r, 1500));
               }
@@ -1431,6 +1431,38 @@ int main(void){
     return cpLoading;
   }
 
+  /* ---------------- 运行结果渲染 ---------------- */
+  function renderRun(r) {
+    const out = cpRoot.querySelector(".cp-out");
+    const q = curQ();
+    out.innerHTML = "";
+    if (r.errors && r.errors.length) {
+      out.innerHTML += '<div class="err">编译/运行错误（点行号跳到源码对应行）：</div>';
+      for (const e of r.errors) {
+        const ln = parseErrLine(e);
+        const cell = document.createElement("div");
+        cell.className = "err";
+        cell.innerHTML = ln
+          ? '<span class="errline" data-line="' + ln + '" title="点击跳到第 ' + ln + ' 行">L' + ln + '</span> ' + escHtml(String(e))
+          : escHtml(String(e));
+        out.appendChild(cell);
+      }
+      out.removeEventListener("click", cpErrDelegate);
+      out.addEventListener("click", cpErrDelegate);
+    } else {
+      out.innerHTML += '<div class="ok">运行成功（exit ' + r.exitCode + '）</div>';
+    }
+    if (r.output) out.innerHTML += "<br>" + escHtml(r.output).replace(/\n/g, "<br>");
+    out.innerHTML += '<div class="meta">' + (r.compileMs ? "编译 " + r.compileMs + "ms" : "") + (r.runMs ? " · 运行 " + r.runMs + "ms" : "") + '</div>';
+    if (q.refOut && !(r.errors && r.errors.length)) {
+      const got = (r.output || "").trim();
+      const exp = q.refOut.trim();
+      const ok = got === exp;
+      out.innerHTML += '<div class="' + (ok ? "ok" : "err") + '">' + (ok ? "✓ 与参考答案输出一致" : "✗ 输出与参考答案不同（参考答案：" + escHtml(q.refOut) + "）") + '</div>';
+    }
+    out.scrollTop = 0;
+  }
+
   /* ---------------- 运行 ---------------- */
   async function run() {
     const q = curQ(); if (!q) return;
@@ -1444,40 +1476,31 @@ int main(void){
       const comp = await loadCompiler();
       btn.textContent = "运行中…";
       const r = await comp.run(ta.value, inp.value || "");
-      out.innerHTML = "";
-      if (r.errors && r.errors.length) {
-        out.innerHTML += '<div class="err">编译/运行错误（点行号跳到源码对应行）：</div>';
-        for (const e of r.errors) {
-          const ln = parseErrLine(e);
-          const cell = document.createElement("div");
-          cell.className = "err";
-          cell.innerHTML = ln
-            ? '<span class="errline" data-line="' + ln + '" title="点击跳到第 ' + ln + ' 行">L' + ln + '</span> ' + escHtml(String(e))
-            : escHtml(String(e));
-          out.appendChild(cell);
-        }
-        out.removeEventListener("click", cpErrDelegate);
-        out.addEventListener("click", cpErrDelegate);
-      } else {
-        out.innerHTML += '<div class="ok">运行成功（exit ' + r.exitCode + '）</div>';
-      }
-      if (r.output) out.innerHTML += "<br>" + escHtml(r.output).replace(/\n/g, "<br>");
-      out.innerHTML += '<div class="meta">' + (r.compileMs ? "编译 " + r.compileMs + "ms" : "") + (r.runMs ? " · 运行 " + r.runMs + "ms" : "") + '</div>';
-      // 对比预期（仅提示，不强判）
-      if (q.refOut && !(r.errors && r.errors.length)) {
-        const got = (r.output || "").trim();
-        const exp = q.refOut.trim();
-        const ok = got === exp;
-        out.innerHTML += '<div class="' + (ok ? "ok" : "err") + '">' + (ok ? "✓ 与参考答案输出一致" : "✗ 输出与参考答案不同（参考答案：" + escHtml(q.refOut) + "）") + '</div>';
-      }
-      out.scrollTop = 0;
+      renderRun(r);
     } catch (e) {
-      /* v52e: 编译内核不可用（网络/CDN）时切模拟输出模式——显示参考答案输出 */
-      var q = curQ();
-      if (q && q.refOut) {
-        out.innerHTML = '<div class="meta">⚠ 编译内核暂不可用（网络/CDN 问题），已切换到「模拟输出」模式——显示本题参考答案输出：</div>'
-          + '<div class="ok">' + escHtml(q.refOut).replace(/\n/g, "<br>") + '</div>'
-          + '<div class="meta">（网络恢复后刷新页面即可使用真实编译内核）</div>';
+      /* v53: 编译内核不可用 -> 模拟输出（参考答案对照）+ 直连重试按钮 */
+      var qq = curQ();
+      if (qq && qq.refOut) {
+        var why = e && e.message ? e.message : String(e);
+        out.innerHTML = '<div class="meta">⚠ 编译内核暂不可用（' + escHtml(why) + '，' + new Date().toLocaleTimeString() + '）——已进入「模拟输出 · 参考答案对照」模式：</div>'
+          + '<div class="ok">' + escHtml(qq.refOut).replace(/\n/g, "<br>") + '</div>'
+          + '<div class="meta">以上为参考答案输出，并非本次真实运行结果。网络恢复后刷新页面自动用真实编译；也可点下方按钮立即直连下载内核（首次约 10 分钟，下完缓存秒开）。</div>'
+          + '<button class="cp-dir-retry">⚡ 使用直连下载重试真实编译</button>';
+        var retryBtn = out.querySelector(".cp-dir-retry");
+        if (retryBtn) retryBtn.onclick = async function () {
+          retryBtn.disabled = true;
+          retryBtn.textContent = "直连下载中（首次约 10 分钟，请勿关闭页面）…";
+          try {
+            btn.textContent = "编译中…";
+            var c2 = await loadCompiler(true);
+            btn.textContent = "运行中…";
+            var r2 = await c2.run(ta.value, inp.value || "");
+            renderRun(r2);
+          } catch (e2) {
+            out.innerHTML = '<div class="err">直连编译失败：' + escHtml(e2 && e2.message ? e2.message : String(e2)) + '</div>'
+              + '<div class="meta">可刷新页面后重试，或继续使用上方参考答案对照。</div>';
+          }
+        };
       } else {
         var msg = e && e.message ? e.message : String(e);
         out.innerHTML = '<div class="err">运行失败：</div>' + escHtml(msg);
