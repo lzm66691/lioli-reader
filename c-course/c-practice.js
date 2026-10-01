@@ -1393,15 +1393,19 @@ int main(void){
           ];
           var lastErr = null;
           var done = false;
+          var withTimeout = function(promise, ms, label) {
+            return Promise.race([promise, new Promise(function(_, rej){ setTimeout(function(){ rej(new Error(label + "超时")); }, ms); })]);
+          };
           for (var si = 0; si < sources.length && !done; si++) {
             var src = sources[si];
+            var timeoutMs = (si === 0 ? 45000 : 600000);
             for (var attempt = 1; attempt <= (si === 0 ? 3 : 1); attempt++) {
               try {
-                cpComp = await window.clangWasm.createCompiler("c", {
+                cpComp = await withTimeout(window.clangWasm.createCompiler("c", {
                   baseUrl: new URL(src.url, location.href),
                   std: "gnu17",
                   onProgress: (p) => { if (fill) fill.style.width = Math.round(p * 100) + "%"; }
-                });
+                }), timeoutMs, src.label + "下载");
                 loadEl.hidden = true;
                 done = true;
                 resolve(cpComp);
@@ -1409,8 +1413,7 @@ int main(void){
               } catch (e) {
                 lastErr = e;
                 if (src.label === "CDN" && attempt === 1 && si === 0) {
-                  /* CDN 首次失败：提示正在切换直连（首次较慢） */
-                  if (loadEl) loadEl.querySelector(".meta") && (loadEl.querySelector(".meta").textContent = "CDN 下载失败，正在切换直连下载（首次约 5-10 分钟，完成后缓存，下次秒开）…");
+                  if (loadEl) loadEl.querySelector(".meta") && (loadEl.querySelector(".meta").textContent = "CDN 下载失败或超时，正在切换直连下载（首次约 5-10 分钟，完成后缓存，下次秒开）…");
                 }
                 if (!(si === 0 && attempt < 3)) break;
                 if (fill) fill.style.width = "0%";
