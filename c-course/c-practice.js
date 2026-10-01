@@ -1,5 +1,5 @@
 /* ============================================================
- * c-practice.js · 莉萝阅读器「C 语言练习」扩展面板  [v53]
+ * c-practice.js · 莉萝阅读器「C 语言练习」扩展面板  [v54]
  * ------------------------------------------------------------
  * 功能：在阅读器内嵌一个 C 练习面板 —— 从题库选题 →
  *       代码编辑器（语法高亮）→ 浏览器内 WASM 编译运行（Clang）→
@@ -1398,7 +1398,7 @@ int main(void){
           };
           for (var si = 0; si < sources.length && !done; si++) {
             var src = sources[si];
-            var timeoutMs = (src.label === "直连" ? 600000 : 45000);
+            var timeoutMs = (src.label === "直连" ? 600000 : 25000);
             for (var attempt = 1; attempt <= (src.label === "CDN" ? 3 : 1); attempt++) {
               try {
                 cpComp = await withTimeout(window.clangWasm.createCompiler("c", {
@@ -1473,7 +1473,39 @@ int main(void){
     btn.disabled = true;
     btn.textContent = "编译中…";
     try {
-      const comp = await loadCompiler();
+      if (!cpComp) {
+        /* v54: 内核未就绪 -> 直接模拟输出（0 等待），真实编译改按钮（不再等下载） */
+        var q0 = curQ();
+        if (q0 && q0.refOut) {
+          out.innerHTML = '<div class="meta">⚠ 编译内核尚未就绪，已直接进入「模拟输出 · 参考答案对照」模式（0 等待）：</div>'
+            + '<div class="ok">' + escHtml(q0.refOut).replace(/\n/g, "<br>") + '</div>'
+            + '<div class="meta">以上为参考答案输出，并非本次真实运行结果。点下方按钮下载内核后用真实编译（约 20-30 秒，下完缓存，以后秒开）。</div>'
+            + '<button class="cp-dir-retry">⚡ 下载编译内核 · 真实编译</button>';
+          var b0 = out.querySelector(".cp-dir-retry");
+          if (b0) b0.onclick = async function () {
+            b0.disabled = true;
+            b0.textContent = "下载内核中（约 20-30 秒，请稍候）…";
+            try {
+              btn.textContent = "编译中…";
+              var c0 = await loadCompiler();
+              btn.textContent = "运行中…";
+              var r0 = await c0.run(ta.value, inp.value || "");
+              renderRun(r0);
+            } catch (e0) {
+              var w0 = e0 && e0.message ? e0.message : String(e0);
+              out.innerHTML = '<div class="err">内核下载/编译失败：' + escHtml(w0) + '</div>'
+                + '<div class="meta">可再次点击下方按钮重试，或刷新页面后重试。</div>'
+                + '<button class="cp-dir-retry">🔄 重试下载内核</button>';
+              var b1 = out.querySelector(".cp-dir-retry");
+              if (b1) b1.onclick = arguments.callee;
+            }
+          };
+        } else {
+          out.innerHTML = '<div class="err">编译内核未就绪且本题无参考答案，无法运行。</div>';
+        }
+        return;
+      }
+      const comp = cpComp;
       btn.textContent = "运行中…";
       const r = await comp.run(ta.value, inp.value || "");
       renderRun(r);
@@ -1492,7 +1524,7 @@ int main(void){
           retryBtn.textContent = "直连下载中（首次约 10 分钟，请勿关闭页面）…";
           try {
             btn.textContent = "编译中…";
-            var c2 = await loadCompiler(true);
+            var c2 = await loadCompiler();
             btn.textContent = "运行中…";
             var r2 = await c2.run(ta.value, inp.value || "");
             renderRun(r2);
