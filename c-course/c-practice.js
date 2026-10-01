@@ -1386,13 +1386,27 @@ int main(void){
       script.onload = async () => {
         try {
           if (!window.clangWasm) throw new Error("clangWasm 未加载");
-          cpComp = await window.clangWasm.createCompiler("c", {
-            baseUrl: new URL(baseUrl, location.href),
-            std: "gnu17",
-            onProgress: (p) => { if (fill) fill.style.width = Math.round(p * 100) + "%"; }
-          });
+          let lastErr = null;
+          for (let attempt = 1; attempt <= 3; attempt++) {
+            try {
+              cpComp = await window.clangWasm.createCompiler("c", {
+                baseUrl: new URL(baseUrl, location.href),
+                std: "gnu17",
+                onProgress: (p) => { if (fill) fill.style.width = Math.round(p * 100) + "%"; }
+              });
+              loadEl.hidden = true;
+              resolve(cpComp);
+              return;
+            } catch (e) {
+              lastErr = e;
+              if (attempt < 3) {
+                if (fill) fill.style.width = "0%";
+                await new Promise((r) => setTimeout(r, 1500));
+              }
+            }
+          }
           loadEl.hidden = true;
-          resolve(cpComp);
+          reject(lastErr);
         } catch (e) { loadEl.hidden = true; reject(e); }
       };
       script.onerror = () => { loadEl.hidden = true; reject(new Error("加载编译内核失败（网络/路径）")); };
@@ -1442,7 +1456,11 @@ int main(void){
       }
       out.scrollTop = 0;
     } catch (e) {
-      out.innerHTML = '<div class="err">运行失败：</div>' + escHtml(e && e.message ? e.message : String(e));
+      var msg = e && e.message ? e.message : String(e);
+      out.innerHTML = '<div class="err">运行失败：</div>' + escHtml(msg)
+        + (msg === "Failed to fetch"
+            ? '<div class="meta">（网络波动或 CDN 未就绪，已自动重试 3 次。请稍后再点「▶ 运行」）</div>'
+            : '');
     } finally {
       btn.disabled = false;
       btn.textContent = "▶ 运行";
