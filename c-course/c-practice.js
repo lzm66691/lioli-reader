@@ -1118,7 +1118,7 @@ int main(void){
           <div class="cp-out"><span class="meta">运行结果将显示在这里。点「▶ 运行」编译并执行你的代码（首次会加载编译内核，约 28MB，请稍候）。</span></div>
         </div>
       </div>
-      <div class="cp-load" hidden><div>正在加载 C 编译内核…</div><div class="bar"><div class="fill"></div></div></div>
+      <div class="cp-load" hidden><div>正在加载 C 编译内核…</div><div class="bar"><div class="fill"></div></div><div class="meta" style="font-size:12px;color:rgba(255,255,255,.75)"></div></div>
       <div class="cp-review" hidden>
         <div class="cp-rv-head"><b>错题复习</b><span class="cnt"></span><button class="exit" title="退出">✕</button></div>
         <div class="cp-rv-body"></div>
@@ -1386,27 +1386,40 @@ int main(void){
       script.onload = async () => {
         try {
           if (!window.clangWasm) throw new Error("clangWasm 未加载");
-          let lastErr = null;
-          for (let attempt = 1; attempt <= 3; attempt++) {
-            try {
-              cpComp = await window.clangWasm.createCompiler("c", {
-                baseUrl: new URL(baseUrl, location.href),
-                std: "gnu17",
-                onProgress: (p) => { if (fill) fill.style.width = Math.round(p * 100) + "%"; }
-              });
-              loadEl.hidden = true;
-              resolve(cpComp);
-              return;
-            } catch (e) {
-              lastErr = e;
-              if (attempt < 3) {
+          var fallbackUrl = (base || ".") + "/vendor/c-runner/assets/";
+          var sources = [
+            { label: "CDN", url: baseUrl },
+            { label: "直连", url: fallbackUrl }
+          ];
+          var lastErr = null;
+          var done = false;
+          for (var si = 0; si < sources.length && !done; si++) {
+            var src = sources[si];
+            for (var attempt = 1; attempt <= (si === 0 ? 3 : 1); attempt++) {
+              try {
+                cpComp = await window.clangWasm.createCompiler("c", {
+                  baseUrl: new URL(src.url, location.href),
+                  std: "gnu17",
+                  onProgress: (p) => { if (fill) fill.style.width = Math.round(p * 100) + "%"; }
+                });
+                loadEl.hidden = true;
+                done = true;
+                resolve(cpComp);
+                return;
+              } catch (e) {
+                lastErr = e;
+                if (src.label === "CDN" && attempt === 1 && si === 0) {
+                  /* CDN 首次失败：提示正在切换直连（首次较慢） */
+                  if (loadEl) loadEl.querySelector(".meta") && (loadEl.querySelector(".meta").textContent = "CDN 下载失败，正在切换直连下载（首次约 5-10 分钟，完成后缓存，下次秒开）…");
+                }
+                if (!(si === 0 && attempt < 3)) break;
                 if (fill) fill.style.width = "0%";
                 await new Promise((r) => setTimeout(r, 1500));
               }
             }
           }
           loadEl.hidden = true;
-          reject(lastErr);
+          reject(lastErr || new Error("编译内核加载失败"));
         } catch (e) { loadEl.hidden = true; reject(e); }
       };
       script.onerror = () => { loadEl.hidden = true; reject(new Error("加载编译内核失败（网络/路径）")); };
