@@ -1048,6 +1048,7 @@ int main(void){
       body.dark .cp-ref pre{background:#0e1f16;border-color:#166534}
       .cp-hint{display:none;margin:6px 0 0;font-size:12.5px;color:var(--muted,#64748b);background:var(--tip-bg,#eff6ff);border-left:3px solid #93c5fd;padding:6px 10px;border-radius:4px}
       .cp-load{position:fixed;inset:0;z-index:7000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;background:rgba(10,14,30,.55);color:#fff;font-size:14px;backdrop-filter:blur(3px)}
+      .cp-load[hidden]{display:none}
       .cp-load .bar{width:280px;height:6px;background:rgba(255,255,255,.2);border-radius:3px;overflow:hidden}
       .cp-load .fill{height:100%;width:0%;background:#4D6BFE;transition:width .2s}
       .cp-review{position:fixed;inset:0;z-index:6000;background:#f7f8fa;display:flex;flex-direction:column}
