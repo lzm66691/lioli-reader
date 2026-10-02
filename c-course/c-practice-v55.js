@@ -1052,6 +1052,7 @@ int main(void){
       .cp-load .bar{width:280px;height:6px;background:rgba(255,255,255,.2);border-radius:3px;overflow:hidden}
       .cp-load .fill{height:100%;width:0%;background:#4D6BFE;transition:width .2s}
       .cp-review{position:fixed;inset:0;z-index:6000;background:#f7f8fa;display:flex;flex-direction:column}
+      .cp-review[hidden]{display:none}
       body.dark .cp-review{background:#101018}
       .cp-rv-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line,#e2e8f0)}
       .cp-rv-head b{font-size:15px;color:var(--ink,#0f172a)}
