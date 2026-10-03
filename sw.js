@@ -1,7 +1,7 @@
-/* PWA Service Worker — 莉萝阅读器 v60：v59 三处微调（收面板可逆/荧光笔主题感知/KaTeX 按需加载）+ config 4 本书 pages 修正（2026-10-03）
-   外壳缓存 reader-p2-dg-v57（含 pdf.js 全套 + KaTeX）；PDF 缓存 reader-pdf-v3（按需 cache-first）
+/* PWA Service Worker — 莉萝阅读器 v61：penBar 增加「保持面板」开关（萝 091 可关要求）（2026-10-03）
+   外壳缓存 reader-p2-dg-v58（含 pdf.js 全套 + KaTeX）；PDF 缓存 reader-pdf-v3（按需 cache-first）
    升级纪律：改外壳/pdf.js → 同时改缓存名 */
-var CACHE_SHELL = "reader-p2-dg-v57";
+var CACHE_SHELL = "reader-p2-dg-v58";
 var CACHE_PDF   = "reader-pdf-v3";
 var CACHE_CRUNNER = "reader-crun-v1";
 
