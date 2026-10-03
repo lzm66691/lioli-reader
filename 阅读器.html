@@ -533,7 +533,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v60</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v61</span></div>
 
   <div class="spacer"></div>
 
@@ -1661,13 +1661,15 @@ if (!BOOKS.length) {
           var f = document.getElementById("pdfFrame");
           if (f && f.contentWindow && f.contentWindow.setPenMode) f.contentWindow.setPenMode(window.__penMode);
           if (window.__penMode) {
-            /* v60：记录进入前状态（退出可逆恢复）；只收遮挡绘图区的面板（工具箱+右栏笔记），左侧目录保留（画标注时看目录） */
+            /* v60：记录进入前状态（退出可逆恢复）；只收遮挡绘图区的面板（工具箱+右栏笔记），左侧目录保留；v61：可关（保持面板开关开则不收） */
             window.__penPrevState = {
               toolbox: !document.getElementById("toolboxPanel").hidden,
               note: document.getElementById("notePanel").classList.contains("collapsed")
             };
-            _tbShow(false);
-            var _s2 = document.getElementById("notePanel"); if (_s2) _s2.classList.add("collapsed");
+            if (!window.__penKeepPanels) {
+              _tbShow(false);
+              var _s2 = document.getElementById("notePanel"); if (_s2) _s2.classList.add("collapsed");
+            }
           } else {
             var _ps = window.__penPrevState;
             if (_ps) {
@@ -2186,6 +2188,12 @@ if (!BOOKS.length) {
             undoB.style.cssText = "height:24px;padding:0 10px;font-size:12px;border-radius:6px;border:1px solid rgba(0,0,0,.15);background:#fff;cursor:pointer";
             undoB.onclick = function(){ if (strokes.length) delStroke(strokes[strokes.length - 1].id); };
             tb.appendChild(undoB);
+            /* v61：保持面板开关（开=进笔模式不收面板；默认收，萝 091 要求的「可关」） */
+            var kpB = doc.createElement("button"); kpB.textContent = "面板";
+            kpB.style.cssText = "height:24px;padding:0 10px;font-size:12px;border-radius:6px;border:1px solid rgba(0,0,0,.15);background:#fff;cursor:pointer";
+            kpB.title = "进画笔模式时是否自动收起面板（默认收起，点开=保持显示）";
+            kpB.onclick = function(){ window.__penKeepPanels = !window.__penKeepPanels; kpB.style.background = window.__penKeepPanels ? "#e8f0fe" : "#fff"; kpB.style.borderColor = window.__penKeepPanels ? "#2F6FEB" : "rgba(0,0,0,.15)"; };
+            tb.appendChild(kpB);
             var doneB = doc.createElement("button"); doneB.textContent = "完成";
             doneB.style.cssText = "height:24px;padding:0 12px;font-size:12px;border-radius:6px;border:none;background:#2F6FEB;color:#fff;cursor:pointer;font-weight:700";
             doneB.onclick = function(){ setPen(false); };
