@@ -515,9 +515,8 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 .toolbox-panel{top:calc(58px + env(safe-area-inset-top,0px));max-height:calc(100vh - 74px - env(safe-area-inset-top,0px))}
 </style>
 
-  <!-- KaTeX 公式渲染（笔记 $...$ 公式） -->
+  <!-- KaTeX 公式渲染（v60 按需加载：仅笔记含公式时才动态拉取，不进首屏关键路径） -->
   <link rel="stylesheet" href="vendor/katex/katex.min.css">
-  <script defer src="vendor/katex/katex.min.js"></script>
 </head>
 
 <body>
@@ -534,7 +533,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v59</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v60</span></div>
 
   <div class="spacer"></div>
 
@@ -1300,12 +1299,26 @@ if (!BOOKS.length) {
 
 
 
-  /* v59：笔记 $...$ 公式预览（KaTeX；文本先转义防注入，公式占位还原安全渲染） */
+  /* v60：笔记 $...$ 公式预览（KaTeX 按需加载；文本先转义防注入，公式占位还原安全渲染） */
+  function ensureKatex(cb){
+    if (window.katex) { cb(); return; }
+    var s = document.createElement("script");
+    s.src = "vendor/katex/katex.min.js";
+    s.onload = cb;
+    s.onerror = function(){ cb(); };
+    document.head.appendChild(s);
+  }
   function renderNotePreview(p){
     var pv = document.getElementById("notePreview");
     if (!pv) return;
-    var t = esc((notes[p] || "").trim());
+    var raw = (notes[p] || "").trim();
+    var t = esc(raw);
     if (!t) { pv.hidden = true; pv.innerHTML = ""; return; }
+    if (/\$\$[\s\S]+\$\$|\$[^$\n]+?\$/.test(raw) && !window.katex) {
+      pv.hidden = false; pv.innerHTML = '<span style="color:var(--muted);font-size:12px">公式渲染加载中…</span>';
+      ensureKatex(function(){ renderNotePreview(p); });
+      return;
+    }
     var ph = [];
     t = t.replace(/\$\$([\s\S]+?)\$\$|\$([^$\n]+?)\$/g, function(m, blk, inl){
       var key = "@@K" + ph.length + "@@";
@@ -1647,11 +1660,22 @@ if (!BOOKS.length) {
           window.__penMode = !window.__penMode;
           var f = document.getElementById("pdfFrame");
           if (f && f.contentWindow && f.contentWindow.setPenMode) f.contentWindow.setPenMode(window.__penMode);
-          /* v59：进画笔模式自动收起工具箱/侧栏/笔记面板，避免事件层遮挡与面板盖住笔迹 */
           if (window.__penMode) {
+            /* v60：记录进入前状态（退出可逆恢复）；只收遮挡绘图区的面板（工具箱+右栏笔记），左侧目录保留（画标注时看目录） */
+            window.__penPrevState = {
+              toolbox: !document.getElementById("toolboxPanel").hidden,
+              note: document.getElementById("notePanel").classList.contains("collapsed")
+            };
             _tbShow(false);
-            var _s1 = document.getElementById("sidebar"); if (_s1) _s1.classList.add("collapsed");
             var _s2 = document.getElementById("notePanel"); if (_s2) _s2.classList.add("collapsed");
+          } else {
+            var _ps = window.__penPrevState;
+            if (_ps) {
+              if (_ps.toolbox) _tbShow(true);
+              var _s2 = document.getElementById("notePanel");
+              if (_s2 && !_ps.note) _s2.classList.remove("collapsed");
+            }
+            window.__penPrevState = null;
           }
         } catch(e){}
       },
@@ -2145,7 +2169,7 @@ if (!BOOKS.length) {
             fluB.style.cssText = "height:24px;padding:0 10px;font-size:12px;border-radius:6px;border:1px solid rgba(0,0,0,.15);background:#fff;cursor:pointer";
             fluB.onclick = function(){
               hlMode = !hlMode;
-              if (hlMode) { prevC = color; prevS = size; color = "#FFC93C"; size = 10; fluB.style.background = "#fff3b8"; fluB.style.borderColor = "#e6c200"; if (hlRectMode) { hlRectMode = false; hrB.style.background = "#fff"; hrB.style.borderColor = "rgba(0,0,0,.15)"; } }
+              if (hlMode) { prevC = color; prevS = size; color = "#FFC93C"; size = (doc.body.classList.contains("dark") ? 9 : 10); fluB.style.background = "#fff3b8"; fluB.style.borderColor = "#e6c200"; if (hlRectMode) { hlRectMode = false; hrB.style.background = "#fff"; hrB.style.borderColor = "rgba(0,0,0,.15)"; } }
               else { color = prevC; size = prevS; fluB.style.background = "#fff"; fluB.style.borderColor = "rgba(0,0,0,.15)"; }
               paintBar();
             };
@@ -2186,6 +2210,8 @@ if (!BOOKS.length) {
               var pdfPt = pv2.viewport.convertToPdfPoint(cx - r.left, cy - r.top);
               return { page: n, x: pdfPt[0], y: pdfPt[1], viewport: pv2.viewport };
             }
+            /* v60：荧光笔透明度主题感知（暗色走反色滤镜，偏浓则调低） */
+            function hlAlpha(){ return doc.body.classList.contains("dark") ? 0.30 : 0.45; }
             /* 重绘背景层：每页笔画按当前视口/缩放位置画（滚动/缩放后重取 rect，天然对齐） */
             function redrawAll(){
               if (!pv || !ov.clientWidth) return;
@@ -2202,11 +2228,11 @@ if (!BOOKS.length) {
                   var q2 = pv2.viewport.convertToViewportPoint(st.rect.x2, st.rect.y2);
                   var rx1 = q1[0] + pr.left - ovR.left, ry1 = q1[1] + pr.top - ovR.top;
                   var rx2 = q2[0] + pr.left - ovR.left, ry2 = q2[1] + pr.top - ovR.top;
-                  ctx.fillStyle = "rgba(255,201,60,.38)";
+                  ctx.fillStyle = "rgba(255,201,60," + hlAlpha() + ")";
                   ctx.fillRect(Math.min(rx1,rx2), Math.min(ry1,ry2), Math.abs(rx2-rx1), Math.abs(ry2-ry1));
                   return;
                 }
-                ctx.strokeStyle = st.color; ctx.lineWidth = st.size; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.globalAlpha = st.hl ? 0.45 : 1;
+                ctx.strokeStyle = st.color; ctx.lineWidth = st.size; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.globalAlpha = st.hl ? hlAlpha() : 1;
                 ctx.beginPath();
                 st.pts.forEach(function(pt, i){
                   var v = pv2.viewport.convertToViewportPoint(pt.x, pt.y);
@@ -2230,7 +2256,7 @@ if (!BOOKS.length) {
               var x2 = q2[0] + pr.left - ovR.left, y2 = q2[1] + pr.top - ovR.top;
               fg.width = ov.clientWidth * dpr; fg.height = ov.clientHeight * dpr;
               var ctx = fg.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-              ctx.fillStyle = "rgba(255,201,60,.38)";
+              ctx.fillStyle = "rgba(255,201,60," + hlAlpha() + ")";
               ctx.fillRect(Math.min(x1,x2), Math.min(y1,y2), Math.abs(x2-x1), Math.abs(y2-y1));
             }
             /* 橡皮命中：按笔画 bbox（萝：按笔画擦，天然可撤销） */
@@ -2277,7 +2303,7 @@ if (!BOOKS.length) {
               curPts.push({ x: p.x, y: p.y });
               var ctx = fg.getContext("2d");
               var ovR = ov.getBoundingClientRect();
-              ctx.strokeStyle = color; ctx.lineWidth = size; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.globalAlpha = hlMode ? 0.45 : 1;
+              ctx.strokeStyle = color; ctx.lineWidth = size; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.globalAlpha = hlMode ? hlAlpha() : 1;
               ctx.beginPath();
               var v = p.viewport.convertToViewportPoint(p.x, p.y);
               ctx.moveTo(v[0] + curPage.getBoundingClientRect().left - ovR.left, v[1] + curPage.getBoundingClientRect().top - ovR.top);
