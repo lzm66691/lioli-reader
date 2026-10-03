@@ -1,7 +1,7 @@
-/* PWA Service Worker — 莉萝阅读器 v51：修练习模块线上 404（build 补 c-course/c-practice.js + vendor/c-runner）+ ch10 练习册补一分钟自测答案（2026-09-30）
-   外壳缓存 reader-p2-dg-v55（含 pdf.js 全套）；PDF 缓存 reader-pdf-v3（按需 cache-first）
+/* PWA Service Worker — 莉萝阅读器 v59：画笔层稳定（面板收起/荧光笔增强/色板双保险/resize 对齐）+ 笔记 KaTeX 公式（2026-10-03）
+   外壳缓存 reader-p2-dg-v56（含 pdf.js 全套 + KaTeX）；PDF 缓存 reader-pdf-v3（按需 cache-first）
    升级纪律：改外壳/pdf.js → 同时改缓存名 */
-var CACHE_SHELL = "reader-p2-dg-v55";
+var CACHE_SHELL = "reader-p2-dg-v56";
 var CACHE_PDF   = "reader-pdf-v3";
 var CACHE_CRUNNER = "reader-crun-v1";
 
@@ -129,7 +129,30 @@ var SHELL_URLS = [
   "./vendor/pdfjs/web/wasm/quickjs-eval.wasm",
   /* iccs 2 */
   "./vendor/pdfjs/web/iccs/CGATS001Compat-v2-micro.icc",
-  "./vendor/pdfjs/web/iccs/LICENSE"
+  "./vendor/pdfjs/web/iccs/LICENSE",
+  /* katex 22 */
+  "./vendor/katex/katex.min.css",
+  "./vendor/katex/katex.min.js",
+  "./vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+  "./vendor/katex/fonts/KaTeX_Caligraphic-Bold.woff2",
+  "./vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+  "./vendor/katex/fonts/KaTeX_Fraktur-Bold.woff2",
+  "./vendor/katex/fonts/KaTeX_Fraktur-Regular.woff2",
+  "./vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+  "./vendor/katex/fonts/KaTeX_Main-BoldItalic.woff2",
+  "./vendor/katex/fonts/KaTeX_Main-Italic.woff2",
+  "./vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+  "./vendor/katex/fonts/KaTeX_Math-BoldItalic.woff2",
+  "./vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+  "./vendor/katex/fonts/KaTeX_SansSerif-Bold.woff2",
+  "./vendor/katex/fonts/KaTeX_SansSerif-Italic.woff2",
+  "./vendor/katex/fonts/KaTeX_SansSerif-Regular.woff2",
+  "./vendor/katex/fonts/KaTeX_Script-Regular.woff2",
+  "./vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+  "./vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+  "./vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+  "./vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+  "./vendor/katex/fonts/KaTeX_Typewriter-Regular.woff2"
 ];
 
 self.addEventListener("install", function(ev){
