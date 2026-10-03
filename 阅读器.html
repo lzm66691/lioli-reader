@@ -216,6 +216,8 @@ body.dark .guide-banner{background:rgba(42,42,42,.95);border-color:rgba(255,255,
 .toc-chapter .arrow{display:inline-block;width:15px;text-align:center;color:var(--muted);font-size:11px;flex-shrink:0}
 .toc-chapter .toc-item{width:100%}
 .app-ver{margin-left:8px;font-size:11px;font-weight:600;color:var(--muted);padding:2px 7px;border:1px solid var(--line);border-radius:6px;background:var(--glass);letter-spacing:.3px}
+.note-preview{margin-top:6px;padding:8px 10px;border-radius:8px;background:var(--glass);border:1px solid var(--line);font-size:13px;line-height:1.7;word-break:break-word}
+.note-preview .katex-display{margin:.3em 0;overflow-x:auto}
 .drawing-active{touch-action:none!important;user-select:none!important;-webkit-user-select:none!important}
 #selModeBtn.active{background:var(--teal-light)!important;color:var(--teal-dark)!important;font-weight:700}
 #selTip{position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:2000;display:none;padding:9px 16px;font-size:13px;color:var(--teal-dark);background:rgba(255,255,255,.94);border:1px solid rgba(0,140,160,.35);border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.16);backdrop-filter:blur(8px);max-width:88vw;text-align:center}
@@ -513,6 +515,9 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 .toolbox-panel{top:calc(58px + env(safe-area-inset-top,0px));max-height:calc(100vh - 74px - env(safe-area-inset-top,0px))}
 </style>
 
+  <!-- KaTeX 公式渲染（笔记 $...$ 公式） -->
+  <link rel="stylesheet" href="vendor/katex/katex.min.css">
+  <script defer src="vendor/katex/katex.min.js"></script>
 </head>
 
 <body>
@@ -529,7 +534,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v58</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v59</span></div>
 
   <div class="spacer"></div>
 
@@ -674,7 +679,9 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
         <label>本页笔记（第 <span id="notePage">1</span> 页）</label>
 
-        <textarea id="noteText" placeholder="写下你对这一页的想法…"></textarea>
+        <textarea id="noteText" placeholder="写下你对这一页的想法…（支持 $LaTeX$ 公式）"></textarea>
+
+        <div class="note-preview" id="notePreview" hidden></div>
 
       </div>
 
@@ -1293,6 +1300,27 @@ if (!BOOKS.length) {
 
 
 
+  /* v59：笔记 $...$ 公式预览（KaTeX；文本先转义防注入，公式占位还原安全渲染） */
+  function renderNotePreview(p){
+    var pv = document.getElementById("notePreview");
+    if (!pv) return;
+    var t = esc((notes[p] || "").trim());
+    if (!t) { pv.hidden = true; pv.innerHTML = ""; return; }
+    var ph = [];
+    t = t.replace(/\$\$([\s\S]+?)\$\$|\$([^$\n]+?)\$/g, function(m, blk, inl){
+      var key = "@@K" + ph.length + "@@";
+      ph.push({ key: key, tex: (blk != null ? blk : inl), display: !!blk });
+      return key;
+    });
+    var html = t.replace(/\n/g, "<br>");
+    ph.forEach(function(o){
+      var r = o.tex;
+      try { if (window.katex) r = katex.renderToString(o.tex, { displayMode: o.display, throwOnError: false }); } catch(e){}
+      html = html.split(o.key).join(r);
+    });
+    pv.hidden = false; pv.innerHTML = html;
+  }
+
   function renderNotes(){
 
     var p = state.page;
@@ -1300,6 +1328,8 @@ if (!BOOKS.length) {
     notePage.textContent = p;
 
     noteText.value = notes[p] || "";
+
+    renderNotePreview(p);
 
     var on = !!bookmarks[p];
 
@@ -1362,6 +1392,8 @@ if (!BOOKS.length) {
     var p = state.page;
 
     notes[p] = noteText.value;
+
+    renderNotePreview(p);
 
     if (!BOOK.volatile) localStorage.setItem(LS_NOTES, JSON.stringify(notes));
 
@@ -1615,6 +1647,12 @@ if (!BOOKS.length) {
           window.__penMode = !window.__penMode;
           var f = document.getElementById("pdfFrame");
           if (f && f.contentWindow && f.contentWindow.setPenMode) f.contentWindow.setPenMode(window.__penMode);
+          /* v59：进画笔模式自动收起工具箱/侧栏/笔记面板，避免事件层遮挡与面板盖住笔迹 */
+          if (window.__penMode) {
+            _tbShow(false);
+            var _s1 = document.getElementById("sidebar"); if (_s1) _s1.classList.add("collapsed");
+            var _s2 = document.getElementById("notePanel"); if (_s2) _s2.classList.add("collapsed");
+          }
         } catch(e){}
       },
       rotate: function(){
@@ -2080,11 +2118,18 @@ if (!BOOKS.length) {
             tb.id = "penBar";
             tb.style.cssText = "position:fixed;top:50px;left:50%;transform:translateX(-50%);z-index:2147483647;display:none;gap:6px;align-items:center;background:rgba(255,255,255,.92);border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:6px 10px;box-shadow:0 4px 14px rgba(0,0,0,.16)";
             var COLORS = ["#E05C4F","#2F6FEB","#0E9F6E","#D97706","#111827","#8B5CF6"];
+            function pickColor(cv){
+              color = cv; eraser = false;
+              if (hlMode) { hlMode = false; fluB.style.background = "#fff"; fluB.style.borderColor = "rgba(0,0,0,.15)"; }
+              if (hlRectMode) { hlRectMode = false; hrB.style.background = "#fff"; hrB.style.borderColor = "rgba(0,0,0,.15)"; }
+              paintBar();
+            }
             COLORS.forEach(function(cv){
               var b = doc.createElement("button");
               b.style.cssText = "width:22px;height:22px;border-radius:50%;border:2px solid transparent;background:" + cv + ";cursor:pointer;padding:0";
               b.dataset.c = cv; b.title = cv;
-              b.onpointerdown = function(ev){ if (ev.stopPropagation) ev.stopPropagation(); color = cv; eraser = false; if (hlMode) { hlMode = false; fluB.style.background = "#fff"; fluB.style.borderColor = "rgba(0,0,0,.15)"; } if (hlRectMode) { hlRectMode = false; hrB.style.background = "#fff"; hrB.style.borderColor = "rgba(0,0,0,.15)"; } paintBar(); };
+              b.onpointerdown = function(ev){ if (ev.stopPropagation) ev.stopPropagation(); pickColor(cv); };
+              b.onclick = function(ev){ if (ev.stopPropagation) ev.stopPropagation(); pickColor(cv); };   /* v59：pointerdown+click 双保险（平板事件差异） */
               tb.appendChild(b);
             });
             var szSel = doc.createElement("select");
@@ -2100,7 +2145,7 @@ if (!BOOKS.length) {
             fluB.style.cssText = "height:24px;padding:0 10px;font-size:12px;border-radius:6px;border:1px solid rgba(0,0,0,.15);background:#fff;cursor:pointer";
             fluB.onclick = function(){
               hlMode = !hlMode;
-              if (hlMode) { prevC = color; prevS = size; color = "#FFC93C"; size = 8; fluB.style.background = "#fff3b8"; fluB.style.borderColor = "#e6c200"; if (hlRectMode) { hlRectMode = false; hrB.style.background = "#fff"; hrB.style.borderColor = "rgba(0,0,0,.15)"; } }
+              if (hlMode) { prevC = color; prevS = size; color = "#FFC93C"; size = 10; fluB.style.background = "#fff3b8"; fluB.style.borderColor = "#e6c200"; if (hlRectMode) { hlRectMode = false; hrB.style.background = "#fff"; hrB.style.borderColor = "rgba(0,0,0,.15)"; } }
               else { color = prevC; size = prevS; fluB.style.background = "#fff"; fluB.style.borderColor = "rgba(0,0,0,.15)"; }
               paintBar();
             };
@@ -2161,7 +2206,7 @@ if (!BOOKS.length) {
                   ctx.fillRect(Math.min(rx1,rx2), Math.min(ry1,ry2), Math.abs(rx2-rx1), Math.abs(ry2-ry1));
                   return;
                 }
-                ctx.strokeStyle = st.color; ctx.lineWidth = st.size; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.globalAlpha = st.hl ? 0.35 : 1;
+                ctx.strokeStyle = st.color; ctx.lineWidth = st.size; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.globalAlpha = st.hl ? 0.45 : 1;
                 ctx.beginPath();
                 st.pts.forEach(function(pt, i){
                   var v = pv2.viewport.convertToViewportPoint(pt.x, pt.y);
@@ -2232,7 +2277,7 @@ if (!BOOKS.length) {
               curPts.push({ x: p.x, y: p.y });
               var ctx = fg.getContext("2d");
               var ovR = ov.getBoundingClientRect();
-              ctx.strokeStyle = color; ctx.lineWidth = size; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.globalAlpha = hlMode ? 0.35 : 1;
+              ctx.strokeStyle = color; ctx.lineWidth = size; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.globalAlpha = hlMode ? 0.45 : 1;
               ctx.beginPath();
               var v = p.viewport.convertToViewportPoint(p.x, p.y);
               ctx.moveTo(v[0] + curPage.getBoundingClientRect().left - ovR.left, v[1] + curPage.getBoundingClientRect().top - ovR.top);
@@ -2270,6 +2315,7 @@ if (!BOOKS.length) {
             doc.addEventListener("contextmenu", function(ev){ if (enabled) { ev.preventDefault(); } });
             /* 缩放/滚动后重绘对齐 */
             if (vc) vc.addEventListener("scroll", function(){ if (enabled) { clearTimeout(vc._rt); vc._rt = setTimeout(redrawAll, 120); } });
+            window.addEventListener("resize", function(){ if (enabled) { clearTimeout(vc._rt); vc._rt = setTimeout(redrawAll, 120); } });   /* v59：窗口尺寸变化重绘对齐 */
             try { if (PAPP && PAPP.eventBus) PAPP.eventBus.on("update", function(){ if (enabled) setTimeout(redrawAll, 80); }); } catch(e){}
             function setPen(on){
               enabled = !!on;
@@ -2277,7 +2323,7 @@ if (!BOOKS.length) {
               evL.style.display = enabled ? "block" : "none";
               tb.style.display = enabled ? "flex" : "none";
               if (doc.body) doc.body.classList.toggle("pen-active", enabled);
-              if (enabled) { setTimeout(redrawAll, 60); }
+              if (enabled) { setTimeout(redrawAll, 60); setTimeout(redrawAll, 350); }   /* v59：pdf.js 渲染完成后二次对齐 */
             }
             pdfFrame.contentWindow.setPenMode = setPen;
           })();
