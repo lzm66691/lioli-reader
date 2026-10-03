@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>C 语言伴读讲义 · Ch11 字符串</title>
+<style>
+  :root{
+    --teal:#4D6BFE; --ink:#0f172a; --body:#334155; --muted:#64748b;
+    --line:#e2e8f0; --code-bg:#f1f5f9; --warn-bg:#fff7ed; --warn-border:#fdba74;
+    --tip-bg:#eff6ff; --tip-border:#93c5fd; --ans-bg:#f0fdf4;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:"Noto Sans SC",-apple-system,"Microsoft YaHei",sans-serif;
+    color:var(--body); font-size:14px; line-height:1.75; padding:36px 44px;
+  }
+  h1{font-size:24px;color:var(--ink);margin-bottom:4px}
+  h2{font-size:18px;color:var(--teal);margin:26px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  h3{font-size:15px;color:var(--ink);margin:18px 0 8px}
+  p{margin:8px 0}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+  .kicker{display:inline-block;background:var(--teal);color:#fff;font-size:11px;padding:2px 8px;border-radius:4px;margin-bottom:8px;letter-spacing:1px}
+  pre{
+    background:var(--code-bg);border:1px solid var(--line);border-radius:8px;
+    padding:12px 14px;font-size:12.5px;line-height:1.6;overflow-x:auto;
+    white-space:pre-wrap;word-break:break-all;font-family:Consolas,"Courier New",monospace;
+  }
+  pre .cm{color:#6b7280}
+  .cmd{font-size:12px;color:var(--muted);font-family:Consolas,monospace;margin:4px 0 12px}
+  .warn,.tip,.ans{border-radius:8px;padding:10px 14px;margin:12px 0;font-size:13.5px}
+  .warn{background:var(--warn-bg);border-left:4px solid var(--warn-border)}
+  .tip{background:var(--tip-bg);border-left:4px solid var(--tip-border)}
+  .ans{background:var(--ans-bg);border-left:4px solid #4ade80}
+  .warn b,.tip b,.ans b{color:var(--ink)}
+  table{border-collapse:collapse;margin:12px 0;width:100%;table-layout:fixed}
+  th,td{border:1px solid var(--line);padding:7px 10px;font-size:13px;text-align:left}
+  th{background:var(--code-bg);color:var(--ink)}
+  ul,ol{margin:8px 0 8px 22px}
+  li{margin:4px 0}
+  .selfcheck{background:#faf5ff;border-left:4px solid #a855f7;border-radius:8px;padding:10px 14px;margin:12px 0}
+  .selfcheck b{color:#7e22ce}
+  .footer{margin-top:28px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);page-break-before:avoid}
+  @media print{.footer{page-break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<div class="kicker">C 语言伴读讲义 · 补全章</div>
+<h1>Ch11 字符串</h1>
+<div class="sub">对应《C Primer Plus（第6版）》第 11 章 · 本章目标：40 分钟读懂 + 60 分钟练完 · 前置：Ch4（printf/scanf）+ Ch9（函数）· 学完本章，fgets/strlen/strcpy/strcmp 全部落地</div>
+
+<h2 id="s11-1">11.1 先看一个真实场景：程序要处理「名字」</h2>
+<p>你写一个考勤程序，要读入同学名字、统计长度、比较两个名字是否相同。C 语言里「名字」不是一种内置类型，而是<b>字符数组 + 结尾的 \0</b>。这一章就是把这套东西讲透——之后读传感器字符串指令（串口 AT 指令）、解析日志行，全靠它。</p>
+
+<h2 id="s11-2">11.2 字符串是什么：char 数组 + '\0'</h2>
+<p>字符串字面量 <code>"hi"</code> 实际是 3 个字节：<code>'h' 'i' '\0'</code>——末尾那个 <code>\0</code>（值为 0 的字符）叫<b>空字符</b>，是字符串的「句号」，函数靠它知道到哪结束：</p>
+<pre><span class="cm">/* ch11_01_str.c — 字符串就是 char 数组 */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    char name[] = "hi";          <span class="cm">/* 自动变成 {'h','i','\0'}，3 个元素 */</span>
+    char word[8] = {'h', 'e', 'y', '\0'};   <span class="cm">/* 手动：必须有 \0 结尾 */</span>
+
+    printf("%s | %s\n", name, word);
+    printf("name 占 %zu 字节\n", sizeof(name));   <span class="cm">/* 输出 3（含 \0）*/</span>
+    return 0;
+}</pre>
+<p class="cmd">实测输出：<code>hi | hey</code>　<code>name 占 3 字节</code>。注意 <code>sizeof(name)</code> 是 3（含 <code>\0</code>），而 <code>strlen(name)</code> 是 2（不含）。</p>
+<div class="tip"><b>数组长度 &ge; 内容长度 + 1</b>：留一位给 <code>\0</code>。char s[5] 最多存 4 个字符 + \0。</div>
+
+<h2 id="s11-3">11.3 字符串的读写：printf / scanf / fgets</h2>
+<p>输出用 <code>%s</code>；输入有两个选择，<b>新手必用 fgets</b>：</p>
+<pre><span class="cm">/* ch11_02_io.c — scanf 遇空格停 vs fgets 读整行 */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    char a[32], b[32];
+    int c;
+
+    printf("输入一行（含空格）：");
+    scanf("%s", a);               <span class="cm">/* 危险：读到空格就停，且不检查长度 */</span>
+    while ((c = getchar()) != '\n' &amp;&amp; c != EOF) {}  <span class="cm">/* 清掉 scanf 留在缓冲区的回车；EOF 时退出，防重定向死循环 */</span>
+
+    printf("再输入一行：");
+    fgets(b, sizeof(b), stdin);   <span class="cm">/* 安全：读一整行，最多 31 字符+ \0 */</span>
+
+    printf("scanf 读到: %s\n", a);
+    printf("fgets 读到: %s", b);  <span class="cm">/* fgets 会保留结尾换行 */</span>
+    return 0;
+}</pre>
+<div class="warn"><b>新手坑 1：scanf("%s") 两个雷</b>：①遇到空格就停（"Li Ming" 只读到 "Li"）；②不限制长度，输入超长会<b>越界写坏内存</b>（缓冲区溢出）。所以读一行用 <code>fgets</code>，别用 scanf %s。</div>
+<div class="warn"><b>新手坑 2：fgets 会把结尾 \n 也存进来</b>。想去掉它：<code>size_t len = strlen(b); if (len &gt; 0 &amp;&amp; b[len-1] == '\n') b[len-1] = '\0';</code>——这是处理 fgets 的标配三行。</div>
+<div class="warn"><b>新手坑 3：清缓冲区必须防 EOF</b>。上面 <code>while ((c = getchar()) != '\n' &amp;&amp; c != EOF)</code> 里的 <code>c != EOF</code> 不能省——若输入被重定向或结束（如 <code>./a.exe &lt; data.txt</code>、判题系统喂数据），<code>getchar()</code> 会一直返回 EOF，不带 EOF 判断就会<b>死循环</b>。用 <code>int c</code> 接收（不能是 <code>char</code>，EOF 是负值）。</div>
+
+<h2 id="s11-4">11.4 字符串函数：strlen / strcpy / strcmp / strcat</h2>
+<table>
+<tr><th>函数</th><th>作用</th><th>示例</th></tr>
+<tr><td><code>strlen(s)</code></td><td>长度（不含 \0）</td><td>strlen("hi") → 2</td></tr>
+<tr><td><code>strcpy(dst, src)</code></td><td>把 src 复制到 dst</td><td>strcpy(b, a);</td></tr>
+<tr><td><code>strcmp(a, b)</code></td><td>比较内容：0 相等 / &lt;0 a 小 / &gt;0 a 大</td><td>if (strcmp(a, b) == 0)</td></tr>
+<tr><td><code>strcat(dst, src)</code></td><td>把 src 接到 dst 末尾</td><td>strcat(b, "!");</td></tr>
+</table>
+<p>这些函数在 <code>#include &lt;string.h&gt;</code> 里：</p>
+<pre><span class="cm">/* ch11_03_funcs.c — 字符串函数全家桶 */</span>
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+int main(void)
+{
+    char a[] = "Li", b[32] = "";
+
+    strcpy(b, a);                       <span class="cm">/* 复制：b = "Li" */</span>
+    strcat(b, " Ming");                 <span class="cm">/* 拼接：b = "Li Ming" */</span>
+
+    printf("%s（长度 %zu）\n", b, strlen(b));
+    printf("比较 a 和 \"Li\"：%d\n", strcmp(a, "Li"));   <span class="cm">/* 0=相等 */</span>
+    return 0;
+}</pre>
+<p class="cmd">实测输出：<code>Li Ming（长度 7）</code>　<code>比较 a 和 "Li"：0</code>。</p>
+<div class="warn"><b>新手坑 3：strcmp 比的是内容，不是地址</b>。<code>if (a == "Li")</code> 比较的是两个地址（永远不相等），必须 <code>strcmp(a, "Li") == 0</code>。同理 <code>==</code> 不能用来比字符串。</div>
+<div class="warn"><b>新手坑 4：strcpy/strcat 不检查空间</b>。目标数组太短会越界写坏内存。稳妥做法：目标数组开大一点 + 用 <code>strncpy/strncat</code>（带长度版本）。</div>
+
+<h2 id="s11-5">11.5 遍历字符串：逐个处理字符</h2>
+<p>配合循环可以数单词、找字符、统计字母：</p>
+<pre><span class="cm">/* ch11_04_count.c — 统计字母个数（\0 是循环的终点）*/</span>
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+int main(void)
+{
+    char line[] = "Hello, LZU 2026!";
+    int letters = 0;
+
+    for (int i = 0; line[i] != '\0'; i++)
+        if ((line[i] &gt;= 'a' &amp;&amp; line[i] &lt;= 'z') || (line[i] &gt;= 'A' &amp;&amp; line[i] &lt;= 'Z'))
+            letters++;
+
+    printf("字母数：%d\n", letters);   <span class="cm">/* H e l l o L Z U = 8 */</span>
+    return 0;
+}</pre>
+<p class="cmd">实测输出：<code>字母数：8</code>。循环条件 <code>line[i] != '\0'</code> 是遍历字符串的标准写法；也可以用 <code>i &lt; strlen(line)</code>（每次重算长度，稍慢）。</p>
+
+<h2 id="s11-6">11.6 新手坑集中营（本章最容易错的 4 件事）</h2>
+<ul>
+<li><b>1. scanf("%s") 遇空格停 + 不查长度</b>：读一行用 fgets；读了超长输入会缓冲区溢出（越界写坏相邻变量）。</li>
+<li><b>2. 数组长度不够放 \0</b>：char s[5] 存 5 个字符会丢 \0 → 之后 strlen 越界乱读。永远「内容长度 + 1」。</li>
+<li><b>3. strcmp 用 == 代替</b>：a == "Li" 比的是地址，必须 strcmp(a,"Li")==0。</li>
+<li><b>4. 中文按字节处理</b>：UTF-8 下一个汉字 3 字节，strlen("你好")=6 不是 2；%10s 宽度按字节，中文对齐会错位。需要处理中文时按字节流操作，别按「字数」想。</li>
+</ul>
+
+<h2 id="s11-7">11.7 一分钟自测（先答后揭，答案见练习册）</h2>
+<div class="selfcheck">
+<b>Q1</b>：字符串 "ab" 在内存里占几个字节？<br>
+<b>Q2</b>：scanf("%s", s) 和 fgets(s, sizeof(s), stdin) 的区别？<br>
+<b>Q3</b>：strcmp(a, b) 返回 0 表示什么？<br>
+<b>Q4</b>：为什么 fgets 读到的字符串常带着一个 \n？怎么去掉？<br>
+<b>Q5</b>：strlen("你好") 是多少？为什么？
+</div>
+
+<h2 id="s11-8">11.8 练习指引</h2>
+<p>打开「练习册 · Ch11」：<b>11-1 填空</b>热手 → <b>11-2 改错</b>（先自己找）→ <b>11-3/11-4 编程</b>（fgets + 字符串函数实操）→ <b>11-5 专业场景</b>（解析串口 AT 指令，电子信息味）。写完对照参考答案的「常见错法」。</p>
+
+<div class="footer">Ch11 讲义 · 兰大 2026 级电子信息 · 本机 gcc 16.1.0 -Wall -Wextra 实测输出与讲义一致</div>
+
+</body>
+</html>
