@@ -533,7 +533,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v63</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v64</span></div>
 
   <div class="spacer"></div>
 
@@ -2517,6 +2517,8 @@ if (!BOOKS.length) {
     idbLocalAll().then(function(list){
       var ls = {};
       try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k && k.indexOf("reader-app-") === 0) ls[k] = localStorage.getItem(k); } } catch(e){}
+      /* v64：自由写代码（草稿 + 代码库）纳入备份（萝 096 实测发现不在备份范围） */
+      try { ["cp-free-code","cp-free-lib"].forEach(function(fk){ var v = localStorage.getItem(fk); if (v !== null) ls[fk] = v; }); } catch(e){}
       var books = [];
       BOOKS.forEach(function(b){ books.push({ id: b.id, title: b.title, fileName: b.pdf || "", pages: b.pages || 0, size: 0, fingerprint: (function(){ try { return localStorage.getItem("reader-app-fp:" + b.id) || ""; } catch(e){ return ""; } })() }); });
       list.forEach(function(b){ var ex = books.some(function(x){ return x.id === b.id; }); if (!ex) books.push({ id: b.id, title: b.title, fileName: b.title + ".pdf", pages: 0, size: (b.blob && b.blob.size) || 0, fingerprint: "" }); });
@@ -2941,7 +2943,7 @@ if (!BOOKS.length) {
 
 </script>
 
-<script src="c-course/c-practice-v60.js?v=20261003" data-base="."></script>
+<script src="c-course/c-practice-v61.js?v=20261003" data-base="."></script>
 
 </body>
 
