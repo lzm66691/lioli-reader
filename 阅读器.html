@@ -533,7 +533,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v65</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v66</span></div>
 
   <div class="spacer"></div>
 
@@ -2943,8 +2943,61 @@ if (!BOOKS.length) {
 
 </script>
 
-<script src="c-course/c-practice-v65.js?v=20261004" data-base="."></script>
+<script src="c-course/c-practice-v66.js?v=20261004" data-base="."></script>
 
+<script>
+/* v66：AI 助手浮层（萝 C 路线：复制选中 → 一键打开 DeepSeek/豆包网页版；零密钥·零成本·零风险） */
+(function(){
+  var el = null;
+  function hide(){ if (el) { el.remove(); el = null; } }
+  function show(x, y, text){
+    hide();
+    el = document.createElement("div");
+    el.style.cssText = "position:fixed;z-index:99999;left:" + x + "px;top:" + y + "px;display:flex;gap:8px;padding:8px 10px;background:rgba(15,23,42,.92);border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.35);backdrop-filter:blur(8px);";
+    function mk(label, url, bg){
+      var b = document.createElement("button");
+      b.textContent = label;
+      b.style.cssText = "height:30px;padding:0 12px;font-size:12px;border-radius:8px;border:none;cursor:pointer;color:#fff;background:" + bg;
+      b.onclick = function(){
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).catch(function(){
+              var ta = document.createElement("textarea"); ta.value = text; ta.style.cssText = "position:fixed;opacity:0"; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); } catch(e){} ta.remove();
+            });
+          } else {
+            var ta = document.createElement("textarea"); ta.value = text; ta.style.cssText = "position:fixed;opacity:0"; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); } catch(e){} ta.remove();
+          }
+        } catch(e){}
+        window.open(url, "_blank");
+        hide();
+      };
+      return b;
+    }
+    el.appendChild(mk("问 DeepSeek", "https://chat.deepseek.com/", "#4D6BFE"));
+    el.appendChild(mk("问 豆包", "https://www.doubao.com/chat/", "#8B5CF6"));
+    var close = document.createElement("button");
+    close.textContent = "✕";
+    close.style.cssText = "height:30px;width:30px;font-size:12px;border-radius:8px;border:none;cursor:pointer;color:#94a3b8;background:transparent";
+    close.onclick = hide;
+    el.appendChild(close);
+    document.body.appendChild(el);
+  }
+  document.addEventListener("mouseup", function(){
+    setTimeout(function(){
+      var sel = window.getSelection();
+      if (!sel || sel.isCollapsed) { hide(); return; }
+      var t = (sel.toString() || "").trim();
+      if (!t || t.length > 2000) { hide(); return; }
+      var r = sel.getRangeAt(0).getBoundingClientRect();
+      var x = Math.min(Math.max(r.left, 8), window.innerWidth - 340);
+      var y = Math.max(r.top - 48, 8);
+      show(x, y, t);
+    }, 10);
+  });
+  document.addEventListener("mousedown", function(e){ if (el && !el.contains(e.target)) setTimeout(hide, 120); });
+  document.addEventListener("scroll", function(){ hide(); }, true);
+})();
+</script>
 </body>
 
 </html>
