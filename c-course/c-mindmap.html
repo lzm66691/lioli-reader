@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>C 语言知识图谱 · 莉萝阅读器</title>
+<style>
+  :root{
+    --bg:#f4f6fb; --card:#ffffff; --ink:#0f172a; --muted:#64748b;
+    --line:#e2e8f0; --acc:#4D6BFE; --acc2:#8B5CF6; --ok:#10b981;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0f172a; --card:rgba(30,41,59,.72); --ink:#e2e8f0; --muted:#94a3b8; --line:rgba(148,163,184,.18); }
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ background:var(--bg); color:var(--ink); font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; }
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(1200px 500px at 10% -10%, rgba(77,107,254,.14), transparent 60%),
+      radial-gradient(900px 420px at 110% 10%, rgba(139,92,246,.12), transparent 55%),
+      var(--bg);
+  }
+  header{
+    position:sticky; top:0; z-index:20;
+    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    background:color-mix(in srgb, var(--bg) 78%, transparent);
+    border-bottom:1px solid var(--line);
+    padding:14px 20px;
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  }
+  header h1{ font-size:18px; font-weight:800; letter-spacing:.5px; }
+  header .sub{ font-size:12px; color:var(--muted); }
+  .pill{
+    margin-left:auto; font-size:11px; color:var(--muted);
+    border:1px solid var(--line); border-radius:999px; padding:4px 12px;
+    background:color-mix(in srgb, var(--card) 60%, transparent);
+  }
+  #wrap{ padding:18px 16px 60px; max-width:1180px; margin:0 auto; }
+  .tips{ font-size:12px; color:var(--muted); margin-bottom:16px; line-height:1.7; }
+  .tree{ user-select:none; }
+  .node{ margin:3px 0; }
+  .node-inner{
+    display:flex; align-items:center; gap:8px;
+    padding:7px 12px; border-radius:10px; cursor:pointer;
+    background:color-mix(in srgb, var(--card) 82%, transparent);
+    border:1px solid var(--line);
+    transition:box-shadow .15s, transform .1s;
+    font-size:14px; line-height:1.4;
+  }
+  .node-inner:hover{ box-shadow:0 4px 16px rgba(15,23,42,.10); transform:translateY(-1px); }
+  .node-inner .ic{ width:22px; text-align:center; flex:none; font-size:13px; }
+  .node-inner .tx{ font-weight:600; }
+  .node-inner .arrow{ margin-left:auto; color:var(--muted); font-size:11px; transition:transform .2s; flex:none; }
+  .node.open > .node-inner .arrow{ transform:rotate(90deg); }
+  .children{ margin-left:20px; padding-left:12px; border-left:2px dashed var(--line); display:none; }
+  .node.open > .children{ display:block; }
+  .node-inner .cnt{ font-size:11px; color:var(--muted); font-weight:400; margin-left:2px; }
+  .node.lv1 > .node-inner{ font-size:15px; background:linear-gradient(135deg, rgba(77,107,254,.12), rgba(139,92,246,.10)); border-color:rgba(77,107,254,.25); }
+  .node.lv1 > .node-inner .ic{ color:var(--acc); }
+  .node.lv2 > .node-inner{ font-size:13.5px; }
+  .node.lv3 > .node-inner{ font-size:13px; padding:6px 12px; background:color-mix(in srgb, var(--card) 55%, transparent); }
+  .leaf .node-inner{ cursor:default; }
+  .leaf .node-inner .ic{ color:var(--ok); }
+  #stats{ font-size:12px; color:var(--muted); }
+  /* 自适应 */
+  @media (max-width:640px){
+    header{ padding:10px 12px; }
+    header h1{ font-size:15px; }
+    .pill{ display:none; }
+    #wrap{ padding:12px 10px 60px; }
+    .node-inner{ font-size:13px; padding:8px 10px; }
+    .node.lv1 > .node-inner{ font-size:14px; }
+    .children{ margin-left:12px; padding-left:8px; }
+  }
+  @media (min-width:1200px){
+    #wrap{ display:grid; grid-template-columns:1fr 300px; gap:20px; align-items:start; }
+    .tips{ grid-column:1 / -1; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>🧠 C 语言知识图谱</h1>
+  <span class="sub">C Primer Plus 蓝本 · 12 大知识域 · 点击展开/收起</span>
+  <span class="pill" id="stats"></span>
+</header>
+<div id="wrap">
+  <div class="tips">点击节点展开/收起子分支；叶子节点（绿点）是核心知识点。学完一章回来点开自查——能讲清每个点，才算真的会。</div>
+  <div class="tree" id="tree"></div>
+</div>
+<script>
+/* C 语言知识图谱（C Primer Plus 蓝本） */
+var TREE = {
+  name:"C 语言知识图谱",
+  children:[
+    { name:"第1章 认识 C 语言", children:[
+      { name:"程序结构", children:[ {name:"#include 预处理 → main() → return 0"},{name:"注释 // 与 /* */"}]},
+      { name:"编译运行", children:[ {name:"源码 → 编译 → 链接 → 可执行文件"},{name:"编译错误 vs 运行时错误"}]},
+      { name:"printf 输出", children:[ {name:"格式符 %d %f %c %s"},{name:"转义 \\n \\t \\\\"},{name:"宽度/精度 %.2f"}]},
+      { name:"scanf 输入", children:[ {name:"& 取地址别忘了"},{name:"%s 遇空格停 → 读行用 fgets"}]}
+    ]},
+    { name:"第2-3章 数据类型", children:[
+      { name:"整数", children:[ {name:"int / long / short / unsigned"},{name:"溢出是循环回绕（不是报错）"}]},
+      { name:"浮点", children:[ {name:"float / double"},{name:"精度有限，别用 == 比较"}]},
+      { name:"字符", children:[ {name:"char：'A' 就是 65"},{name:"\\0 是字符串结束符"}]},
+      { name:"类型转换", children:[ {name:"自动提升：int→float→double"},{name:"强制转换 (int)x"},{name:"整数除法 7/2=3 的坑"}]},
+      { name:"常量与变量", children:[ {name:"#define 宏常量"},{name:"const 只读变量"},{name:"变量先声明后使用"}]}
+    ]},
+    { name:"运算符", children:[
+      { name:"算术", children:[ {name:"+ - * / %"},{name:"% 只对整数有意义"}]},
+      { name:"赋值", children:[ {name:"= 与 == 别混"},{name:"复合赋值 += -= *="}]},
+      { name:"关系", children:[ {name:"> < >= <="},{name:"== != 浮点别用"}]},
+      { name:"逻辑", children:[ {name:"&& || ! 短路求值"}]},
+      { name:"位运算", children:[ {name:"& | ^ ~ << >>"},{name:"掩码 & 1 判奇偶"}]}
+    ]},
+    { name:"流程控制", children:[
+      { name:"分支", children:[ {name:"if-else 嵌套"},{name:"switch-case 记得 break"}]},
+      { name:"循环", children:[ {name:"while / do-while / for"},{name:"for(初;条件;步进)"}]},
+      { name:"跳转", children:[ {name:"break 跳出本层"},{name:"continue 跳过本次"}]},
+      { name:"新手坑", children:[ {name:"死循环（条件永远真）"},{name:"== 写成 ="}]}
+    ]},
+    { name:"函数", children:[
+      { name:"定义与原型", children:[ {name:"返回类型 名(参数)"},{name:"先声明后使用（否则警告）"}]},
+      { name:"参数传递", children:[ {name:"值传递：形参是副本"},{name:"想改原值 → 传指针"}]},
+      { name:"返回值", children:[ {name:"return 表达式"},{name:"void 无返回值"}]},
+      { name:"递归", children:[ {name:"基线条件 + 递归步"},{name:"阶乘/斐波那契经典"}]},
+      { name:"作用域", children:[ {name:"局部变量遮蔽全局"},{name:"static 保留上次值"}]}
+    ]},
+    { name:"数组", children:[
+      { name:"一维", children:[ {name:"int a[5] 下标 0~4"},{name:"越界不报错但很危险"}]},
+      { name:"初始化", children:[ {name:"{1,2} 其余补 0"},{name:"sizeof(a)/sizeof(a[0]) 求个数"}]},
+      { name:"二维", children:[ {name:"int a[3][4] 按行连续排"},{name:"a[i][j] 访问"}]},
+      { name:"数组与函数", children:[ {name:"传参退化为指针"},{name:"必须同时传长度 n"}]}
+    ]},
+    { name:"指针", children:[
+      { name:"基础", children:[ {name:"&a 取地址 / *p 解引用"},{name:"int *p = &a;"}]},
+      { name:"指针运算", children:[ {name:"p+1 跳过 sizeof 个字节"},{name:"a[i] ≡ *(a+i)"}]},
+      { name:"指针与函数", children:[ {name:"传指针改原值（swap）"},{name:"数组名当指针传"}]},
+      { name:"安全", children:[ {name:"NULL 空指针判空"},{name:"野指针/悬垂指针最危险"},{name:"malloc 后必须 free"}]}
+    ]},
+    { name:"字符串", children:[
+      { name:"存储", children:[ {name:"char 数组 + '\\0'"},{name:"\"hi\" 占 3 字节"}]},
+      { name:"输入", children:[ {name:"scanf %s 遇空格停"},{name:"fgets 读整行（推荐）"},{name:"清缓冲要判 EOF"}]},
+      { name:"函数", children:[ {name:"strlen 长度"},{name:"strcpy 复制"},{name:"strcmp 比较"},{name:"strcat 拼接"}]}
+    ]},
+    { name:"结构体", children:[
+      { name:"定义", children:[ {name:"struct 名 { 成员 };"},{name:"typedef 起别名"}]},
+      { name:"访问", children:[ {name:"s.成员"},{name:"ps->成员（指针）"}]},
+      { name:"应用", children:[ {name:"结构体数组"},{name:"结构体嵌套"},{name:"结构体指针传参"}]}
+    ]},
+    { name:"文件", children:[
+      { name:"打开", children:[ {name:"fopen(\"r/w/a\")"},{name:"fopen 失败返回 NULL（必查）"}]},
+      { name:"读写", children:[ {name:"fprintf / fscanf"},{name:"fgetc / fputc"},{name:"fgets / fputs"}]},
+      { name:"关闭", children:[ {name:"fclose 别忘了（数据可能没落盘）"}]}
+    ]},
+    { name:"进阶", children:[
+      { name:"动态内存", children:[ {name:"malloc / free"},{name:"用多少申请多少"}]},
+      { name:"链表", children:[ {name:"节点 = 数据 + 指向下一个的指针"},{name:"增删改查四操作"}]},
+      { name:"多文件", children:[ {name:"头文件 .h 声明"},{name:"extern 跨文件变量"}]},
+      { name:"预处理器", children:[ {name:"#include #define"},{name:"条件编译 #ifdef"}]}
+    ]},
+    { name:"调试与避坑", children:[
+      { name:"编译错误", children:[ {name:"语法/类型不匹配/未定义"},{name:"读报错先看行号"}]},
+      { name:"运行时错误", children:[ {name:"段错误 = 野指针/越界"},{name:"死循环/栈溢出（递归无底）"}]},
+      { name:"逻辑错误", children:[ {name:"== vs = / 整数除法 / 越界"},{name:"printf 打点调试"},{name:"小步验证：先跑通再加功能"}]}
+    ]}
+  ]
+};
+
+var treeEl = document.getElementById("tree");
+var statsEl = document.getElementById("stats");
+function countLeaves(n){ return n.children ? n.children.reduce(function(s,c){ return s + countLeaves(c); }, 0) : 1; }
+statsEl.textContent = TREE.children.length + " 大知识域 · " + countLeaves(TREE) + " 个知识点";
+
+function render(nodes, lv, parent){
+  nodes.forEach(function(n){
+    var isLeaf = !n.children || !n.children.length;
+    var node = document.createElement("div");
+    node.className = "node" + (isLeaf ? " leaf" : "") + " lv" + Math.min(lv, 3);
+    var inner = document.createElement("div");
+    inner.className = "node-inner";
+    var ic = document.createElement("span");
+    ic.className = "ic";
+    ic.textContent = isLeaf ? "●" : (lv === 1 ? "📘" : "📂");
+    var tx = document.createElement("span");
+    tx.className = "tx";
+    tx.textContent = n.name;
+    inner.appendChild(ic); inner.appendChild(tx);
+    if (!isLeaf){
+      var cnt = document.createElement("span");
+      cnt.className = "cnt";
+      cnt.textContent = countLeaves(n) + " 点";
+      inner.appendChild(cnt);
+      var arr = document.createElement("span");
+      arr.className = "arrow";
+      arr.textContent = "▸";
+      inner.appendChild(arr);
+      node.appendChild(inner);
+      var childBox = document.createElement("div");
+      childBox.className = "children";
+      node.appendChild(childBox);
+      render(n.children, lv + 1, childBox);
+      node.addEventListener("click", function(){ node.classList.toggle("open"); });
+    } else {
+      node.appendChild(inner);
+    }
+    parent.appendChild(node);
+  });
+}
+render(TREE.children, 1, treeEl);
+/* 首屏：展开一层 */
+document.querySelectorAll("#tree > .node").forEach(function(n){ n.classList.add("open"); });
+</script>
+</body>
+</html>
