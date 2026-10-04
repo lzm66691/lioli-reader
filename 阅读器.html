@@ -547,7 +547,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v68</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v69</span></div>
 
   <div class="spacer"></div>
 
@@ -1976,7 +1976,27 @@ if (!BOOKS.length) {
     if (el) el.textContent = "已练习 " + n + " 题（保存过代码）";
   }
   var _pbC = document.getElementById("pbCardC");
-  if (_pbC) _pbC.addEventListener("click", function(){ if (window.initCPractice) window.initCPractice(); });
+  if (_pbC) _pbC.addEventListener("click", function(){ if (window.initCPractice) window.initCPractice(); else window.showCpErr("题库脚本未加载：c-practice 未执行成功，请清缓存重试或反馈莉（v69 诊断）"); });
+
+  /* v69 诊断：脚本错误提示浮层（用于平板「点不开」问题定位） */
+  window.showCpErr = function (msg) {
+    try {
+      var d = document.getElementById("cpErrToast");
+      if (!d) {
+        d = document.createElement("div");
+        d.id = "cpErrToast";
+        d.style.cssText = "position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:99999;background:#b91c1c;color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;max-width:86vw;box-shadow:0 4px 20px rgba(0,0,0,.35);line-height:1.5";
+        document.body.appendChild(d);
+      }
+      d.textContent = "⚠ " + msg;
+      clearTimeout(d._t);
+      d._t = setTimeout(function () { if (d.parentNode) d.parentNode.removeChild(d); }, 15000);
+    } catch (_) {}
+  };
+  window.addEventListener("error", function (e) {
+    var f = (e.filename || "").split("/").pop();
+    window.showCpErr("脚本错误: " + (e.message || "unknown") + (f ? " @" + f + ":" + e.lineno : ""));
+  });
   var _pbF = document.getElementById("pbCardFree");
   if (_pbF) _pbF.addEventListener("click", function(){ if (window.openCPFree) window.openCPFree(); else if (window.initCPractice) window.initCPractice(); });
 
@@ -3036,7 +3056,7 @@ if (!BOOKS.length) {
 
 </script>
 
-<script src="c-course/c-practice-v68.js?v=20261004c" data-base="."></script>
+<script src="c-course/c-practice-v69.js?v=20261004d" data-base="."></script>
 
 <script>
 /* v66：AI 助手浮层（萝 C 路线：复制选中 → 一键打开 DeepSeek/豆包网页版；零密钥·零成本·零风险） */
