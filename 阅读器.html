@@ -547,7 +547,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v75</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v76</span></div>
 
   <div class="spacer"></div>
 
@@ -3057,7 +3057,7 @@ if (!BOOKS.length) {
 
 </script>
 
-<script src="c-course/c-practice-v75.js?v=20261004f" data-base="."></script>
+<script src="c-course/c-practice-v76.js?v=20261004g" data-base="."></script>
 
 <script>
 /* v75：划词浮层升级（UI 报告第二阶段①）——高亮三色 + 复制 + 问 AI；支持 PDF 内（iframe）选区；高亮复用 marks 标注体系（萝 C 路线零密钥） */
@@ -3149,16 +3149,26 @@ if (!BOOKS.length) {
     }
     return null;
   }
-  document.addEventListener("mouseup", function(){
-    setTimeout(function(){
-      var info = probeSelection();
-      if (!info) { hide(); return; }
-      var x = Math.min(Math.max(info.x, 8), window.innerWidth - 360);
-      var y = Math.max(info.y - 46, 8);
-      curRange = info.range; curDoc = info.doc;
-      show(x, y, info.text);
-    }, 10);
-  });
+  var lastIframeDoc = null;
+  function maybeShow(){
+    var info = probeSelection();
+    if (!info) { hide(); return; }
+    var x = Math.min(Math.max(info.x, 8), window.innerWidth - 360);
+    var y = Math.max(info.y - 46, 8);
+    curRange = info.range; curDoc = info.doc;
+    show(x, y, info.text);
+  }
+  function bindIframe(){
+    var f = document.getElementById("pdfFrame");
+    var d = f && f.contentDocument ? f.contentDocument : null;
+    if (d && d !== lastIframeDoc) {
+      lastIframeDoc = d;
+      d.addEventListener("mouseup", function(){ setTimeout(maybeShow, 10); });
+    }
+  }
+  document.addEventListener("mouseup", function(){ setTimeout(maybeShow, 10); });
+  setInterval(bindIframe, 2000);
+  bindIframe();
   document.addEventListener("mousedown", function(e){ if (el && !el.contains(e.target)) setTimeout(hide, 120); });
   document.addEventListener("scroll", function(){ hide(); }, true);
 })();
