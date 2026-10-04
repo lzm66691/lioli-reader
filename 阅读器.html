@@ -547,7 +547,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v77</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v78</span></div>
 
   <div class="spacer"></div>
 
@@ -721,6 +721,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
   <div class="pdf-wrap">
 
     <iframe class="pdf-frame" id="pdfFrame" title="PDF 阅读区"></iframe>
+    <div id="pageSliderWrap" style="position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:900;display:none;align-items:center;gap:10px;padding:8px 14px;background:rgba(15,23,42,.82);border-radius:14px;backdrop-filter:blur(10px);box-shadow:0 8px 30px rgba(0,0,0,.3)"><span id="sliderPage" style="font-size:12px;color:#e6e6e6;min-width:36px;text-align:center">1/1</span><input id="pageSlider" type="range" min="1" max="1" value="1" style="width:200px;accent-color:#4D6BFE;cursor:pointer" aria-label="阅读进度滑杆"></div>
 
   </div>
 
@@ -1194,6 +1195,8 @@ if (!BOOKS.length) {
     state.page = n; save();
 
     pageInput.value = n;
+
+    var _sl = document.getElementById("pageSlider"); if (_sl) { _sl.value = n; var _sp = document.getElementById("sliderPage"); if (_sp) _sp.textContent = n + "/" + (_sl.max || "?"); }
 
     notePage.textContent = n;
 
@@ -1853,6 +1856,29 @@ if (!BOOKS.length) {
   var _prevB = document.getElementById("prevPageBtn");
   var _nextB = document.getElementById("nextPageBtn");
   if (_prevB) _prevB.addEventListener("click", function(){ var v = parseInt(pageInput.value || "1", 10); goPage(Math.max(1, v - 1)); });
+
+  /* v78：底部进度滑杆事件 + 键盘快捷键（←→翻页 / T 切主题 / G 页码；PDF iframe 内也生效） */
+  var _sl = document.getElementById("pageSlider");
+  if (_sl) {
+    _sl.addEventListener("input", function(){ var _sp = document.getElementById("sliderPage"); if (_sp) _sp.textContent = this.value + "/" + (this.max || "?"); });
+    _sl.addEventListener("change", function(){ goPage(parseInt(this.value || "1", 10)); });
+  }
+  function _hotkeys(e){
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    var tg = e.target, tag = tg && tg.tagName ? tg.tagName : "";
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (tg && tg.isContentEditable)) return;
+    if (e.key === "ArrowLeft") { var v = parseInt(pageInput.value || "1", 10); goPage(Math.max(1, v - 1)); e.preventDefault(); }
+    else if (e.key === "ArrowRight") { var v2 = parseInt(pageInput.value || "1", 10); goPage(v2 + 1); e.preventDefault(); }
+    else if (e.key === "t" || e.key === "T") { var cur = THEME_ORDER.indexOf(state.theme); state.theme = THEME_ORDER[(cur + 1) % THEME_ORDER.length]; applyTheme(); save(); }
+    else if (e.key === "g" || e.key === "G") { pageInput.focus(); if (pageInput.select) pageInput.select(); }
+  }
+  document.addEventListener("keydown", _hotkeys);
+  var _hLast = null;
+  setInterval(function(){
+    var f = document.getElementById("pdfFrame");
+    var d = f && f.contentDocument ? f.contentDocument : null;
+    if (d && d !== _hLast) { _hLast = d; d.removeEventListener("keydown", _hotkeys); d.addEventListener("keydown", _hotkeys); }
+  }, 2000);
   if (_nextB) _nextB.addEventListener("click", function(){ var v = parseInt(pageInput.value || "1", 10); goPage(v + 1); });
 
   document.getElementById("darkBtn").addEventListener("click", toggleDark);
@@ -2148,6 +2174,7 @@ if (!BOOKS.length) {
               var app = pdfFrame.contentWindow.PDFViewerApplication;
               if (app && app.pdfDocument) {
                 pageTotal.textContent = app.pdfDocument.numPages;
+                var _sl = document.getElementById("pageSlider"); if (_sl) { _sl.max = app.pdfDocument.numPages; _sl.value = parseInt(pageInput.value || "1", 10) || 1; var _sp = document.getElementById("sliderPage"); if (_sp) _sp.textContent = _sl.value + "/" + _sl.max; var _pw = document.getElementById("pageSliderWrap"); if (_pw) _pw.style.display = "flex"; }
                 clearInterval(iv);
                 return;
               }
@@ -3057,7 +3084,7 @@ if (!BOOKS.length) {
 
 </script>
 
-<script src="c-course/c-practice-v77.js?v=20261004h" data-base="."></script>
+<script src="c-course/c-practice-v78.js?v=20261004i" data-base="."></script>
 
 <script>
 /* v75：划词浮层升级（UI 报告第二阶段①）——高亮三色 + 复制 + 问 AI；支持 PDF 内（iframe）选区；高亮复用 marks 标注体系（萝 C 路线零密钥） */
