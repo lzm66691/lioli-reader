@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>C 语言伴读讲义 · Ch3 数据和C</title>
+<style>
+  :root{
+    --teal:#4D6BFE; --ink:#0f172a; --body:#334155; --muted:#64748b;
+    --line:#e2e8f0; --code-bg:#f1f5f9; --warn-bg:#fff7ed; --warn-border:#fdba74;
+    --tip-bg:#eff6ff; --tip-border:#93c5fd; --ans-bg:#f0fdf4;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:"Noto Sans SC",-apple-system,"Microsoft YaHei",sans-serif;
+    color:var(--body); font-size:14px; line-height:1.75; padding:36px 44px;
+  }
+  h1{font-size:24px;color:var(--ink);margin-bottom:4px}
+  h2{font-size:18px;color:var(--teal);margin:26px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  h3{font-size:15px;color:var(--ink);margin:18px 0 8px}
+  p{margin:8px 0}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+  .kicker{display:inline-block;background:var(--teal);color:#fff;font-size:11px;padding:2px 8px;border-radius:4px;margin-bottom:8px;letter-spacing:1px}
+  pre{
+    background:var(--code-bg);border:1px solid var(--line);border-radius:8px;
+    padding:12px 14px;font-size:12.5px;line-height:1.6;overflow-x:auto;
+    white-space:pre-wrap;word-break:break-all;font-family:Consolas,"Courier New",monospace;
+  }
+  pre .cm{color:#6b7280}
+  .cmd{font-size:12px;color:var(--muted);font-family:Consolas,monospace;margin:4px 0 12px}
+  .warn,.tip,.ans{border-radius:8px;padding:10px 14px;margin:12px 0;font-size:13.5px}
+  .warn{background:var(--warn-bg);border-left:4px solid var(--warn-border)}
+  .tip{background:var(--tip-bg);border-left:4px solid var(--tip-border)}
+  .ans{background:var(--ans-bg);border-left:4px solid #4ade80}
+  .warn b,.tip b,.ans b{color:var(--ink)}
+  table{border-collapse:collapse;margin:12px 0;width:100%;table-layout:fixed}
+  th,td{border:1px solid var(--line);padding:7px 10px;font-size:13px;text-align:left}
+  th{background:var(--code-bg);color:var(--ink)}
+  ul,ol{margin:8px 0 8px 22px}
+  li{margin:4px 0}
+  .selfcheck{background:#faf5ff;border-left:4px solid #a855f7;border-radius:8px;padding:10px 14px;margin:12px 0}
+  .selfcheck b{color:#7e22ce}
+  .footer{margin-top:28px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);page-break-before:avoid}
+  @media print{.footer{page-break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<div class="kicker">C 语言伴读讲义 · 第 1 批</div>
+<h1>Ch3 数据和C</h1>
+<div class="sub">对应《C Primer Plus（第6版）》第 3 章 · 本章目标：30 分钟读懂 + 60 分钟练完 · 不覆盖：位运算技巧、进制转换细节</div>
+
+<h2 id="s3-1">3.1 数据在电脑里是怎么存的</h2>
+<p>计算机的"最小单位"是<b>位（bit）</b>，只能存 0 或 1。8 个位组成一个<b>字节（byte）</b>。一个 <code>int</code> 通常占 <b>4 字节 = 32 位</b>。你可以把变量理解成"一个有固定大小的盒子"——盒子多大（字节数），决定了它能装多大/多精的值。</p>
+<div class="tip"><b>一句话理解：</b>类型决定两件事——<b>占几个字节</b>（能存多大）和<b>怎么解释这些字节</b>（整数还是小数还是字符）。这就是为什么"类型不匹配"会出乱码。</div>
+
+<h2 id="s3-2">3.2 整数类型：int 及其亲戚</h2>
+<table>
+<colgroup><col style="width:24%"><col style="width:22%"><col style="width:54%"></colgroup>
+<tr><th>类型</th><th>通常占用</th><th>范围（示例）</th></tr>
+<tr><td><code>short</code></td><td>2 字节</td><td>约 -32768 ~ 32767</td></tr>
+<tr><td><code>int</code></td><td>4 字节</td><td>约 -21亿 ~ 21亿</td></tr>
+<tr><td><code>long long</code></td><td>8 字节</td><td>约 ±9.2×10^18</td></tr>
+</table>
+<div class="warn"><b>新手坑 1：int 溢出（最常见）。</b>盒子的容量是固定的，放进去的值超出范围就会"溢出"——结果像一个坏掉的里程表那样<b>绕回</b>。C 语言<b>不报错</b>，这是最危险的地方。</div>
+<pre><span class="cm">/* ch3_01_overflow.c — int 溢出现象 */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int big = 2147483647;   <span class="cm">/* int 能装的最大值 */</span>
+    printf("big = %d\n", big);
+    printf("big + 1 = %d\n", big + 1);   <span class="cm">/* 溢出！会绕回成负数 */</span>
+    return 0;
+}</pre>
+<p class="cmd">运行输出（本机 gcc 16.1.0 实测）：big = 2147483647　big + 1 = -2147483648</p>
+<div class="tip"><b>为什么是 -2147483648？</b>因为 <code>int</code> 用最高位表示正负（补码）。最大值再加 1，二进制全 1 进位翻到符号位，就成了最小的负数。记住现象即可：<b>超出范围会绕回，编译器不提醒，只能靠判断范围</b>。</div>
+
+<h2 id="s3-3">3.3 浮点类型：float 和 double</h2>
+<p>存小数用浮点：<code>float</code>（4 字节，精度约 7 位）和 <code>double</code>（8 字节，精度约 15 位）。<b>日常运算默认用 double</b>，除非明确要求省内存。</p>
+<pre><span class="cm">/* ch3_02_float.c — 浮点精度 */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    float  f = 0.1f;
+    double d = 0.1;
+    printf("float 0.1  → %.10f\n", f);
+    printf("double 0.1 → %.10f\n", d);
+    return 0;
+}</pre>
+<p class="cmd">运行输出（实测）：float 0.1  → 0.1000000015　double 0.1 → 0.1000000000</p>
+<div class="warn"><b>新手坑 2：小数不"精确"。</b>0.1 在二进制里是无限循环小数，存不下。float 会把误差放大——看到 <code>0.1000000015</code> 别惊讶。<b>结论：不要用 == 判断两个浮点数相等</b>（见练习册）；金额、分数这类需要精确的，要么用整数（分），要么用高精度库。</div>
+
+<h2 id="s3-4">3.4 字符类型：char 和 ASCII</h2>
+<p><code>char</code> 存<b>一个字符</b>，其实是存这个字符的 <b>ASCII 编码数字</b>。<code>'A'</code> 在内存里就是数字 <code>65</code>。</p>
+<pre><span class="cm">/* ch3_03_char.c — char 就是数字 */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    char c = 'A';
+    printf("字符：%c\n", c);
+    printf("它的 ASCII 数字：%d\n", c);   <span class="cm">/* %c 当字符打，%d 当数字打 */</span>
+    return 0;
+}</pre>
+<p class="cmd">运行输出（实测）：字符：A　它的 ASCII 数字：65</p>
+<div class="tip"><b>伏笔：</b>因为字符就是数字，所以 <code>c + 1</code> 会得到 <code>66</code>（即 'B'）。这在后面做字母大小写转换时会用到。</div>
+
+<h2 id="s3-5">3.5 常量：不打算改的值</h2>
+<p>写死在代码里的字面量（<code>42</code>、<code>3.14</code>、<code>'A'</code>）是<b>字面常量</b>。想给常量起个名字、防止手滑改掉，用 <code>const</code>：</p>
+<pre><span class="cm">/* ch3_04_const.c — const 常量 */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    const double PI = 3.14159;
+    int radius = 10;
+    printf("圆面积 = %f\n", PI * radius * radius);
+    return 0;
+}</pre>
+<p class="cmd">运行输出（实测）：圆面积 = 314.159000</p>
+<div class="warn"><b>新手坑 3：</b><code>PI = 3.0;</code> 这种对 <code>const</code> 变量的赋值，编译器会报错——这正是 const 想保护你的。别把 const 常量当变量改。</div>
+
+<h2 id="s3-6">3.6 printf/scanf：%占位符要对上类型</h2>
+<p>上一章学过 printf/scanf，这一章重点是<b>类型必须对号入座</b>：</p>
+<table>
+<colgroup><col style="width:24%"><col style="width:30%"><col style="width:46%"></colgroup>
+<tr><th>占位符</th><th>配什么类型</th><th>说明</th></tr>
+<tr><td><code>%d</code></td><td><code>int</code></td><td>整数</td></tr>
+<tr><td><code>%ld</code></td><td><code>long</code></td><td>长整数</td></tr>
+<tr><td><code>%f</code></td><td><code>float</code>（printf 里也接受 double）</td><td>小数，6 位</td></tr>
+<tr><td><code>%lf</code></td><td><code>double</code></td><td><b>scanf 读 double 必须 %lf</b></td></tr>
+<tr><td><code>%c</code></td><td><code>char</code></td><td>字符</td></tr>
+<tr><td><code>%s</code></td><td><code>char[]</code></td><td>字符串</td></tr>
+</table>
+<pre><span class="cm">/* ch3_05_scanf.c — scanf 读 double 的坑 */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    double height;
+    printf("输入身高：");
+    scanf("%lf", &amp;height);   <span class="cm">/* double 必须 %lf，且要 &amp; */</span>
+    printf("身高 = %f\n", height);
+    return 0;
+}</pre>
+<div class="warn"><b>新手坑 4：scanf 用 %f 读 double。</b>这是 Ch4 已埋的坑，再强调一次：<code>printf</code> 里 <code>%f</code> 能打 double（自动转），但 <code>scanf</code> 里<b>必须</b> <code>%lf</code> 配 double、<code>%f</code> 配 float——写反了读出来的值是乱码。</div>
+
+<h2 id="s3-7">3.7 新手坑集中营（本章最容易错的 4 件事）</h2>
+<ol>
+<li><b>int 溢出不报错</b>（见 3.2）——算大数前先估算范围。</li>
+<li><b>浮点数 == 判断相等</b>（见 3.3）——用 <code>fabs(a-b) &lt; 1e-6</code> 这类容差判断。</li>
+<li><b>scanf 占位符和类型对不上</b>（见 3.6）——<code>%d</code>/<code>%f</code>/<code>%lf</code> 记牢。</li>
+<li><b>给 <code>%d</code> 传 <code>double</code></b>：printf 里 <code>printf("%d", 3.14)</code> 输出是乱码（类型和格式对不上，gcc 开 <code>-Wall</code> 会警告）。</li>
+</ol>
+
+<h2 id="s3-8">3.8 一分钟自测（答案见练习册）</h2>
+<div class="selfcheck">
+<b>判断对错：</b><br>
+① <code>int n = 2147483647; n + 1</code> 的结果一定是正数。<br>
+② <code>scanf("%lf", &amp;x)</code> 可以读 <code>double</code> 类型。<br>
+③ 两个 <code>double</code> 用 <code>==</code> 判断相等是可靠的。
+</div>
+
+<h2 id="s3-9">3.9 练习指引</h2>
+<p>做完本章内容后，去练习册完成 Ch3 配套练习；同时打开《C Primer Plus（第6版）》第 3 章，完成<b>复习题 1、3、5</b>（题号对应主教材）。改错题是练习册里最有价值的部分——先自己找 bug，再看答案的思路讲解。</p>
+
+<div class="footer">本讲义为自写原创讲解，仅作课堂伴读；示例代码均可用 <code>gcc -Wall -Wextra</code> 编译，讲义每句「输出：」均已实跑核对。原书题目请以正版教材为准。</div>
+</body>
+</html>

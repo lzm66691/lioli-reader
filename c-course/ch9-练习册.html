@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>C 语言伴读练习册 · Ch9 函数</title>
+<style>
+  :root{
+    --teal:#4D6BFE; --ink:#0f172a; --body:#334155; --muted:#64748b;
+    --line:#e2e8f0; --code-bg:#f1f5f9; --warn-bg:#fff7ed; --warn-border:#fdba74;
+    --tip-bg:#eff6ff; --tip-border:#93c5fd; --ans-bg:#f0fdf4;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:"Noto Sans SC",-apple-system,"Microsoft YaHei",sans-serif;
+    color:var(--body); font-size:14px; line-height:1.75; padding:36px 44px;
+  }
+  h1{font-size:24px;color:var(--ink);margin-bottom:4px}
+  h2{font-size:18px;color:var(--teal);margin:26px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  h3{font-size:15px;color:var(--ink);margin:18px 0 8px}
+  p{margin:8px 0}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+  .kicker{display:inline-block;background:var(--teal);color:#fff;font-size:11px;padding:2px 8px;border-radius:4px;margin-bottom:8px;letter-spacing:1px}
+  pre{
+    background:var(--code-bg);border:1px solid var(--line);border-radius:8px;
+    padding:12px 14px;font-size:12.5px;line-height:1.6;overflow-x:auto;
+    white-space:pre-wrap;word-break:break-all;font-family:Consolas,"Courier New",monospace;
+  }
+  pre .cm{color:#6b7280}
+  .cmd{font-size:12px;color:var(--muted);font-family:Consolas,monospace;margin:4px 0 12px}
+  .warn,.tip,.ans{border-radius:8px;padding:10px 14px;margin:12px 0;font-size:13.5px}
+  .warn{background:var(--warn-bg);border-left:4px solid var(--warn-border)}
+  .tip{background:var(--tip-bg);border-left:4px solid var(--tip-border)}
+  .ans{background:var(--ans-bg);border-left:4px solid #4ade80}
+  .warn b,.tip b,.ans b{color:var(--ink)}
+  ul,ol{margin:8px 0 8px 22px}
+  li{margin:4px 0}
+  .footer{margin-top:28px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);page-break-before:avoid}
+  @media print{.footer{page-break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<div class="kicker">C 语言伴读练习册 · 补全章</div>
+<h1>Ch9 函数 · 练习册</h1>
+<div class="sub">配套讲义 Ch9 · 题链：填空★ → 改错★★ → 编程★★/★★★ → 专业场景 → 复习题索引 → 参考答案 · 先自己写，再看答案</div>
+
+<h2 id="s9-1">9-1 填空（★）</h2>
+<ol>
+<li>函数定义的三要素是：<b>____</b>、函数名、参数列表；不交回值的函数返回类型写 <b>____</b>。</li>
+<li>调用函数时，实参的值被<b>____</b>给形参（传的是副本）。</li>
+<li>main 在函数定义之前调用它，必须先写<b>____</b>，否则编译报「隐式声明」。</li>
+<li><code>return;</code> 在 void 函数里表示<b>____</b>（提前结束/交回值）。</li>
+<li>数组作参数时，函数里 <code>sizeof(arr)</code> 得到的是<b>____</b>的大小，不是数组大小，所以要另传<b>____</b>。</li>
+</ol>
+
+<h2 id="s9-2">9-2 改错（★★，先自己找再对答案）</h2>
+<p>下面程序有 3 处错误，先自己找，再对照答案：</p>
+<pre><span class="cm">/* debug_exercise_109.c — 找 3 处错误 */</span>
+#include &lt;stdio.h&gt;
+
+double average(int a, int b, int c);
+
+int main(void)
+{
+    int x = 7, y = 9, z = 4;
+    printf("avg = %f\n", average(x, y, z));
+    return 0;
+}
+
+double average(int a, int b, int c)
+{
+    int sum = a + b + c;
+    return sum / 3;
+}</pre>
+<p>提示：先在草稿纸上标出你怀疑的每一行，再翻页对答案。</p>
+
+<h2 id="s9-3">9-3 编程（★★）</h2>
+<p>写一个函数 <code>int max3(int a, int b, int c)</code> 返回三个数中的最大值，并在 main 里读入三个整数调用它、打印结果（样例：输入 5 9 3 → 输出 9）。</p>
+
+<h2 id="s9-4">9-4 编程（★★★）</h2>
+<p>写函数 <code>int count_positive(const int arr[], int n)</code> 统计数组中正数的个数，main 里用 <code>int a[] = {3, -1, 0, 7, -2, 5};</code> 调用并打印（应输出 3）。</p>
+
+<h2 id="s9-5">9-5 专业场景拓展（★★，不需要硬件知识）</h2>
+<p>写函数 <code>void blink_led(int pin, int times)</code>：用循环打印 <code>LED 亮</code> / <code>LED 灭</code> 交替 times 次（pin 打印在开头一行）。main 里调用 <code>blink_led(3, 4)</code>。输出前两行应为 <code>LED 亮</code> <code>LED 灭</code>。</p>
+
+<h2 id="s9-6">9-6 复习题索引</h2>
+<p>对应《C Primer Plus（第6版）》第 9 章复习题：Q1–Q10 可全做；Q11（递归）留到看懂 9.7 再做。Q5 的「形参 vs 实参」、Q7 的「return 位置」与本章新手坑 1/3 直接对应。</p>
+
+<h2 id="s9-7">9-7 参考答案（先自己写，再看思路与常见错法）</h2>
+<div class="ans"><b>9-1 填空答案</b>：① 返回类型 / void；② 复制；③ 函数原型；④ 提前结束；⑤ 指针 / 长度 n。</div>
+<div class="ans"><b>9-2 改错答案</b>：
+<pre>/* debug_exercise_109_fixed.c — 修好的版本 */
+#include &lt;stdio.h&gt;
+
+double average(int a, int b, int c);
+
+int main(void)
+{
+    int x = 7, y = 9, z = 4;
+    printf("avg = %.2f\n", average(x, y, z));
+    return 0;
+}
+
+double average(int a, int b, int c)
+{
+    double sum = a + b + c;      /* 错误1：sum 要是 double，否则整数除法丢小数 */
+    return sum / 3.0;            /* 错误2：除 3.0 而不是 3，触发浮点除法 */
+}                                /* 错误3：main 里 %f 与 double 匹配，但补了 %.2f 更规范 */</pre>
+三处错误：①<code>int sum</code> 应为 <code>double sum</code>；②<code>sum / 3</code> 应为 <code>sum / 3.0</code>（整数除法丢小数）；③<code>printf</code> 的 <code>%f</code> 可配 <code>%.2f</code> 让输出更清晰（第 3 处也可算「格式不规范」）。<br>
+<b>本机 gcc 16.1.0 -Wall -Wextra 实测</b>：fixed 版输出 <code>avg = 6.67</code>；原版输出 <code>avg = 6.000000</code>（静默丢小数，无警告——正是「静默错误」的典型）。</div>
+<div class="ans"><b>9-3 编程参考</b>：核心 <code>int m = a; if (b&gt;m) m=b; if (c&gt;m) m=c; return m;</code>。常见错法：用 <code>a&gt;b?a:b</code> 嵌套但括号写错；漏处理相等情况（不影响结果）。</div>
+<div class="ans"><b>9-4 编程参考</b>：<code>for (int i=0; i&lt;n; i++) if (arr[i]&gt;0) cnt++;</code>，返回 cnt。常见错法：忘了 const；用 <code>sizeof(arr)/sizeof(arr[0])</code> 取长度（新手坑 3，必须传 n）。</div>
+<div class="ans"><b>9-5 专业场景参考</b>：<pre>void blink_led(int pin, int times)
+{
+    printf("pin %d\n", pin);
+    for (int i = 0; i &lt; times; i++)
+    {
+        printf("LED 亮\n");
+        printf("LED 灭\n");
+    }
+}</pre>常见错法：把「LED 亮/灭」循环次数想成 2×times（输出 8 行）——题目只要交替 times 次。</div>
+
+<div class="footer">Ch9 练习册 · 本机 gcc 16.1.0 -Wall -Wextra 实测（9-2 fixed 输出 6.67）</div>
+
+</body>
+</html>

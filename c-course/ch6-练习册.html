@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>C 语言伴读练习册 · Ch6 C控制语句：循环</title>
+<style>
+  :root{
+    --teal:#4D6BFE; --ink:#0f172a; --body:#334155; --muted:#64748b;
+    --line:#e2e8f0; --code-bg:#f1f5f9; --warn-bg:#fff7ed; --warn-border:#fdba74;
+    --tip-bg:#eff6ff; --tip-border:#93c5fd; --ans-bg:#f0fdf4;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:"Noto Sans SC",-apple-system,"Microsoft YaHei",sans-serif;
+    color:var(--body); font-size:14px; line-height:1.75; padding:36px 44px;
+  }
+  h1{font-size:24px;color:var(--ink);margin-bottom:4px}
+  h2{font-size:18px;color:var(--teal);margin:26px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  h3{font-size:15px;color:var(--ink);margin:18px 0 8px}
+  p{margin:8px 0}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+  .kicker{display:inline-block;background:var(--teal);color:#fff;font-size:11px;padding:2px 8px;border-radius:4px;margin-bottom:8px;letter-spacing:1px}
+  pre{
+    background:var(--code-bg);border:1px solid var(--line);border-radius:8px;
+    padding:12px 14px;font-size:12.5px;line-height:1.6;overflow-x:auto;
+    white-space:pre-wrap;word-break:break-all;font-family:Consolas,"Courier New",monospace;
+  }
+  pre .cm{color:#6b7280}
+  .cmd{font-size:12px;color:var(--muted);font-family:Consolas,monospace;margin:4px 0 12px}
+  .warn,.tip,.ans{border-radius:8px;padding:10px 14px;margin:12px 0;font-size:13.5px}
+  .warn{background:var(--warn-bg);border-left:4px solid var(--warn-border)}
+  .tip{background:var(--tip-bg);border-left:4px solid var(--tip-border)}
+  .ans{background:var(--ans-bg);border-left:4px solid #4ade80}
+  .warn b,.tip b,.ans b{color:var(--ink)}
+  .q{font-size:14px;font-weight:700;color:var(--ink);margin:18px 0 6px}
+  .q .tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:10px;margin-right:8px;vertical-align:2px;color:#fff}
+  .tag-f{background:#f59e0b}
+  .tag-b{background:#ef4444}
+  .tag-p{background:#4D6BFE}
+  .tag-s{background:#a855f7}
+  .footer{margin-top:28px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);page-break-before:avoid}
+  @media print{.footer{page-break-inside:avoid}}
+  .ans{page-break-inside:avoid}
+</style>
+</head>
+<body>
+
+<div class="kicker">C 语言伴读练习册 · 第 2 批</div>
+<h1>Ch6 C控制语句：循环 · 练习</h1>
+<div class="sub">对应《C Primer Plus（第6版）》第 6 章 · 参考答案含「思路 + 常见错法」· 请先独立完成再看答案</div>
+
+<h2 id="p6-1">6-1 填空</h2>
+<div class="q"><span class="tag tag-f">填空</span>① <code>for (int i=0; i&lt;3; i++) printf("%d", i);</code> 打印 ____。</div>
+<h2 id="p6-2">6-2 填空</h2>
+<div class="q"><span class="tag tag-f">填空</span>② <code>int n=5; while (n&lt;5) n++; printf("%d", n);</code> 打印 ____。</div>
+<h2 id="p6-3">6-3 填空</h2>
+<div class="q"><span class="tag tag-f">填空</span>③ <code>for (int i=0; i&lt;5; i++) { if (i==2) continue; printf("hi "); }</code> 打印 "hi" ____ 次。</div>
+
+<h2 id="p6-4">6-4 改错</h2>
+<div class="q"><span class="tag tag-b">改错</span>④ 下面程序想打印 1 2 3 4 5 然后 "done"，但有 2 处问题。先自己找，再对照答案。</div>
+<pre><span class="cm">/* debug_exercise_106.c — 找 2 处问题 */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int n = 0;
+    while (n &lt; 5); {
+        printf("%d ", n);
+        n++;
+    }
+    printf("done\n");
+    return 0;
+}</pre>
+
+<h2 id="p6-5">6-5 编程</h2>
+<div class="q"><span class="tag tag-p">编程</span>⑤ 写程序：用 <code>for</code> 计算 <code>1+2+...+100</code> 并打印。示例输出：
+<pre><span class="cm">ch6_p6_sum.c</span>
+1+2+...+100 = 5050</pre></div>
+
+<h2 id="p6-6">6-6 编程</h2>
+<div class="q"><span class="tag tag-p">编程</span>⑥ 写程序：用循环打印 <code>2</code> 的 <code>1..5</code> 次幂（<code>2^1</code> 到 <code>2^5</code>）。提示：每次乘 2。示例输出：
+<pre><span class="cm">ch6_p7_power.c</span>
+2^1 = 2
+2^2 = 4
+2^3 = 8
+2^4 = 16
+2^5 = 32</pre></div>
+
+<h2 id="p6-7">6-7 专业场景</h2>
+<div class="q"><span class="tag tag-s">专业场景</span>⑦（不需要硬件知识）写程序：用 <code>while</code> 循环反复读入考试成绩（整数），输入 <code>0</code> 结束，最后打印一共几门、平均分（保留 1 位）。<code>scanf</code> 写法参考 Ch4：<code>scanf("%d", &amp;score)</code>。示例交互：
+<pre><span class="cm">ch6_p8_avgloop.c</span>
+输入成绩（0 结束）：85 90 0
+共 2 门，平均 = 87.5</pre></div>
+
+<h2 id="p6-8">6-8 索引</h2>
+<div class="q"><span class="tag tag-f">索引</span>⑧ 打开《C Primer Plus（第6版）》第 6 章，完成 <b>复习题 2、3、6</b>（题号对应主教材）。</div>
+
+<h2>参考答案</h2>
+
+<div class="ans"><b>①</b> 012。
+<div class="tip"><b>思路：</b>i=0,1,2 各打一次，i=3 时条件为假退出（讲义 6.2）。</div></div>
+
+<div class="ans"><b>②</b> 5。
+<div class="tip"><b>思路：</b>n=5 时条件 <code>5&lt;5</code> 已为假，循环体一次不执行，直接打印 5（讲义 6.1 的 while 先查条件）。</div></div>
+
+<div class="ans"><b>③</b> 4 次（打印 "hi hi hi hi"）。
+<div class="tip"><b>思路：</b>i=2 时 continue 跳过本次的 printf，其余 4 轮照常（讲义 6.4）。</div></div>
+
+<div class="ans"><b>④ 诊断（本机 gcc 16.1.0 实测）：2 处问题，其中 1 处编译期只有 warning、运行直接"卡死"。</b>
+<ol>
+<li>第 7 行 <code>while (n &lt; 5);</code>——<b>while 后多了个分号</b>，循环体变成空语句 <code>;</code>，大括号里的打印成了"跟在后面的普通代码块"。编译期 gcc 只给 <code>warning: this 'while' clause does not guard...</code>（警告，不是错误），<b>运行时 n 永远不变 → 死循环卡死</b>。修复：删掉分号；</li>
+<li>第 6 行 <code>int n = 0;</code>——就算修好分号，输出是 0 1 2 3 4 而不是想要的 1..5。想打印 1..5 应 <code>int n = 1;</code>（条件 <code>&lt;= 5</code>）。</li>
+</ol>
+<div class="warn"><b>修复 = 删分号 + n 从 1 开始。修复版输出（实测）：<code>1 2 3 4 5 done</code>。教学点：<b>死循环编译期往往看不见</b>（只有 warning 甚至没 warning）——改完代码先想想"条件会变假吗"，再运行。</div></div>
+
+<div class="ans"><b>⑤ 参考代码：</b>
+<pre><span class="cm">ch6_p6_sum.c</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int sum = 0;
+    for (int i = 1; i &lt;= 100; i++) {
+        sum += i;
+    }
+    printf("1+2+...+100 = %d\n", sum);
+    return 0;
+}</pre>
+<div class="tip"><b>思路：</b>计数器 i 从 1 到 100，每轮 <code>sum += i</code>。<b>常见错法：</b>把 <code>i &lt;= 100</code> 写成 <code>i &lt; 100</code>（少加 100）；或 <code>sum</code> 忘了初始化成 0（残留值）。实测输出：5050。</div></div>
+
+<div class="ans"><b>⑥ 参考代码：</b>
+<pre><span class="cm">ch6_p7_power.c</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int p = 1;
+    for (int i = 1; i &lt;= 5; i++) {
+        p *= 2;
+        printf("2^%d = %d\n", i, p);
+    }
+    return 0;
+}</pre>
+<div class="tip"><b>思路：</b>p 每轮乘 2，正好是 2 的幂。<b>常见错法：</b>每轮 <code>p = 2 * i</code>（那是 2i 不是 2 的 i 次方）。实测输出：2,4,8,16,32。</div></div>
+
+<div class="ans"><b>⑦ 参考代码（循环读成绩）：</b>
+<pre><span class="cm">ch6_p8_avgloop.c</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int score, count = 0;
+    double sum = 0.0;
+    printf("输入成绩（0 结束）：");
+    while (scanf("%d", &amp;score) == 1 &amp;&amp; score != 0) {
+        sum += score;
+        count++;
+    }
+    if (count &gt; 0)
+        printf("共 %d 门，平均 = %.1f\n", count, sum / count);
+    else
+        printf("没有输入成绩\n");
+    return 0;
+}</pre>
+<div class="tip"><b>思路：</b>条件里 <code>scanf == 1</code> 检查"读到了数字"（防乱输入），<code>score != 0</code> 是终止信号。<b>常见错法：</b>把 0 也算进成绩（先判 0 再累加）。实测输出：共 2 门，平均 = 87.5。</div></div>
+
+<div class="footer">本练习册为自写原创变式题，仅作课堂伴读；改错题请在 <code>gcc -Wall -Wextra</code> 下先实测再对照答案。原书题目请以正版教材为准。</div>
+</body>
+</html>

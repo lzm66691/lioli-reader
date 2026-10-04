@@ -921,10 +921,443 @@ int main(void){
 }`,
       refOut: "缓存大小 n=? 缓冲前 3 字节：A A A",
       hint: "malloc(n) 字节后循环填 'A'，打印前 3 个加护栏（n<3 时不越界），最后 free；malloc 后检查 NULL。"
+    },
+    /* ===== Ch4 输入输出（v67c 补全） ===== */
+    {
+      id: "ch4-q4", ch: "4", type: "debug", level: "★",
+      title: "改错：scanf 的 3 个雷",
+      desc: "下面程序读入年龄和身高有 3 处错：<br><b>① scanf 漏 &；② 格式符与变量类型不匹配；③ 输出格式缺小数点位数。</b>",
+      starter:
+`#include <stdio.h>
+
+int main(void)
+{
+    int age;
+    float h;
+    printf("年龄身高：");
+    scanf("%d %f", age, h);
+    printf("我 %d 岁 %f 米\n", age, h);
+    return 0;
+}`,
+      ref:
+`#include <stdio.h>
+
+int main(void)
+{
+    int age;
+    float h;
+    printf("年龄身高：");
+    scanf("%d %f", &age, &h);
+    printf("我 %d 岁 %.2f 米\n", age, h);
+    return 0;
+}`,
+      refOut: "年龄身高：19 1.87<br>我 19 岁 1.87 米",
+      hint: "scanf 必须传地址（&变量）；float 用 %f 读；%.2f 控制两位小数。"
+    },
+    {
+      id: "ch4-q5", ch: "4", type: "program", level: "★",
+      title: "编程：两数平均值",
+      desc: "读入两个整数，输出它们的平均值（保留 1 位小数）。示例交互：",
+      sampleIn: "3 4",
+      sampleOut: "平均 = 3.5",
+      starter:
+`#include <stdio.h>
+
+int main(void)
+{
+    /* 在这里写你的代码 */
+
+    return 0;
+}`,
+      ref:
+`#include <stdio.h>
+
+int main(void)
+{
+    int a, b;
+    scanf("%d %d", &a, &b);
+    printf("平均 = %.1f\n", (a + b) / 2.0);
+    return 0;
+}`,
+      refOut: "平均 = 3.5",
+      hint: "整数除法坑：(a+b)/2 是整数除法；除以 2.0 才得到小数。"
+    },
+    {
+      id: "ch4-q6", ch: "4", type: "program", level: "★★",
+      title: "编程：华氏温度转摄氏",
+      desc: "读入华氏温度 F，按公式 C = (F-32)×5/9 输出摄氏温度（保留 2 位小数）。",
+      sampleIn: "100",
+      sampleOut: "100.00 华氏 = 37.78 摄氏",
+      starter:
+`#include <stdio.h>
+
+int main(void)
+{
+    /* 在这里写你的代码 */
+
+    return 0;
+}`,
+      ref:
+`#include <stdio.h>
+
+int main(void)
+{
+    float f;
+    scanf("%f", &f);
+    printf("%.2f 华氏 = %.2f 摄氏\n", f, (f - 32) * 5.0 / 9);
+    return 0;
+}`,
+      refOut: "100.00 华氏 = 37.78 摄氏",
+      hint: "公式里 5/9 是整数除法得 0！写成 5.0/9 或先乘后除。"
+    },
+    {
+      id: "ch4-q7", ch: "4", type: "pro", level: "★★",
+      title: "专业：格式化成绩表",
+      desc: "读入学号和三门成绩，按固定宽度打印成绩表（学号 10 宽右对齐、成绩 6 宽保留 1 位小数）。",
+      sampleIn: "2026001 85 90 78",
+      sampleOut: "学号      成绩1  成绩2  成绩3\n  2026001   85.0   90.0   78.0",
+      starter:
+`#include <stdio.h>
+
+int main(void)
+{
+    /* 在这里写你的代码 */
+
+    return 0;
+}`,
+      ref:
+`#include <stdio.h>
+
+int main(void)
+{
+    long id;
+    float a, b, c;
+    scanf("%ld %f %f %f", &id, &a, &b, &c);
+    printf("学号      成绩1  成绩2  成绩3\n");
+    printf("%10ld %6.1f %6.1f %6.1f\n", id, a, b, c);
+    return 0;
+}`,
+      refOut: "学号      成绩1  成绩2  成绩3\n  2026001   85.0   90.0   78.0",
+      hint: "%10ld 右对齐占 10 宽，%6.1f 占 6 宽保留 1 位小数。"
+    },
+    /* ===== Ch9 函数（v67c 补全） ===== */
+    {
+      id: "ch9-q4", ch: "9", type: "debug", level: "★",
+      title: "改错：函数使用三处错",
+      desc: "下面程序调用 max 函数有 3 处错：<br><b>① 函数未声明先使用；② 调用传参类型不匹配；③ 函数没有 return。</b>",
+      starter:
+`#include <stdio.h>
+
+int main(void)
+{
+    int a = 3, b = 7;
+    printf("较大 = %d\n", max(a, 2.5));
+    return 0;
+}
+
+int max(int x, int y)
+{
+    int m = x;
+    if (y > m) m = y;
+}`,
+      ref:
+`#include <stdio.h>
+
+int max(int x, int y);
+
+int main(void)
+{
+    int a = 3, b = 7;
+    printf("较大 = %d\n", max(a, b));
+    return 0;
+}
+
+int max(int x, int y)
+{
+    int m = x;
+    if (y > m) m = y;
+    return m;
+}`,
+      refOut: "较大 = 7",
+      hint: "先用原型声明再调用；类型要对（2.5 是 double 不是 int）；函数要 return 结果。"
+    },
+    {
+      id: "ch9-q5", ch: "9", type: "program", level: "★",
+      title: "编程：函数求两数较大值",
+      desc: "写一个 max2(a, b) 函数返回较大值，main 读入两个整数调用它并输出。",
+      sampleIn: "5 9",
+      sampleOut: "较大 = 9",
+      starter:
+`#include <stdio.h>
+
+int max2(int x, int y);
+
+int main(void)
+{
+    /* 在这里写你的代码 */
+
+    return 0;
+}
+
+int max2(int x, int y)
+{
+    /* 在这里写你的代码 */
+}`,
+      ref:
+`#include <stdio.h>
+
+int max2(int x, int y);
+
+int main(void)
+{
+    int a, b;
+    scanf("%d %d", &a, &b);
+    printf("较大 = %d\n", max2(a, b));
+    return 0;
+}
+
+int max2(int x, int y)
+{
+    return x > y ? x : y;
+}`,
+      refOut: "较大 = 9",
+      hint: "函数职责单一：只算不打印；main 里负责输入输出。"
+    },
+    {
+      id: "ch9-q6", ch: "9", type: "program", level: "★★",
+      title: "编程：递归求阶乘",
+      desc: "写递归函数 fact(n) 求 n!（n≤12），main 读入 n 调用输出。基线条件 n≤1 时返回 1。",
+      sampleIn: "5",
+      sampleOut: "5! = 120",
+      starter:
+`#include <stdio.h>
+
+long fact(int n);
+
+int main(void)
+{
+    /* 在这里写你的代码 */
+
+    return 0;
+}
+
+long fact(int n)
+{
+    /* 在这里写你的代码 */
+}`,
+      ref:
+`#include <stdio.h>
+
+long fact(int n);
+
+int main(void)
+{
+    int n;
+    scanf("%d", &n);
+    printf("%d! = %ld\n", n, fact(n));
+    return 0;
+}
+
+long fact(int n)
+{
+    if (n <= 1) return 1;
+    return n * fact(n - 1);
+}`,
+      refOut: "5! = 120",
+      hint: "递归两要素：基线条件（n≤1）+ 递归步（n × fact(n-1)）；n≤12 防溢出。"
+    },
+    {
+      id: "ch9-q7", ch: "9", type: "pro", level: "★★★",
+      title: "专业：函数求数组最大值",
+      desc: "写函数 arrMax(int a[], int n) 返回数组最大值。注意：数组参数退化指针，必须同时传长度 n。main 读 n 和 n 个数调用。",
+      sampleIn: "5\n3 9 2 7 5",
+      sampleOut: "最大值 = 9",
+      starter:
+`#include <stdio.h>
+
+int arrMax(int a[], int n);
+
+int main(void)
+{
+    /* 在这里写你的代码 */
+
+    return 0;
+}
+
+int arrMax(int a[], int n)
+{
+    /* 在这里写你的代码 */
+}`,
+      ref:
+`#include <stdio.h>
+
+int arrMax(int a[], int n);
+
+int main(void)
+{
+    int n, i, a[100];
+    scanf("%d", &n);
+    for (i = 0; i < n; i++) scanf("%d", &a[i]);
+    printf("最大值 = %d\n", arrMax(a, n));
+    return 0;
+}
+
+int arrMax(int a[], int n)
+{
+    int m = a[0], i;
+    for (i = 1; i < n; i++)
+        if (a[i] > m) m = a[i];
+    return m;
+}`,
+      refOut: "最大值 = 9",
+      hint: "函数内 sizeof(a) 是 8（指针），所以必须传 n；初始化 m=a[0] 再逐个比。"
+    },
+    /* ===== Ch11 字符串（v67c 补全） ===== */
+    {
+      id: "ch11-q4", ch: "11", type: "debug", level: "★★",
+      title: "改错：strcmp 用错 + 越界",
+      desc: "下面程序想判断密码是否匹配，有 3 处错：<br><b>① strcmp 返回值判断反了；② 用 == 比较字符串；③ 数组没留 \\0 空间。</b>",
+      starter:
+`#include <stdio.h>
+#include <string.h>
+
+int main(void)
+{
+    char pwd[3] = "abc";
+    char in[20];
+    printf("密码：");
+    scanf("%s", in);
+    if (strcmp(in, pwd) == 1) printf("正确\n");
+    else if (in == pwd) printf("正确2\n");
+    else printf("错误\n");
+    return 0;
+}`,
+      ref:
+`#include <stdio.h>
+#include <string.h>
+
+int main(void)
+{
+    char pwd[] = "abc";
+    char in[20];
+    printf("密码：");
+    scanf("%s", in);
+    if (strcmp(in, pwd) == 0) printf("正确\n");
+    else printf("错误\n");
+    return 0;
+}`,
+      refOut: "密码：abc<br>正确",
+      hint: "strcmp 返回 0 表示相等；字符串必须用 strcmp 比较（== 比的是地址）；数组要留 \\0 空间（pwd[3] 装不下 \"abc\\0\"）。"
+    },
+    {
+      id: "ch11-q5", ch: "11", type: "program", level: "★★",
+      title: "编程：字符串反转",
+      desc: "读入一个字符串（不含空格），原地反转后输出。用 strlen 求长度、首尾交换。",
+      sampleIn: "hello",
+      sampleOut: "olleh",
+      starter:
+`#include <stdio.h>
+#include <string.h>
+
+int main(void)
+{
+    /* 在这里写你的代码 */
+
+    return 0;
+}`,
+      ref:
+`#include <stdio.h>
+#include <string.h>
+
+int main(void)
+{
+    char s[100];
+    int i, n;
+    scanf("%s", s);
+    n = strlen(s);
+    for (i = 0; i < n / 2; i++) {
+        char t = s[i];
+        s[i] = s[n - 1 - i];
+        s[n - 1 - i] = t;
+    }
+    printf("%s\n", s);
+    return 0;
+}`,
+      refOut: "olleh",
+      hint: "首尾对称交换：s[i] 与 s[n-1-i]，交换 n/2 次即可。"
+    },
+    {
+      id: "ch11-q6", ch: "11", type: "program", level: "★★",
+      title: "编程：fgets 统计字符数",
+      desc: "用 fgets 读入一行（含空格），去掉结尾换行后输出字符数。",
+      sampleIn: "hello world",
+      sampleOut: "字符数 = 11",
+      starter:
+`#include <stdio.h>
+#include <string.h>
+
+int main(void)
+{
+    /* 在这里写你的代码 */
+
+    return 0;
+}`,
+      ref:
+`#include <stdio.h>
+#include <string.h>
+
+int main(void)
+{
+    char s[100];
+    int len;
+    fgets(s, sizeof s, stdin);
+    len = strlen(s);
+    if (len > 0 && s[len - 1] == '\n') s[len - 1] = '\0';
+    printf("字符数 = %d\n", strlen(s));
+    return 0;
+}`,
+      refOut: "字符数 = 11",
+      hint: "fgets 会保留结尾 \\n，要去掉：检查 s[len-1]=='\\n' 则置 '\\0'——这是处理 fgets 的标配三行。"
+    },
+    {
+      id: "ch11-q7", ch: "11", type: "pro", level: "★★★",
+      title: "专业：统计单词数",
+      desc: "读入一行英文（fgets），统计单词个数（空格分隔，无标点）。示例：",
+      sampleIn: "I love C language",
+      sampleOut: "单词数 = 4",
+      starter:
+`#include <stdio.h>
+#include <string.h>
+
+int main(void)
+{
+    /* 在这里写你的代码 */
+
+    return 0;
+}`,
+      ref:
+`#include <stdio.h>
+#include <string.h>
+
+int main(void)
+{
+    char s[200];
+    int i, n, cnt = 0, in = 0;
+    fgets(s, sizeof s, stdin);
+    n = strlen(s);
+    for (i = 0; i < n; i++) {
+        if (s[i] == ' ' || s[i] == '\n') in = 0;
+        else if (!in) { in = 1; cnt++; }
+    }
+    printf("单词数 = %d\n", cnt);
+    return 0;
+}`,
+      refOut: "单词数 = 4",
+      hint: "状态机：in 标记是否在单词内；遇空格复位，遇非空格且不在词内则计数。"
     }
   ];
 
-  const CHAPTER_ORDER = ["1", "3", "5", "6", "7", "10", "12"];
+  const CHAPTER_ORDER = ["1", "3", "4", "5", "6", "7", "9", "10", "11", "12"];
   const TYPE_NAME = { debug: "改错", program: "编程", pro: "专业" };
   const TYPE_CLASS = { debug: "cpt-debug", program: "cpt-program", pro: "cpt-pro" };
 

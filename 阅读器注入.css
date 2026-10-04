@@ -1,0 +1,38 @@
+/* 莉萝阅读器 → pdf.js viewer 注入样式（2026-09-27 批注开关 方案C）
+   背景：pdf.js viewer.html 自带 CSP style-src 'self'，inline <style> 会被拦截，
+   故改用同源外部 CSS，经 iframe <link rel=stylesheet> 注入（CSP 允许 'self'）。
+   升级纪律：改本文件 = 改外壳 → sw.js CACHE_SHELL 缓存名 +1 */
+
+/* 原：隐藏 pdf.js 自带但阅读器不需要的按钮 */
+#download, #print, #openFile, #secondaryToolbarToggle { display: none !important; }
+
+/* 批注工具栏常显：
+   - pdf.js 在权限 DISABLE 分支会给 #editorModeButtons 加 .hidden → 用 id 优先级强制回显
+   - 视觉分组（浅边框 + 圆角 + 微底色），让「批注开关」一眼可见 */
+#editorModeButtons {
+  display: flex !important;
+  padding: 2px 4px !important;
+  border: 1px solid rgba(77,107,254,.45) !important;
+  border-radius: 6px !important;
+  margin-inline-start: 4px !important;
+  background: rgba(77,107,254,.09) !important;
+}
+#editorModeButtons .toolbarButton:hover { background: rgba(77,107,254,.14) !important; }
+#editorModeButtons.hidden { display: flex !important; }
+#editorModeButtons .toolbarButton { width: 28px !important; height: 28px !important; }
+
+/* 隐藏与阅读器顶栏重复的页码/缩放控件 → 给批注工具栏腾出常显空间
+   （阅读器顶栏已有「页 x / n」与「缩放：Ctrl + 滚轮」） */
+#pageNumber, #numPages, #zoomOutButton, #zoomInButton, #scaleSelectContainer { display: none !important; }
+/* pdf.js 自带侧栏切换（阅读器已有左侧目录栏）也隐藏，让窄 iframe 内只留批注工具栏 */
+#sidebarToggle { display: none !important; }
+#toolbarViewer { justify-content: flex-end !important; }
+
+/* 原：PDF 页面卡片阴影 + 透明容器 */
+#viewer .page { box-shadow: 0 4px 24px rgba(0,0,0,.13) !important; margin: 18px auto !important; border-radius: 2px; background: #fff; }
+body.dark #viewer .page { box-shadow: 0 4px 20px rgba(255,255,255,.08) !important; }
+#viewerContainer { background: transparent !important; }
+
+
+/* 划词标注 + 划词工具条 + 选择禁用（原 阅读器.html inline 注入，CSP style-src self 拦截后并入本文件） */
+.hl-marker{position:absolute;z-index:5;border-radius:2px;cursor:pointer;pointer-events:auto} .hl-marker.hl-1{background:rgba(251,218,131,.42)} .hl-marker.hl-2{background:rgba(228,147,142,.38)} .hl-marker.hl-3{background:rgba(141,187,255,.38)} .hl-marker:hover{outline:1px solid rgba(0,0,0,.25)} #hlBar{position:fixed;z-index:9999;display:none;gap:4px;background:rgba(255,255,255,.96);border:1px solid rgba(0,0,0,.12);border-radius:8px;padding:4px 6px;box-shadow:0 4px 14px rgba(0,0,0,.18);align-items:center} #hlBar button{width:20px;height:20px;border:none;border-radius:4px;cursor:pointer;border:1px solid rgba(0,0,0,.15);padding:0} #hlBar .hl-b1{background:#FBDA83} #hlBar .hl-b2{background:#E4938E} #hlBar .hl-b3{background:#8DBBFF} #hlBar .hl-note-btn{width:auto;padding:0 8px;font-size:12px;color:#333;background:#fff} body.dark #hlBar{background:rgba(42,42,42,.96);border-color:rgba(255,255,255,.15)} body.dark #hlBar .hl-note-btn{color:#ddd} body.dark #hlBar .hl-note-btn{background:rgba(60,60,60,.9)} body.sel-disabled,body.sel-disabled *,body.sel-disabled .textLayer,body.sel-disabled .textLayer span,body.sel-disabled .textLayer ::selection{user-select:none!important;-webkit-user-select:none!important;-webkit-touch-callout:none!important} body.sel-disabled #viewer .textLayer{display:none!important} body.sel-disabled #viewer{touch-action:none!important}

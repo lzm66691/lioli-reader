@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>C 语言伴读讲义 · Ch9 函数</title>
+<style>
+  :root{
+    --teal:#4D6BFE; --ink:#0f172a; --body:#334155; --muted:#64748b;
+    --line:#e2e8f0; --code-bg:#f1f5f9; --warn-bg:#fff7ed; --warn-border:#fdba74;
+    --tip-bg:#eff6ff; --tip-border:#93c5fd; --ans-bg:#f0fdf4;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:"Noto Sans SC",-apple-system,"Microsoft YaHei",sans-serif;
+    color:var(--body); font-size:14px; line-height:1.75; padding:36px 44px;
+  }
+  h1{font-size:24px;color:var(--ink);margin-bottom:4px}
+  h2{font-size:18px;color:var(--teal);margin:26px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  h3{font-size:15px;color:var(--ink);margin:18px 0 8px}
+  p{margin:8px 0}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+  .kicker{display:inline-block;background:var(--teal);color:#fff;font-size:11px;padding:2px 8px;border-radius:4px;margin-bottom:8px;letter-spacing:1px}
+  pre{
+    background:var(--code-bg);border:1px solid var(--line);border-radius:8px;
+    padding:12px 14px;font-size:12.5px;line-height:1.6;overflow-x:auto;
+    white-space:pre-wrap;word-break:break-all;font-family:Consolas,"Courier New",monospace;
+  }
+  pre .cm{color:#6b7280}
+  .cmd{font-size:12px;color:var(--muted);font-family:Consolas,monospace;margin:4px 0 12px}
+  .warn,.tip,.ans{border-radius:8px;padding:10px 14px;margin:12px 0;font-size:13.5px}
+  .warn{background:var(--warn-bg);border-left:4px solid var(--warn-border)}
+  .tip{background:var(--tip-bg);border-left:4px solid var(--tip-border)}
+  .ans{background:var(--ans-bg);border-left:4px solid #4ade80}
+  .warn b,.tip b,.ans b{color:var(--ink)}
+  table{border-collapse:collapse;margin:12px 0;width:100%;table-layout:fixed}
+  th,td{border:1px solid var(--line);padding:7px 10px;font-size:13px;text-align:left}
+  th{background:var(--code-bg);color:var(--ink)}
+  ul,ol{margin:8px 0 8px 22px}
+  li{margin:4px 0}
+  .selfcheck{background:#faf5ff;border-left:4px solid #a855f7;border-radius:8px;padding:10px 14px;margin:12px 0}
+  .selfcheck b{color:#7e22ce}
+  .footer{margin-top:28px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);page-break-before:avoid}
+  @media print{.footer{page-break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<div class="kicker">C 语言伴读讲义 · 补全章</div>
+<h1>Ch9 函数</h1>
+<div class="sub">对应《C Primer Plus（第6版）》第 9 章 · 本章目标：40 分钟读懂 + 60 分钟练完 · 前置：Ch1–Ch7 · 学完本章，Ch10 的数组与指针才能继续</div>
+
+<h2 id="s9-1">9.1 先看一个真实场景：为什么需要函数</h2>
+<p>你写了一个「把 10 个 LED 依次点亮」的程序，现在要再点亮 20 个、30 个——把点亮逻辑复制三遍？代码会越堆越长，改一个细节要改三处。函数就是<b>给一段代码起名字、随叫随到</b>的工具：</p>
+<ul>
+<li><b>复用</b>：同一段逻辑写一次，需要时调用多次；</li>
+<li><b>分工</b>：大程序拆成小函数，各管一段，出错好定位；</li>
+<li><b>可读</b>：main 里全是「做什么」（turn_on_led(3)），而不是「怎么做」。</li>
+</ul>
+<p>电子信息专业的视角：驱动库、算法库（FFT、滤波）全部是「函数集合」。你之后读学长代码、用厂商 SDK，第一步就是找它的函数原型。</p>
+
+<h2 id="s9-2">9.2 函数的定义：返回值类型 + 名字 + 参数 + 函数体</h2>
+<p>函数定义长这样（和 main 同级的兄弟函数）：</p>
+<pre><span class="cm">/* ch9_01_add.c — 最简单的函数：两数相加 */</span>
+#include &lt;stdio.h&gt;
+
+int add(int a, int b)      <span class="cm">/* 返回类型 int；参数 a、b 都是 int */</span>
+{
+    return a + b;          <span class="cm">/* return 把结果交回给调用者 */</span>
+}
+
+int main(void)
+{
+    int r = add(3, 5);     <span class="cm">/* 调用：实参 3 和 5 传给形参 a 和 b */</span>
+    printf("%d\n", r);     <span class="cm">/* 输出 8 */</span>
+    return 0;
+}</pre>
+<p class="cmd">编译：gcc -Wall -Wextra -o add.exe ch9_01_add.c　运行：.\add.exe　→ 8</p>
+<table>
+<tr><th>部件</th><th>说明</th><th>示例</th></tr>
+<tr><td>返回类型</td><td>函数交回的值是什么类型；不需要交回就用 <code>void</code></td><td><code>int</code> / <code>void</code></td></tr>
+<tr><td>函数名</td><td>动词化命名，让别人一看就知道干什么</td><td><code>add</code> / <code>turn_on_led</code></td></tr>
+<tr><td>参数列表</td><td>函数需要的「输入」；没有就用 <code>void</code></td><td><code>(int a, int b)</code> / <code>(void)</code></td></tr>
+<tr><td>函数体</td><td>{ } 里的语句，最后通常 return</td><td><code>{ return a + b; }</code></td></tr>
+</table>
+<div class="warn"><b>新手坑 1：形参和实参是两个东西。</b>定义里写的是<b>形参</b>（a、b 是占位符），调用时传的是<b>实参</b>（3、5 是真值）。调用那一刻，实参的值被<b>复制</b>给形参——函数内部改形参，外面的实参不受影响（9.4 细讲）。</div>
+
+<h2 id="s9-3">9.3 函数原型：先声明，后使用</h2>
+<p>编译器读代码是<b>从上到下</b>的。如果 main 在 add 前面，编译器看到 <code>add(3,5)</code> 时还不知道 add 是什么 → 报「隐式声明」错误（C99 之后直接拒绝编译）。解决办法：在调用之前放一行<b>函数原型</b>：</p>
+<pre><span class="cm">/* ch9_02_proto.c — 函数原型先行 */</span>
+#include &lt;stdio.h&gt;
+
+int add(int a, int b);     <span class="cm">/* 函数原型：只声明签名，不写函数体 */</span>
+
+int main(void)
+{
+    printf("%d\n", add(3, 5));
+    return 0;
+}
+
+int add(int a, int b)      <span class="cm">/* 函数定义可以放后面 */</span>
+{
+    return a + b;
+}</pre>
+<div class="tip"><b>习惯</b>：所有函数原型集中在 main 前面（或放头文件），函数定义随意排。这也是你读别人代码时的第一站。</div>
+
+<h2 id="s9-4">9.4 参数传递：值传递（swap 为什么不行）</h2>
+<p>参数是<b>值传递</b>——传进去的是副本。经典的「交换两个数」陷阱：</p>
+<pre><span class="cm">/* ch9_03_swap.c — 为什么 swap 没生效？ */</span>
+#include &lt;stdio.h&gt;
+
+void swap(int a, int b)    <span class="cm">/* 形参 a、b 是实参的副本 */</span>
+{
+    int t = a;
+    a = b;
+    b = t;                 <span class="cm">/* 只交换了副本 */</span>
+}
+
+int main(void)
+{
+    int x = 1, y = 2;
+    swap(x, y);
+    printf("x=%d y=%d\n", x, y);   <span class="cm">/* 输出 x=1 y=2，没换！ */</span>
+    return 0;
+}</pre>
+<p class="cmd">实测输出：<code>x=1 y=2</code>——swap 里的 a、b 是 x、y 的复制品，交换副本不影响原件。</p>
+<div class="warn"><b>新手坑 2：想改外面的变量，要么传地址（指针，Ch10 学），要么让函数 return 新值再赋值。</b>目前阶段：需要「带出结果」就 <code>return</code>，如 <code>x = add(x, 5);</code>。</div>
+
+<h2 id="s9-5">9.5 返回值与 void：函数能交回什么</h2>
+<p><code>return 表达式;</code> 把结果交回调用处；<code>void</code> 函数不交回值（但可以 <code>return;</code> 提前结束）：</p>
+<pre><span class="cm">/* ch9_04_return.c — 返回值与提前返回 */</span>
+#include &lt;stdio.h&gt;
+
+int abs_val(int n)         <span class="cm">/* 绝对值 */</span>
+{
+    if (n &lt; 0) return -n;  <span class="cm">/* 提前返回 */</span>
+    return n;
+}
+
+void report(int n)         <span class="cm">/* void：只做事，不交回 */</span>
+{
+    printf("abs(%d) = %d\n", n, abs_val(n));
+}
+
+int main(void)
+{
+    report(-7);            <span class="cm">/* 输出 abs(-7) = 7 */</span>
+    report(4);             <span class="cm">/* 输出 abs(4) = 4 */</span>
+    return 0;
+}</pre>
+<div class="tip"><b>返回类型要对上</b>：return 的类型和函数声明的返回类型不一致，编译器会警告（-Wall 会提醒）。double 函数里 return int 值 → 自动转 double，但反过来 int 函数里 return double 会<b>截断</b>（丢小数）。</div>
+
+<h2 id="s9-6">9.6 函数与数组：传数组 = 传首地址（const 保护）</h2>
+<p>把整个数组复制给函数太浪费，C 的做法是<b>只传数组首地址 + 长度</b>（指针细节 Ch10 展开，这里先会用）：</p>
+<pre><span class="cm">/* ch9_05_array.c — 数组求和函数（Ch10 会用到同款写法）*/</span>
+#include &lt;stdio.h&gt;
+
+int sum_array(const int arr[], int n)   <span class="cm">/* const：承诺不修改数组内容 */</span>
+{
+    int s = 0;
+    for (int i = 0; i &lt; n; i++)
+        s += arr[i];
+    return s;
+}
+
+int main(void)
+{
+    int a[] = {2, 4, 6, 8};
+    printf("%d\n", sum_array(a, 4));    <span class="cm">/* 输出 20 */</span>
+    return 0;
+}</pre>
+<p class="cmd">实测输出：<code>20</code>。arr 形参里写 <code>const int arr[]</code> 是告诉编译器「我只读不改」——误改 arr[i] 会直接报错，防止手滑。</p>
+<div class="warn"><b>新手坑 3：函数里 sizeof(arr) 不是数组大小！</b>形参 <code>int arr[]</code> 本质是指针，<code>sizeof(arr)</code> 是指针大小（8 字节，64 位机），不是数组字节数。所以必须<b>同时传长度 n</b>。这是 C 语言的经典陷阱，面试也爱考。</div>
+
+<h2 id="s9-7">9.7 递归：函数调用自己（先看懂再写）</h2>
+<p>递归 = 函数体里调用它自己，配合「终止条件」结束。经典阶乘：</p>
+<pre><span class="cm">/* ch9_06_fact.c — 递归求阶乘 */</span>
+#include &lt;stdio.h&gt;
+
+long fact(int n)
+{
+    if (n &lt;= 1) return 1;   <span class="cm">/* 终止条件：不再往下调 */</span>
+    return n * fact(n - 1); <span class="cm">/* 自己调用自己，规模缩小 */</span>
+}
+
+int main(void)
+{
+    printf("%ld\n", fact(5));   <span class="cm">/* 输出 120 */</span>
+    return 0;
+}</pre>
+<p class="cmd">实测输出：<code>120</code>（5×4×3×2×1）。递归执行路径：fact(5) → 5×fact(4) → 5×4×fact(3) → … → 5×4×3×2×1。</p>
+<div class="tip"><b>递归三要素</b>：①终止条件（不满足就无限调 → 栈溢出崩溃）；②每次调用规模变小；③能把「缩小后的结果」拼回大结果。写不出递归就用循环，二者等价，别硬撑。</div>
+
+<h2 id="s9-8">9.8 新手坑集中营（本章最容易错的 4 件事）</h2>
+<ul>
+<li><b>1. 漏函数原型</b>：main 在前、函数定义在后，中间没有原型 → 编译报「隐式声明」错误。报错先看是不是函数顺序问题。</li>
+<li><b>2. 函数里 sizeof(数组形参)</b>：拿到的是指针大小不是数组大小——数组参数必须另传长度。</li>
+<li><b>3. 忘记 return / 返回类型不匹配</b>：int 函数漏 return 是<b>未定义行为</b>（可能返回垃圾值）；-Wall 会警告「control reaches end of non-void function」——看到立刻补。</li>
+<li><b>4. 想用函数改外部变量却用值传递</b>：swap(x,y) 换不了——要么 return 新值，要么等 Ch10 学指针再传地址。</li>
+</ul>
+
+<h2 id="s9-9">9.9 一分钟自测（先答后揭，答案见练习册）</h2>
+<div class="selfcheck">
+<b>Q1</b>：函数原型和函数定义的区别是什么？<br>
+<b>Q2</b>：void 函数可以写 return; 吗？<br>
+<b>Q3</b>：int sum(const int a[], int n) 里的 const 有什么用？<br>
+<b>Q4</b>：为什么 swap(int a, int b) 换不了外面的两个变量？<br>
+<b>Q5</b>：递归必须有的两个条件是什么？
+</div>
+
+<h2 id="s9-10">9.10 练习指引</h2>
+<p>打开「练习册 · Ch9」：先做 <b>9-1 填空</b>（热手）→ <b>9-2 改错</b>（先自己找错再对答案，最有价值）→ <b>9-3/9-4 编程</b>（自己写，参考代码在参考答案）→ <b>9-5 专业场景</b>（写一个 LED 灯效函数，电子信息味）。写完对照参考答案，重点看「常见错法」。</p>
+
+<div class="footer">Ch9 讲义 · 兰大 2026 级电子信息 · 本机 gcc 16.1.0 -Wall -Wextra 实测输出与讲义一致</div>
+
+</body>
+</html>

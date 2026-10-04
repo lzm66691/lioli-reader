@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>C 语言伴读讲义 · Ch12 存储类别、链接和内存管理</title>
+<style>
+  :root{
+    --teal:#4D6BFE; --ink:#0f172a; --body:#334155; --muted:#64748b;
+    --line:#e2e8f0; --code-bg:#f1f5f9; --warn-bg:#fff7ed; --warn-border:#fdba74;
+    --tip-bg:#eff6ff; --tip-border:#93c5fd; --ans-bg:#f0fdf4;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:"Noto Sans SC",-apple-system,"Microsoft YaHei",sans-serif;color:var(--body);font-size:14px;line-height:1.75;padding:32px 40px}
+  h1{font-size:24px;color:var(--ink);margin-bottom:4px}
+  h2{font-size:18px;color:var(--teal);margin:24px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line);page-break-before:auto}
+  h3{font-size:15px;color:var(--ink);margin:16px 0 8px}
+  p{margin:8px 0}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+  .kicker{display:inline-block;background:var(--teal);color:#fff;font-size:11px;padding:2px 8px;border-radius:4px;margin-bottom:8px;letter-spacing:1px}
+  pre{background:var(--code-bg);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:12.5px;line-height:1.6;overflow-x:auto;white-space:pre-wrap;word-break:break-all;font-family:Consolas,"Courier New",monospace}
+  pre .cm{color:#6b7280}
+  .cmd{font-size:12px;color:var(--muted);font-family:Consolas,monospace;margin:4px 0 12px}
+  .warn,.tip{border-radius:8px;padding:10px 14px;margin:12px 0;font-size:13.5px}
+  .warn{background:var(--warn-bg);border-left:4px solid var(--warn-border)}
+  .tip{background:var(--tip-bg);border-left:4px solid var(--tip-border)}
+  .warn b,.tip b{color:var(--ink)}
+  table{border-collapse:collapse;margin:12px 0;width:100%;table-layout:fixed}
+  th,td{border:1px solid var(--line);padding:7px 10px;font-size:13px;text-align:left}
+  th{background:var(--code-bg);color:var(--ink)}
+  ul,ol{margin:8px 0 8px 22px}
+  li{margin:4px 0}
+  .selfcheck{background:#faf5ff;border-left:4px solid #a855f7;border-radius:8px;padding:10px 14px;margin:12px 0}
+  .selfcheck b{color:#7e22ce}
+  .footer{margin-top:28px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);page-break-before:avoid}
+  @media print{.footer{page-break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<div class="kicker">C 语言伴读讲义 · 重点章</div>
+<h1>Ch12 存储类别、链接和内存管理</h1>
+<div class="sub">对应《C Primer Plus（第6版）》第 12 章 · 本章目标：30 分钟读懂 + 60 分钟练完 · 电子信息方向后续课程与期末常见考点（static/extern、作用域存储期、malloc/free）</div>
+
+<h2 id="s12-1">12.1 两个问题：变量「管到哪」和「活多久」</h2>
+<p>每个变量都有两个属性，初学时常被忽略但考试必考：</p>
+<ul>
+<li><b>作用域</b>：在哪些代码里能用到它？——<b>块作用域</b>（函数或 {} 内声明，出了块就没了）vs <b>文件作用域</b>（函数外面声明，整个文件都能用，也叫全局变量）。</li>
+<li><b>存储期</b>：它的内存什么时候分配、什么时候释放？——<b>自动存储期</b>（进入块分配、出块释放，默认的局部变量）vs <b>静态存储期</b>（程序启动分配、程序结束才释放）。</li>
+</ul>
+<pre><span class="cm">/* ch12_01_scope.c — 作用域演示 */</span>
+#include &lt;stdio.h&gt;
+
+int count = 0;            <span class="cm">/* 文件作用域 + 静态存储期（全局）*/</span>
+
+int main(void)
+{
+    int x = 1;            <span class="cm">/* 块作用域 + 自动存储期 */</span>
+    {
+        int x = 2;        <span class="cm">/* 内层块自己的 x，遮蔽外层 */</span>
+        printf("内层 x = %d\n", x);
+    }
+    printf("外层 x = %d\n", x);
+    printf("全局 count = %d\n", count);
+    return 0;
+}</pre>
+
+<h2 id="s12-2">12.2 static：让局部变量「记住」上一次的值</h2>
+<p>函数里普通的局部变量，每次调用都重新分配，但<b>不会自动初始化</b>——未赋初值的话，值是栈上残留的不确定值（本机实测同一函数两次调用分别得到 1 和 0）。加 <code>static</code> 后，它变成<b>静态存储期</b>：只初始化一次（默认置 0），函数退出不销毁，下次调用还留着上次的值。只有 <code>static</code> 变量与全局变量默认置 0。</p>
+<pre><span class="cm">/* ch12_02_static.c — static 计数器 */</span>
+#include &lt;stdio.h&gt;
+
+int next_id(void)
+{
+    static int n = 0;     <span class="cm">/* 只初始化一次！ */</span>
+    n++;
+    return n;
+}
+
+int main(void)
+{
+    printf("%d %d %d\n", next_id(), next_id(), next_id());
+    return 0;
+}</pre>
+<p class="cmd">本机 gcc 16.1.0 实测输出：3 2 1。C 标准不规定实参求值顺序（本机是从右向左），所以这种一行多次调用的写法不要用。若去掉 <code>static</code> 且保留初值 0，输出会是 1 1 1（每次调用重新初始化，与「记住上次值」无关）；若连初值都不给，值是栈上残留的不确定值并触发 <code>-Wuninitialized</code> 警告。</p>
+<div class="tip"><b>典型用途</b>：计数器、只初始化一次的标志位、生成递增 ID（电子信息里给数据帧编号很常见）。</div>
+
+<h2 id="s12-3">12.3 extern：使用别处定义的全局变量</h2>
+<p><code>extern</code> 声明「这个变量在别处定义过，我这里只是引用」。同一个全局变量在多个文件/函数里共享时用它。单文件里，只要变量定义在前面，后面函数直接能用；跨文件时必须在使用方写 <code>extern int count;</code>。</p>
+<pre><span class="cm">/* ch12_03_extern.c — 跨函数共享全局（单文件演示）*/</span>
+#include &lt;stdio.h&gt;
+
+int counter = 0;          <span class="cm">/* 定义 */</span>
+
+void bump(void)           <span class="cm">/* 函数里想用 counter：其实同文件不用 extern */</span>
+{
+    counter++;
+}
+
+int main(void)
+{
+    bump(); bump(); bump();
+    printf("counter = %d\n", counter);
+    return 0;
+}</pre>
+<div class="warn"><b>新手坑 1：全局变量不是越多越好。</b>它让任何函数都能改，调试时不知道谁改的。课程阶段：少用全局，函数间传参优先（这也是 Ch10 讲 const 保护的原因）。</div>
+
+<h2 id="s12-4">12.4 动态内存：malloc 和 free</h2>
+<p>前面学的数组长度都是<b>编译时就定死的</b>。运行时才知道要多大？用 <code>malloc</code> 在<b>堆</b>上按需申请：</p>
+<pre><span class="cm">/* ch12_04_malloc.c — 动态数组 */</span>
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;      <span class="cm">/* malloc/free 在这里 */</span>
+
+int main(void)
+{
+    int n, i;
+    int *arr;
+
+    printf("要几个数？");
+    scanf("%d", &amp;n);
+    arr = malloc(n * sizeof(int));         <span class="cm">/* 申请 n 个 int；C 里无需 (int*) 强转 */</span>
+    if (arr == NULL) {                     <span class="cm">/* 申请失败检查！ */</span>
+        printf("内存不足\n");
+        return 1;
+    }
+    for (i = 0; i &lt; n; i++) arr[i] = i * i;
+    for (i = 0; i &lt; n; i++) printf("%d ", arr[i]);
+    printf("\n");
+    free(arr);                            <span class="cm">/* 用完必须还回去 */</span>
+    return 0;
+}</pre>
+<div class="warn"><b>新手坑 2：申请了不 free = 内存泄漏。</b>循环里反复 malloc 不释放，内存越占越多，程序跑久了变慢甚至崩。养成「malloc 和 free 成对写」的习惯。<br>
+<b>新手坑 3：free 之后再用。</b>free 只是把内存还给系统，指针还指着那块地址——再去写就是未定义行为。free 后把指针置 NULL 是好习惯。</div>
+
+<h2 id="s12-5">12.5 常见坑集中营</h2>
+<ol>
+<li><b>static 初始化时机</b>：static 变量初始化只发生一次，且必须是编译期常量（不能用运行时值初始化）。</li>
+<li><b>忘了检查 malloc 返回值</b>：内存申请失败返回 NULL，直接用就崩。</li>
+<li><b>malloc 和 free 不配对</b>：申请 3 次只 free 1 次 = 泄漏；free 两次 = 双重释放崩溃。</li>
+<li><b>sizeof 用错</b>：<code>malloc(n)</code> 对 int 数组应该是 <code>malloc(n * sizeof(int))</code>，忘了乘 sizeof 会分配太小。</li>
+</ol>
+
+<h2 id="s12-6">12.6 一分钟自测（答案见练习册）</h2>
+<div class="selfcheck">
+<b>判断对错：</b><br>
+① 函数内 <code>static int n = 0;</code> 每次调用函数时 n 都会被重置成 0。<br>
+② <code>malloc</code> 申请的内存用完必须 <code>free</code>，否则会泄漏。<br>
+③ 局部变量的作用域是它所在的整个文件。
+</div>
+
+<h2 id="s12-7">12.7 练习指引</h2>
+<p>做完本章内容后，去练习册完成 Ch12 配套练习；同时打开《C Primer Plus（第6版）》第 12 章，完成<b>复习题 1、3、5</b>（题号对应主教材）。本章内容期末常考，static/extern 的理解建议用「把程序运行过程在脑子里演一遍」的方式自测。</p>
+
+<div class="footer">本讲义为自写原创讲解，仅作课堂伴读；示例代码均可用 <code>gcc -Wall -Wextra</code> 编译。原书题目请以正版教材为准。</div>
+</body>
+</html>

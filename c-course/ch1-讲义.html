@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>C 语言伴读讲义 · Ch1 初识C语言与程序框架</title>
+<style>
+  :root{
+    --teal:#4D6BFE; --ink:#0f172a; --body:#334155; --muted:#64748b;
+    --line:#e2e8f0; --code-bg:#f1f5f9; --warn-bg:#fff7ed; --warn-border:#fdba74;
+    --tip-bg:#eff6ff; --tip-border:#93c5fd; --ans-bg:#f0fdf4;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:"Noto Sans SC",-apple-system,"Microsoft YaHei",sans-serif;
+    color:var(--body); font-size:14px; line-height:1.75; padding:36px 44px;
+  }
+  h1{font-size:24px;color:var(--ink);margin-bottom:4px}
+  h2{font-size:18px;color:var(--teal);margin:26px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  h3{font-size:15px;color:var(--ink);margin:18px 0 8px}
+  p{margin:8px 0}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+  .kicker{display:inline-block;background:var(--teal);color:#fff;font-size:11px;padding:2px 8px;border-radius:4px;margin-bottom:8px;letter-spacing:1px}
+  pre{
+    background:var(--code-bg);border:1px solid var(--line);border-radius:8px;
+    padding:12px 14px;font-size:12.5px;line-height:1.6;overflow-x:auto;
+    white-space:pre-wrap;word-break:break-all;font-family:Consolas,"Courier New",monospace;
+  }
+  pre .cm{color:#6b7280}
+  .cmd{font-size:12px;color:var(--muted);font-family:Consolas,monospace;margin:4px 0 12px}
+  .warn,.tip,.ans{border-radius:8px;padding:10px 14px;margin:12px 0;font-size:13.5px}
+  .warn{background:var(--warn-bg);border-left:4px solid var(--warn-border)}
+  .tip{background:var(--tip-bg);border-left:4px solid var(--tip-border)}
+  .ans{background:var(--ans-bg);border-left:4px solid #4ade80}
+  .warn b,.tip b,.ans b{color:var(--ink)}
+  table{border-collapse:collapse;margin:12px 0;width:100%;table-layout:fixed}
+  th,td{border:1px solid var(--line);padding:7px 10px;font-size:13px;text-align:left}
+  th{background:var(--code-bg);color:var(--ink)}
+  ul,ol{margin:8px 0 8px 22px}
+  li{margin:4px 0}
+  .selfcheck{background:#faf5ff;border-left:4px solid #a855f7;border-radius:8px;padding:10px 14px;margin:12px 0}
+  .selfcheck b{color:#7e22ce}
+  .footer{margin-top:28px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);page-break-before:avoid}
+  @media print{.footer{page-break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<div class="kicker">C 语言伴读讲义 · 第 1 批</div>
+<h1>Ch1 初识C语言与程序框架</h1>
+<div class="sub">对应《C Primer Plus（第6版）》第 1–2 章合并 · 本章目标：30 分钟读懂 + 60 分钟练完 · 不覆盖：指针、位运算</div>
+
+<h2 id="s1-1">1.1 学 C 之前：这语言为什么值得学</h2>
+<p>C 语言是很多大学电子信息/计算机专业的第一门编程课。它离"硬件"很近——你能直接控制内存地址、字节、硬件寄存器，这是 Python/Java 这些"更省事"的语言替你藏起来的东西。兰大的电子信息课程里，单片机的 C 代码、嵌入式、信号处理库，背后都是 C。</p>
+<div class="tip"><b>一句话定位：</b>C 让你看清"程序是怎么跑起来的"。哪怕以后主要用别的语言，C 建立的"内存、指针、编译"心智模型也会跟着你走。</div>
+<p>但这门课有 <b>两座大山</b>：指针（第 10 章）和内存管理（第 12 章）。别怕——本讲义会在前面章节不断埋伏笔，到那两章你就不觉得陡了。</p>
+
+<h2 id="s1-2">1.2 环境搭建：让"编译器"跑起来</h2>
+<p>你写的 C 代码（<code>.c</code> 文件）计算机不能直接运行，需要先用<b>编译器</b>把它翻译成机器能懂的机器码。本课程统一用 <b>MinGW-W64 的 gcc</b>（本机已装，16.1.0）。</p>
+<p>三步走：</p>
+<ol>
+<li><b>写代码</b>：用编辑器（VS Code / Dev-C++ / 记事本都行）写一个 <code>hello.c</code> 文件，纯文本保存；</li>
+<li><b>编译</b>：命令行敲 <code>gcc -Wall -Wextra -o hello.exe hello.c</code>，生成可执行文件 <code>hello.exe</code>；</li>
+<li><b>运行</b>：敲 <code>.\hello.exe</code>，看到输出。</li>
+</ol>
+<pre><span class="cm">/* 编译 + 运行（在 hello.c 所在目录的终端里敲）*/</span>
+gcc -Wall -Wextra -o hello.exe hello.c   <span class="cm">/* 生成 hello.exe */</span>
+.\hello.exe                              <span class="cm">/* 运行，看到 "Hello, C!" */</span></pre>
+<div class="tip"><b>为什么要 -Wall -Wextra？</b>它让编译器把「可疑但还没到报错」的写法也提示出来（叫"警告"，warning）。初学者的 90% 低级错误——变量没初始化、类型不匹配、变量没用到——靠这两个选项提前暴露。养成习惯：写代码就开这两个选项，看到警告先修掉再运行，别"能跑就行"。</div>
+
+<h2 id="s1-3">1.3 第一个程序：Hello, C!</h2>
+<p>每一个 C 程序都长这样（先背下来，后面所有章节都在这个骨架里加东西）：</p>
+<pre><span class="cm">/* ch1_01_hello.c — 第一个程序 */</span>
+#include &lt;stdio.h&gt;          <span class="cm">/* 引入"标准输入输出"库：printf/scanf 都在这里 */</span>
+
+int main(void)               <span class="cm">/* 程序入口：程序从这里开始执行 */</span>
+{
+    printf("Hello, C!\n");   <span class="cm">/* 输出一行文字；\n 是换行 */</span>
+    return 0;                <span class="cm">/* 告诉操作系统"正常结束" */</span>
+}</pre>
+<p class="cmd">编译：gcc -Wall -Wextra -o hello.exe hello.c　运行：.\hello.exe　→ 输出：Hello, C!</p>
+<p>四个部件逐个看：</p>
+<ul>
+<li><b><code>#include &lt;stdio.h&gt;</code></b>：告诉编译器"我要用标准输入输出函数"。<code>stdio.h</code> 是"标准头文件"，里面声明了 <code>printf</code>/<code>scanf</code> 等。不 include 就用 <code>printf</code>，编译器会报"隐式声明"错误。</li>
+<li><b><code>int main(void)</code></b>：每个程序必须有且只有一个 <code>main</code>，它是入口。<code>int</code> 表示 main 会返回一个整数，<code>void</code> 表示"不接受参数"。</li>
+<li><b><code>printf(...)</code></b>：打印函数。<code>\n</code> 是"换行"转义字符。</li>
+<li><b><code>return 0;</code></b>：返回 0 表示程序正常结束。返回非 0 通常表示出错。</li>
+</ul>
+
+<h2 id="s1-4">1.4 编译错误三行对照：先学会读报错</h2>
+<p>零基础最先崩溃的不是写错逻辑，而是<b>看不懂编译器的报错</b>。养成习惯：看到报错，先看<b>行号</b>和<b>报错关键字</b>，再去那一行附近找问题。</p>
+<table>
+<colgroup><col style="width:34%"><col style="width:24%"><col style="width:42%"></colgroup>
+<tr><th>报错原文（gcc 常见）</th><th>人话</th><th>怎么改</th></tr>
+<tr><td><code>error: expected '=', ',', ';', 'asm' or '__attribute__' before 'printf'</code></td><td>少了分号</td><td>上一行末尾补 <code>;</code>（同类错误在不同上下文提示文字不同——此为本题实测原句）</td></tr>
+<tr><td><code>error: 'x' undeclared (first use...)</code></td><td>变量 x 没声明</td><td>用之前先 <code>int x;</code> 声明</td></tr>
+<tr><td><code>warning: unused variable 'x'</code></td><td>x 声明了没用</td><td>删掉，或真用起来</td></tr>
+<tr><td><code>error: implicit declaration of function 'printf'</code></td><td>printf 没声明</td><td>检查 <code>#include &lt;stdio.h&gt;</code> 是否写上（<b>GCC 14 起为 error</b>，旧版仅 warning——本机 gcc 16.1.0 实测为 error）</td></tr>
+<tr><td><code>undefined reference to 'main'</code></td><td>找不到 main</td><td>确认有 <code>int main(void)</code></td></tr>
+</table>
+<div class="warn"><b>新手坑 1：报错行号只看个大概。</b>gcc 报的行号往往指向问题"所在的那一行附近"，真正的错误可能在前一行（比如漏了分号时，报错常落在下一行的 <code>}</code>）。从报错行往上多看两行，别死盯那一行。</div>
+
+<h2 id="s1-5">1.5 数据和变量：程序怎么"记住"东西</h2>
+<p>程序要处理数据，就得先把数据放到"盒子"里——这个盒子叫<b>变量</b>。用之前必须先<b>声明</b>：告诉编译器"我要一个装整数的盒子，叫 num"。</p>
+<pre><span class="cm">/* ch1_02_var.c — 声明、赋值、输出 */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int age;          <span class="cm">/* 声明：一个装 int（整数）的盒子，名叫 age */</span>
+    age = 19;         <span class="cm">/* 赋值：往盒子里放 19 */</span>
+
+    int score = 95;   <span class="cm">/* 声明 + 赋值，一步到位（初始化）*/</span>
+
+    printf("我 %d 岁，这次考了 %d 分\n", age, score);
+    return 0;
+}</pre>
+<p class="cmd">运行输出：我 19 岁，这次考了 95 分</p>
+<p>常用的基础类型先认识三个（更多在第 3 章 Ch3）：</p>
+<table>
+<colgroup><col style="width:22%"><col style="width:22%"><col style="width:56%"></colgroup>
+<tr><th>类型</th><th>含义</th><th>示例</th></tr>
+<tr><td><code>int</code></td><td>整数</td><td><code>int n = 42;</code></td></tr>
+<tr><td><code>double</code></td><td>双精度小数</td><td><code>double pi = 3.14159;</code></td></tr>
+<tr><td><code>char</code></td><td>单个字符</td><td><code>char c = 'A';</code></td></tr>
+</table>
+<div class="warn"><b>新手坑 2：变量没初始化就用。</b>声明了变量但没赋值（没放东西）就用，它的值是<b>内存里的残留值</b>——不确定、可能很大或很怪。这就是为什么 <code>-Wall -Wextra</code> 会警告 <code>uninitialized</code>。入门规矩：声明时就顺手给个初值（<code>int score = 95;</code>）。</div>
+
+<h2 id="s1-6">1.6 新手坑集中营（本章最容易错的 3 件事）</h2>
+<ol>
+<li><b>漏分号</b>：C 里每条"语句"（printf、赋值、return）结尾都要 <code>;</code>。漏了编译器从下一行才反应过来，报错看起来"错在别处"（见 1.4 对照表第一行）。</li>
+<li><b>变量没初始化就用</b>（见 1.5）——开 <code>-Wall</code> 让编译器替你抓。</li>
+<li><b>忘了 return 0</b>：C99 起 main 结尾缺 <code>return 0;</code> 编译器会补，但养成显式写的习惯，也避免有些环境告警。</li>
+</ol>
+
+<h2 id="s1-7">1.7 一分钟自测（答案见练习册）</h2>
+<div class="selfcheck">
+<b>判断对错：</b><br>
+① 程序必须先 <code>#include &lt;stdio.h&gt;</code> 才能用 <code>printf</code>。<br>
+② <code>int n;</code> 声明后，n 的初始值一定是 0。<br>
+③ <code>main</code> 是程序入口，每个程序只能有一个。
+</div>
+
+<h2 id="s1-8">1.8 练习指引</h2>
+<p>做完本章内容后，去练习册完成 Ch1 配套练习；同时打开《C Primer Plus（第6版）》第 1、2 章，完成<b>复习题 1、2、3</b>（题号对应主教材）。改错题是练习册里最有价值的部分——先自己找 bug，再看答案的思路讲解。</p>
+
+<div class="footer">本讲义为自写原创讲解，仅作课堂伴读；示例代码均可用 <code>gcc -Wall -Wextra</code> 编译。原书题目请以正版教材为准。</div>
+</body>
+</html>

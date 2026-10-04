@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>C 语言伴读讲义 · Ch10 数组和指针</title>
+<style>
+  :root{
+    --teal:#4D6BFE; --ink:#0f172a; --body:#334155; --muted:#64748b;
+    --line:#e2e8f0; --code-bg:#f1f5f9; --warn-bg:#fff7ed; --warn-border:#fdba74;
+    --tip-bg:#eff6ff; --tip-border:#93c5fd; --ans-bg:#f0fdf4;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:"Noto Sans SC",-apple-system,"Microsoft YaHei",sans-serif;
+    color:var(--body); font-size:14px; line-height:1.75; padding:36px 44px;
+  }
+  h1{font-size:24px;color:var(--ink);margin-bottom:4px}
+  h2{font-size:18px;color:var(--teal);margin:26px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  h3{font-size:15px;color:var(--ink);margin:18px 0 8px}
+  p{margin:8px 0}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+  .kicker{display:inline-block;background:var(--teal);color:#fff;font-size:11px;padding:2px 8px;border-radius:4px;margin-bottom:8px;letter-spacing:1px}
+  pre{
+    background:var(--code-bg);border:1px solid var(--line);border-radius:8px;
+    padding:12px 14px;font-size:12.5px;line-height:1.6;overflow-x:auto;
+    white-space:pre-wrap;word-break:break-all;font-family:Consolas,"Courier New",monospace;
+  }
+  pre .cm{color:#6b7280}
+  .cmd{font-size:12px;color:var(--muted);font-family:Consolas,monospace;margin:4px 0 12px}
+  .warn,.tip,.ans{border-radius:8px;padding:10px 14px;margin:12px 0;font-size:13.5px}
+  .warn{background:var(--warn-bg);border-left:4px solid var(--warn-border)}
+  .tip{background:var(--tip-bg);border-left:4px solid var(--tip-border)}
+  .ans{background:var(--ans-bg);border-left:4px solid #4ade80}
+  .warn b,.tip b,.ans b{color:var(--ink)}
+  table{border-collapse:collapse;margin:12px 0;width:100%;table-layout:fixed}
+  th,td{border:1px solid var(--line);padding:7px 10px;font-size:13px;text-align:left}
+  th{background:var(--code-bg);color:var(--ink)}
+  ul,ol{margin:8px 0 8px 22px}
+  li{margin:4px 0}
+  .footer{margin-top:28px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);page-break-before:avoid}
+  @media print{.footer{page-break-inside:avoid}}
+
+  /* ---- 教案 v2 新增组件 ---- */
+  .mem{margin:14px 0;padding:10px 12px 6px;background:#fbfdff;border:1px solid var(--line);border-radius:8px}
+  .mem figcaption{font-size:12.5px;color:var(--muted);margin-top:6px}
+  .cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+  .cmp>div{border-radius:8px;padding:9px 12px;font-size:13px}
+  .cmp .bad{background:#fef2f2;border-left:4px solid #f87171}
+  .cmp .good{background:#f0fdf4;border-left:4px solid #4ade80}
+  .cmp h4{font-size:13.5px;color:var(--ink);margin-bottom:6px}
+  .cmp pre{font-size:12px;padding:8px 10px;margin:6px 0}
+  .trace td,.trace th{text-align:center;font-size:12.5px;padding:6px 8px}
+  details.qa{background:var(--ans-bg);border-left:4px solid #4ade80;border-radius:8px;padding:9px 14px;margin:10px 0;font-size:13.5px}
+  details.qa summary{cursor:pointer;font-weight:600;color:var(--ink);list-style:none}
+  details.qa summary::-webkit-details-marker{display:none}
+  details.qa summary::before{content:"▸ ";color:#16a34a}
+  details.qa[open] summary::before{content:"▾ "}
+  details.qa .wrong{color:#b91c1c}
+  details.qa .body{margin-top:8px;padding-top:8px;border-top:1px dashed #86efac}
+  .scope{background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:12px 0;font-size:13px}
+  .scope b{color:var(--ink)}
+  .must{color:#b91c1c;font-weight:600}
+  .may{color:#b45309;font-weight:600}
+  .later{color:var(--muted);font-weight:600}
+  .step{background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:12px 0;font-size:13px}
+  .step .no{display:inline-block;width:20px;height:20px;line-height:20px;text-align:center;background:var(--teal);color:#fff;border-radius:50%;font-size:11px;margin-right:6px}
+</style>
+</head>
+<body>
+
+<div class="kicker">C 语言伴读讲义 · 教案 v2 样板</div>
+<h1>Ch10 数组和指针</h1>
+<div class="sub">对应《C Primer Plus（第6版）》第 10 章 · 本章目标：30 分钟读懂 + 60 分钟练完 · 不覆盖：多维数组深度用法、`int (*p)[5]` 这类复杂声明</div>
+
+<h2 id="s10-0">10.0 本章定位与取舍</h2>
+<div class="scope">
+  <b>学完这一章你会写什么：</b>用数组存一组数据、用指针遍历它、写一个能改到"外面数组"的函数。<br>
+  <b><span class="must">必看：</span></b>10.2 数组名不是变量 · 10.5 为什么 <code>a[i]</code> 等于 <code>*(a+i)</code> · 10.7 函数传数组<br>
+  <b><span class="may">可跳过：</span></b>10.6 的 <code>*p++</code>（第一次读知道有这么回事就行，写代码时回头再看）<br>
+  <b><span class="later">以后再看：</span></b>多维数组、指向数组的指针、动态内存（Ch12 会讲 <code>malloc</code>）<br>
+  <b>本章在课程里的位置：</b>Ch4 埋过一句"数组名是地址"的伏笔，这一章兑现它；Ch9 函数与本章合用，才能写出"能改到外面"的函数。
+</div>
+
+<h2 id="s10-1">10.1 先看一个真实场景：ADC 采样</h2>
+<p>单片机每隔一段时间读一次 ADC（模数转换），把 12 位的结果存起来：</p>
+<pre><span class="cm">/* 想象中的数据长这样，不是要你现在写 */</span>
+第 1 次采样：2048
+第 2 次采样：2011
+第 3 次采样：2056
+…一共采 64 次</pre>
+<p>如果只用单个变量，你得声明 <code>adc0</code> 到 <code>adc63</code> 六十四个名字——这显然不行。<br>
+你需要的是「<b>一排连续的、同类型的格子</b>」，能用一个名字加编号访问。这就是<b>数组</b>。</p>
+
+<h2 id="s10-2">10.2 数组：一排连续的格子</h2>
+<p><code>int a[5];</code> 一次申请 5 个 <code>int</code> 的格子，用 <code>a[0]</code> 到 <code>a[4]</code> 访问。<b>下标从 0 开始，不是 1</b>——第<i>一</i>个格子叫 <code>a[0]</code>。</p>
+<pre><span class="cm">/* ch10_01_array.c */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int a[5] = {10, 20, 30, 40, 50};
+    int i;
+
+    for (i = 0; i &lt; 5; i++)
+        printf("a[%d] = %d\n", i, a[i]);
+    return 0;
+}</pre>
+<p class="cmd">编译：gcc -std=c11 -Wall -Wextra -o a.exe ch10_01_array.c &nbsp;|&nbsp; 运行输出（实测）：</p>
+<pre>a[0] = 10
+a[1] = 20
+a[2] = 30
+a[3] = 40
+a[4] = 50</pre>
+<div class="warn"><b>新手坑 · 基础：越界不报错。</b><code>a[5]</code> 编译器<b>一句话都不说</b>。C 不检查下标，它只是"悄悄读/写了数组后面那块内存"。轻则读到垃圾值，重则改坏别的变量。写循环边界时多看一眼：<code>i &lt; 5</code> 不是 <code>i &lt;= 5</code>。</div>
+
+<h2 id="s10-3">10.3 数组名是地址，但不是变量</h2>
+<p>这一节是本章<b>最容易学错</b>的地方。先记结论，再看三组实验：</p>
+<div class="tip"><b>一句话模型：数组名是地址，但它不是变量——不能给它赋值，也不能自增。</b></div>
+
+<h3>实验一：数组名就是首格地址</h3>
+<pre><span class="cm">/* ch10_02_addr.c */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int a[3] = {7, 8, 9};
+
+    printf("a     = %p\n", (void*)a);
+    printf("&amp;a[0] = %p\n", (void*)&amp;a[0]);
+    printf("&amp;a[1] = %p\n", (void*)&amp;a[1]);
+    return 0;
+}</pre>
+<p class="cmd">运行输出（实测，地址每次运行会变，看<b>差值</b>）：</p>
+<pre>a     = 0000005445BFF964
+&amp;a[0] = 0000005445BFF964   ← 和 a 完全相同
+&amp;a[1] = 0000005445BFF968   ← 比 a[0] 大 4 = sizeof(int)</pre>
+
+<h3>实验二：<code>sizeof</code> 在 main 里和函数里不一样</h3>
+<p>这是"数组名不是指针"最直接的证据。同一个 <code>a</code>，出了 <code>main</code> 就"变小"了：</p>
+<pre><span class="cm">/* ch10_02_sizeof.c */</span>
+#include &lt;stdio.h&gt;
+
+void show(int arr[])
+{
+    printf("函数里 sizeof(arr)  = %zu\n", sizeof(arr));
+    printf("函数里 sizeof(*arr) = %zu\n", sizeof(*arr));
+}
+
+int main(void)
+{
+    int a[5] = {1, 2, 3, 4, 5};
+
+    printf("main 里 sizeof(a)   = %zu\n", sizeof(a));
+    printf("main 里元素个数     = %zu\n", sizeof(a) / sizeof(a[0]));
+
+    show(a);
+    return 0;
+}</pre>
+<p class="cmd">运行输出（实测）：</p>
+<pre>main 里 sizeof(a)   = 20   ← 5 个 int，整个数组
+main 里元素个数     = 5
+函数里 sizeof(arr)  = 8    ← 只是指针的大小（64 位）
+函数里 sizeof(*arr) = 4    ← 一个 int</pre>
+<div class="tip"><b>编译器会主动提醒你这件事。</b>上面这段代码用 <code>-Wall -Wextra</code> 编译时，gcc 会报一条警告（实测原文）：<br>
+<code>warning: 'sizeof' on array function parameter 'arr' will return size of 'int *' [-Wsizeof-array-argument]</code><br>
+<b>这条警告就是编译器在替你回答"参数到底是不是数组"。</b>所以：<b>函数里永远不要用 <code>sizeof(arr)</code> 求数组长度</b>，要把长度当参数传进去（见 10.7）。</div>
+
+<h3>实验三：给数组名自增，编译器直接拦下</h3>
+<div class="cmp">
+  <div class="bad">
+    <h4>❌ 错例（不要照抄）</h4>
+<pre><span class="cm">/* debug_ch10_arrayname.c */</span>
+int a[3] = {1, 2, 3};
+a++;              <span class="cm">/* 想让 a 往后走一格 */</span></pre>
+    <p class="cmd">编译报错（实测原文）：</p>
+<pre>error: lvalue required as
+increment operand</pre>
+    <p>人话翻译：<b><code>++</code> 要求左边是"能被赋值的变量"，而数组名不是。</b></p>
+  </div>
+  <div class="good">
+    <h4>✅ 对例：让指针走</h4>
+<pre><span class="cm">/* 想移动就用指针 */</span>
+int a[3] = {1, 2, 3};
+int *p = a;
+p++;              <span class="cm">/* p 现在指向 a[1] */</span></pre>
+    <p>指针 <code>p</code> 是变量，可以自增；数组名 <code>a</code> 不是。</p>
+  </div>
+</div>
+<div class="warn"><b>新手坑 · 基础：别把"数组名"当成"指针"。</b>它们的<b>值</b>常常相同（都指向首格），但<b>性质</b>不同：
+数组名不能被赋值、不能自增、<code>sizeof</code> 是整个数组的大小；指针这三件事都能做。</div>
+
+<h2 id="s10-4">10.4 指针：专门存地址的变量</h2>
+<figure class="mem">
+<svg viewBox="0 0 520 150" width="100%" role="img" aria-label="内存模型：三个连续的 int 格子，以及一个存着首格地址的指针">
+  <defs>
+    <marker id="ar1" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 z" fill="#e11d48"/>
+    </marker>
+  </defs>
+  <g font-family="Consolas,monospace" font-size="13">
+    <rect x="150" y="42" width="72" height="36" fill="#ffffff" stroke="#4D6BFE" stroke-width="1.5"/>
+    <rect x="222" y="42" width="72" height="36" fill="#ffffff" stroke="#4D6BFE" stroke-width="1.5"/>
+    <rect x="294" y="42" width="72" height="36" fill="#ffffff" stroke="#4D6BFE" stroke-width="1.5"/>
+    <text x="186" y="65" text-anchor="middle" fill="#0f172a">2</text>
+    <text x="258" y="65" text-anchor="middle" fill="#0f172a">4</text>
+    <text x="330" y="65" text-anchor="middle" fill="#0f172a">6</text>
+    <g font-size="11" fill="#64748b">
+      <text x="186" y="94" text-anchor="middle">0x1000</text>
+      <text x="258" y="94" text-anchor="middle">0x1004</text>
+      <text x="330" y="94" text-anchor="middle">0x1008</text>
+    </g>
+    <g font-size="11" fill="#334155">
+      <text x="186" y="113" text-anchor="middle">a[0]</text>
+      <text x="258" y="113" text-anchor="middle">a[1]</text>
+      <text x="330" y="113" text-anchor="middle">a[2]</text>
+    </g>
+    <rect x="52" y="42" width="58" height="36" rx="4" fill="#eef2ff" stroke="#4D6BFE" stroke-width="1.5"/>
+    <text x="81" y="65" text-anchor="middle" fill="#0f172a">p</text>
+    <text x="81" y="94" text-anchor="middle" font-size="11" fill="#64748b">指针</text>
+    <line x1="110" y1="60" x2="146" y2="60" stroke="#e11d48" stroke-width="2" marker-end="url(#ar1)"/>
+    <text x="30" y="28" font-size="11" fill="#334155" font-family="sans-serif">p 里存的是 a 的地址</text>
+  </g>
+</svg>
+<figcaption>内存模型：<b>数组 a 是一排连续的格子</b>，地址 0x1000 / 0x1004 / 0x1008（每个 int 占 4 字节）；<b>指针 p 自己也是一块内存</b>，里面存着 0x1000 这个<b>地址值</b>。（地址为示意，实际每次运行不同）</figcaption>
+</figure>
+<p>两个配套运算符，C 里最基础也最容易搞反的一对：</p>
+<ul>
+  <li><b><code>&amp;</code>（取地址）</b>：<code>p = &amp;n;</code> 把 n 的地址存进 p。</li>
+  <li><b><code>*</code>（解引用）</b>：<code>*p</code> 表示"p 指向的那个变量"。<code>*p = 5;</code> 等价于给 n 赋值 5。</li>
+</ul>
+<pre><span class="cm">/* ch10_03_pointer.c */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int n = 42;
+    int *p = &amp;n;      <span class="cm">/* p 存 n 的地址 */</span>
+
+    printf("n = %d\n", n);
+    printf("*p = %d\n", *p);   <span class="cm">/* 通过指针读 n */</span>
+    *p = 100;                 <span class="cm">/* 通过指针改 n */</span>
+    printf("改后 n = %d\n", n);
+    return 0;
+}</pre>
+<p class="cmd">运行输出（实测）：</p>
+<pre>n = 42
+*p = 42
+改后 n = 100</pre>
+<div class="warn"><b>新手坑 · 基础：野指针。</b><code>int *p; *p = 5;</code> —— <code>p</code> 没初始化，指向哪里未知，往里写就是往一块不知道是谁的内存里写。<br>
+实测（gcc 16.1.0）：单独编译这一行会得到 <code>warning: 'p' is used uninitialized [-Wuninitialized]</code>（本机开不开 <code>-O2</code> 都会报）。<br>
+<b>但不要用"有没有警告"来判断野指针</b>——如果同一段代码里还有别的硬错误，编译器可能根本走不到这条分析。</div>
+
+<h2 id="s10-5">10.5 <code>a[i]</code> 就是 <code>*(a+i)</code>：为什么</h2>
+<p>本章最核心的一个等式：</p>
+<pre>a[i]  ==  *(a + i)</pre>
+<p>它<b>不是约定，是定义</b>。理解它需要先回答一个问题：<b><code>a + 1</code> 到底加了多少？</b></p>
+
+<h3>先看实验：同一个 <code>+1</code>，跳的距离不一样</h3>
+<pre><span class="cm">/* ch10_06_ptrstep.c */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int  a[3] = {0x11111111, 0x22222222, 0x33333333};
+    int  *pi = a;
+    char *pc = (char *)a;
+
+    printf("int*  pi + 1   = %p   跳 %ld 字节\n",
+           (void *)(pi + 1), (long)((char *)(pi + 1) - (char *)pi));
+    printf("char* pc + 1   = %p   跳 %ld 字节\n",
+           (void *)(pc + 1), (long)((pc + 1) - pc));
+    return 0;
+}</pre>
+<p class="cmd">运行输出（实测，地址每次运行会变，看"跳几字节"）：</p>
+<pre>int*  pi + 1   = 000000299C3FFE08   跳 4 字节
+char* pc + 1   = 000000299C3FFE05   跳 1 字节</pre>
+<figure class="mem">
+<svg viewBox="0 0 520 128" width="100%" role="img" aria-label="同一个加一，int 指针跨四字节，char 指针跨一字节">
+  <defs>
+    <marker id="ar2" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 z" fill="#e11d48"/>
+    </marker>
+  </defs>
+  <g font-family="Consolas,monospace" font-size="12">
+    <text x="8" y="30" fill="#334155" font-family="sans-serif" font-size="11">int*  +1</text>
+    <rect x="120" y="14" width="96" height="24" fill="#eef2ff" stroke="#4D6BFE" stroke-width="1.5"/>
+    <rect x="216" y="14" width="96" height="24" fill="#ffffff" stroke="#4D6BFE" stroke-width="1.5"/>
+    <text x="168" y="31" text-anchor="middle" font-size="11" fill="#0f172a">int（4 字节）</text>
+    <line x1="168" y1="44" x2="264" y2="44" stroke="#e11d48" stroke-width="2" marker-end="url(#ar2)"/>
+    <text x="216" y="60" text-anchor="middle" fill="#e11d48" font-size="11">跳 4 字节</text>
+
+    <text x="8" y="98" fill="#334155" font-family="sans-serif" font-size="11">char* +1</text>
+    <rect x="120" y="82" width="24" height="24" fill="#eef2ff" stroke="#4D6BFE" stroke-width="1.5"/>
+    <rect x="144" y="82" width="24" height="24" fill="#ffffff" stroke="#4D6BFE" stroke-width="1.5"/>
+    <rect x="168" y="82" width="24" height="24" fill="#ffffff" stroke="#4D6BFE" stroke-width="1.5"/>
+    <rect x="192" y="82" width="24" height="24" fill="#ffffff" stroke="#4D6BFE" stroke-width="1.5"/>
+    <line x1="132" y1="112" x2="156" y2="112" stroke="#e11d48" stroke-width="2" marker-end="url(#ar2)"/>
+    <text x="192" y="115" fill="#e11d48" font-size="11">跳 1 字节</text>
+  </g>
+</svg>
+<figcaption>指针加法按<b>它指向的类型</b>缩放：<code>int*</code> 跳 <code>sizeof(int)</code>=4 字节，<code>char*</code> 跳 1 字节。所以 <code>a + i</code> 是"从数组开头往后数 <b>i 个元素</b>"的地址，不是"i 个字节"。</figcaption>
+</figure>
+
+<h3>于是等式就成立了</h3>
+<div class="step"><span class="no">1</span><code>a</code> 是首格地址。</div>
+<div class="step"><span class="no">2</span><code>a + i</code> 是"往后数 i 个元素"的地址——<b>因为是按元素缩放，所以正好落在 <code>a[i]</code> 上</b>。</div>
+<div class="step"><span class="no">3</span><code>*(a + i)</code> 就是"取那个地址上的值"＝ <code>a[i]</code>。</div>
+<p>所以<b>下标只是指针运算的语法糖</b>：<code>a[i]</code> 是写给人类看的，编译器看到的就是 <code>*(a+i)</code>。理解这一点，你就同时理解了：为什么数组名能当指针用、为什么指针也能用 <code>p[i]</code> 下标。</p>
+<pre><span class="cm">/* ch10_04_equiv.c */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int a[4] = {2, 4, 6, 8};
+    int *p = a;
+
+    printf("a[2] = %d, *(a+2) = %d\n", a[2], *(a + 2));
+    printf("p[2] = %d, *(p+2) = %d\n", p[2], *(p + 2));
+    return 0;
+}</pre>
+<p class="cmd">运行输出（实测）：</p>
+<pre>a[2] = 6, *(a+2) = 6
+p[2] = 6, *(p+2) = 6</pre>
+
+<h2 id="s10-6">10.6 <code>*p++</code> 还是 <code>(*p)++</code></h2>
+<p>这两个写法只差一对括号，但做的事<b>完全不同</b>。先看实测，再看记忆法：</p>
+<pre><span class="cm">/* ch10_07_ptrincr.c */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int a[3] = {10, 20, 30};
+    int *p = a;
+    int x, y;
+
+    x = *p++;   <span class="cm">/* 先取出 *p，再让 p 往后走一格 */</span>
+    printf("x = %d, *p = %d, p 指向 a[%ld]\n", x, *p, (long)(p - a));
+
+    p = a;      <span class="cm">/* 复位 */</span>
+    y = (*p)++; <span class="cm">/* 先取出 *p，再把那一格内容加 1；p 不动 */</span>
+    printf("y = %d, a[0] = %d, p 仍指向 a[%ld]\n", y, a[0], (long)(p - a));
+    return 0;
+}</pre>
+<p class="cmd">运行输出（实测）：</p>
+<pre>x = 10, *p = 20, p 指向 a[1]
+y = 10, a[0] = 11, p 仍指向 a[0]</pre>
+<table class="trace">
+  <tr><th>写法</th><th>谁变了</th><th>变多少</th><th>结果</th></tr>
+  <tr><td><code>*p++</code></td><td><b>指针 p</b></td><td>往后走 1 个元素</td><td>遍历数组用</td></tr>
+  <tr><td><code>(*p)++</code></td><td><b>p 指向的内容</b></td><td>内容 +1</td><td>给数组元素计数累加用</td></tr>
+</table>
+<div class="tip"><b>记忆法：看 <code>++</code> 贴着谁。</b><code>++</code> 紧贴 <code>p</code>（<code>*p++</code> 里的 <code>p++</code>）就动指针；<code>++</code> 紧贴括号（<code>(*p)++</code>）就动内容。</div>
+
+<h3>状态追踪：用 <code>*p++</code> 遍历数组</h3>
+<p>把每一步的变量值摊开来看，比读文字清楚得多：</p>
+<pre><span class="cm">/* ch10_08_trace.c 的循环体 */</span>
+for (i = 0; i &lt; 4; i++)
+    sum += *p++;   <span class="cm">/* 取值 + 指针前进，一步完成 */</span></pre>
+<table class="trace">
+  <tr><th>轮次 i</th><th>执行前 *p</th><th>执行前 p 指向</th><th>sum 累加后</th><th>执行后 p 指向</th></tr>
+  <tr><td>0</td><td>2</td><td>a[0]</td><td>2</td><td>a[1]</td></tr>
+  <tr><td>1</td><td>4</td><td>a[1]</td><td>6</td><td>a[2]</td></tr>
+  <tr><td>2</td><td>6</td><td>a[2]</td><td>12</td><td>a[3]</td></tr>
+  <tr><td>3</td><td>8</td><td>a[3]</td><td>20</td><td>a[4]（末尾之后）</td></tr>
+</table>
+<p class="cmd">运行输出（实测）：</p>
+<pre>sum = 20
+循环结束后 p - a = 4（p 已走到末尾之后再一格）</pre>
+<div class="warn"><b>新手坑 · 基础：循环结束后 <code>p</code> 已经不在数组里了。</b><code>p - a = 4</code>，而数组只有 <code>a[0]</code>–<code>a[3]</code>。此时<b>不要解引用 <code>*p</code></b>。规范的写法是在循环里用 <code>a[i]</code>，或者循环后重新 <code>p = a;</code>。</div>
+
+<h2 id="s10-7">10.7 函数传数组：传的是地址</h2>
+<p>函数形参写成 <code>int arr[]</code>，实际拿到的是<b>指向数组开头的指针</b>——数组不会被复制。所以函数里改数组，外面的数组会跟着变。</p>
+<pre><span class="cm">/* ch10_05_func.c */</span>
+#include &lt;stdio.h&gt;
+
+int sum(const int arr[], int n)   <span class="cm">/* const 承诺不修改数组内容 */</span>
+{
+    int i, total = 0;
+    for (i = 0; i &lt; n; i++)
+        total += arr[i];
+    return total;
+}
+
+int main(void)
+{
+    int a[5] = {1, 2, 3, 4, 5};
+    printf("总和 = %d\n", sum(a, 5));
+    return 0;
+}</pre>
+<p class="cmd">运行输出（实测）：</p>
+<pre>总和 = 15</pre>
+<div class="tip"><b>为什么 <code>n</code> 必须单独传？</b>回到 10.3 的实验二：函数里 <code>sizeof(arr)</code> 只有 8，量不出数组有多长。所以「数组 + 长度」要成对传，这是 C 的固定套路。<br>
+<b>为什么写 <code>const</code>？</b>函数不打算改数组时就写 <code>const int arr[]</code>，编译器会拦住你误改——这是给自己设的护栏。</div>
+
+<h2 id="s10-8">10.8 新手坑：基础与扩展</h2>
+<table>
+  <colgroup><col style="width:12%"><col style="width:44%"><col style="width:44%"></colgroup>
+  <tr><th>级别</th><th>坑</th><th>怎么躲</th></tr>
+  <tr><td><b>基础</b></td><td>下标越界（<code>a[5]</code> 合法访问 5 个元素的数组）</td><td>循环写 <code>i &lt; n</code>；C 不检查越界</td></tr>
+  <tr><td><b>基础</b></td><td>函数里 <code>sizeof(arr)</code> 当数组长度</td><td>长度当参数传；看 <code>-Wsizeof-array-argument</code> 警告</td></tr>
+  <tr><td><b>基础</b></td><td>给数组名自增 / 赋值</td><td>要移动就用指针；数组名不是变量</td></tr>
+  <tr><td><b>基础</b></td><td><code>&amp;</code> 与 <code>*</code> 搞反</td><td><code>p = &amp;n</code> 存地址；<code>*p = 5</code> 改内容</td></tr>
+  <tr><td><b>基础</b></td><td>以为传数组是复制</td><td>函数改形参数组＝改外面；要副本得自己拷</td></tr>
+  <tr><td><b>扩展</b></td><td>循环结束后解引用 <code>*p</code></td><td><code>p</code> 已到末尾之后；循环后重新 <code>p = a</code></td></tr>
+  <tr><td><b>扩展</b></td><td>把 <code>a</code> 和 <code>&amp;a</code> 当成一回事</td><td>值相同但类型不同（<code>&amp;a+1</code> 跳整个数组）</td></tr>
+</table>
+
+<h2 id="s10-9">10.9 一分钟自测（先答后揭）</h2>
+<p>先在纸上写下你的答案，再点开对照——<b>直接看答案等于没做</b>。</p>
+
+<details class="qa">
+  <summary>① <code>int a[5] = {1,2,3,4,5}; printf("%d", a[5]);</code> 会输出 5 吗？</summary>
+  <div class="body">
+    <b>正解：不会。</b><code>a[5]</code> 越界了——合法下标只有 0–4。它读到的是数组后面那块内存，值是<b>不确定的</b>（可能正好是别的变量，也可能是垃圾值）。<br>
+    <span class="wrong">常见错解："会，因为 a[5] 是第 5 个元素。"</span> ← 错在把"第 5 个"当成 <code>a[5]</code>；第一个元素是 <code>a[0]</code>，第 5 个是 <code>a[4]</code>。<br>
+    <b>为什么这条最容易错：</b>日常语言从 1 数起，C 从 0 数起；而且越界<b>不报错</b>，写错的人常常"看起来能跑"。
+  </div>
+</details>
+
+<details class="qa">
+  <summary>② <code>int *p; *p = 10;</code> 是合法写法吗？</summary>
+  <div class="body">
+    <b>正解：语法合法，但行为未定义——不能这么写。</b><code>p</code> 没初始化，里面是残留值，<code>*p = 10</code> 等于往一块不知道属于谁的内存里写。<br>
+    <span class="wrong">常见错解："编译能过就是合法。"</span> ← 错在混淆"编译通过"与"行为正确"。C 里这两件事经常不一致，这也是本章反复强调"看编译器警告"的原因。<br>
+    <b>正确做法：</b>先让指针有明确指向（<code>int n; int *p = &amp;n;</code>），或指向动态内存（Ch12）。
+  </div>
+</details>
+
+<details class="qa">
+  <summary>③ 函数形参写 <code>int arr[]</code>，它实际是什么类型？<code>sizeof(arr)</code> 是多少？</summary>
+  <div class="body">
+    <b>正解：实际是 <code>int *arr</code>；<code>sizeof(arr)</code> 是指针大小（本机 64 位 = 8），不是整个数组。</b><br>
+    <span class="wrong">常见错解："是数组，sizeof 应该等于元素个数 × 4。"</span> ← 错在把形参当成了数组本体。数组名作实参时会"退化"成指向首元素的指针，函数拿到的是地址，不是副本。<br>
+    <b>交叉验证：</b>本机实测 <code>main</code> 里 <code>sizeof(a)=20</code>、函数里 <code>sizeof(arr)=8</code>（见 10.3 实验二）。
+  </div>
+</details>
+
+<h2 id="s10-10">10.10 练习指引</h2>
+<p><b>四级阶梯，按顺序做</b>（做完再去练习册对答案）：</p>
+<ol>
+  <li><b>照抄改数</b>：把 <code>ch10_01_array.c</code> 的初值改成你自己的 5 次 ADC 采样值，打印出来。</li>
+  <li><b>自己写逻辑</b>：写一个函数 <code>int max_of(const int arr[], int n)</code> 返回最大值，并在 <code>main</code> 里调用验证。</li>
+  <li><b>组合两个知识点</b>：用 10.6 的 <code>*p++</code> 写法重写上面的遍历，并对照 <code>p - a</code> 观察指针最终停在哪。</li>
+  <li><b>专业场景</b>：用数组存 64 次 12 位 ADC 采样，算出平均值与峰峰值（最大值 − 最小值）——先想清楚"为什么函数里量不出数组长度"。</li>
+</ol>
+<p>本章配套练习见《练习册 · Ch10》。主教材复习题建议完成 <b>2、4、6</b> 三题。</p>
+<p><b>下一章预告</b>：Ch12 会讲动态内存 <code>malloc</code>/<code>free</code>——那是"数组长度在运行时才确定"时的办法。本章的 <code>a[i] == *(a+i)</code> 与 <code>p - a</code> 在那里会再用到。</p>
+
+<div class="footer">本讲义为自写原创讲解，仅作课堂伴读；示例代码均用 <code>gcc -std=c11 -Wall -Wextra</code> 编译并实跑，输出与文中标注一致（唯一例外见 10.3 实验二，那条警告是本节的教学内容本身）。原书题目请以正版教材为准。</div>
+
+<script>
+(function () {
+  function all() { return document.querySelectorAll('details'); }
+  window.addEventListener('beforeprint', function () {
+    all().forEach(function (d) { d.dataset.wasOpen = d.open ? '1' : '0'; d.open = true; });
+  });
+  window.addEventListener('afterprint', function () {
+    all().forEach(function (d) { d.open = d.dataset.wasOpen === '1'; });
+  });
+})();
+</script>
+</body>
+</html>

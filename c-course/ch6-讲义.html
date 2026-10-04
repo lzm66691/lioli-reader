@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>C 语言伴读讲义 · Ch6 C控制语句：循环</title>
+<style>
+  :root{
+    --teal:#4D6BFE; --ink:#0f172a; --body:#334155; --muted:#64748b;
+    --line:#e2e8f0; --code-bg:#f1f5f9; --warn-bg:#fff7ed; --warn-border:#fdba74;
+    --tip-bg:#eff6ff; --tip-border:#93c5fd; --ans-bg:#f0fdf4;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:"Noto Sans SC",-apple-system,"Microsoft YaHei",sans-serif;
+    color:var(--body); font-size:14px; line-height:1.75; padding:36px 44px;
+  }
+  h1{font-size:24px;color:var(--ink);margin-bottom:4px}
+  h2{font-size:18px;color:var(--teal);margin:26px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  h3{font-size:15px;color:var(--ink);margin:18px 0 8px}
+  p{margin:8px 0}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+  .kicker{display:inline-block;background:var(--teal);color:#fff;font-size:11px;padding:2px 8px;border-radius:4px;margin-bottom:8px;letter-spacing:1px}
+  pre{
+    background:var(--code-bg);border:1px solid var(--line);border-radius:8px;
+    padding:12px 14px;font-size:12.5px;line-height:1.6;overflow-x:auto;
+    white-space:pre-wrap;word-break:break-all;font-family:Consolas,"Courier New",monospace;
+  }
+  pre .cm{color:#6b7280}
+  .cmd{font-size:12px;color:var(--muted);font-family:Consolas,monospace;margin:4px 0 12px}
+  .warn,.tip,.ans{border-radius:8px;padding:10px 14px;margin:12px 0;font-size:13.5px}
+  .warn{background:var(--warn-bg);border-left:4px solid var(--warn-border)}
+  .tip{background:var(--tip-bg);border-left:4px solid var(--tip-border)}
+  .ans{background:var(--ans-bg);border-left:4px solid #4ade80}
+  .warn b,.tip b,.ans b{color:var(--ink)}
+  table{border-collapse:collapse;margin:12px 0;width:100%;table-layout:fixed}
+  th,td{border:1px solid var(--line);padding:7px 10px;font-size:13px;text-align:left}
+  th{background:var(--code-bg);color:var(--ink)}
+  ul,ol{margin:8px 0 8px 22px}
+  li{margin:4px 0}
+  .selfcheck{background:#faf5ff;border-left:4px solid #a855f7;border-radius:8px;padding:10px 14px;margin:12px 0}
+  .selfcheck b{color:#7e22ce}
+  .footer{margin-top:28px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);page-break-before:avoid}
+  @media print{.footer{page-break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<div class="kicker">C 语言伴读讲义 · 第 2 批</div>
+<h1>Ch6 C控制语句：循环</h1>
+<div class="sub">对应《C Primer Plus（第6版）》第 6 章 · 本章目标：30 分钟读懂 + 60 分钟练完 · 不覆盖：goto、逗号表达式</div>
+
+<h2 id="s6-1">6.1 while 循环：条件成立就一直做</h2>
+<p>程序最强大的能力是<b>重复</b>。让计算机打印 1 到 10，不需要写十行 <code>printf</code>——用循环。最基础的是 <code>while</code>：</p>
+<pre><span class="cm">/* ch6_01_while.c — while 数数 */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int n = 1;
+    while (n &lt;= 5) {        <span class="cm">/* 条件为真就进循环体 */</span>
+        printf("%d ", n);
+        n++;                <span class="cm">/* 计数器 +1，否则死循环 */</span>
+    }
+    printf("\n");
+    return 0;
+}</pre>
+<p class="cmd">运行输出（实测）：1 2 3 4 5</p>
+<p><code>while</code> 的套路是<b>三件套</b>：</p>
+<ol>
+<li><b>初始化</b>：进循环前先把计数器设好（<code>int n = 1;</code>）；</li>
+<li><b>条件</b>：<code>while (条件)</code>——为真继续，为假退出；</li>
+<li><b>更新</b>：循环体里改计数器（<code>n++</code>）——<b>忘了它 = 死循环</b>。</li>
+</ol>
+<div class="warn"><b>新手坑 1：死循环。</b>条件永远为真就无限循环（程序"卡住"）。急救：按 <code>Ctrl+C</code> 中断。写 <code>while</code> 前先问自己：这个条件<b>有办法变假</b>吗？</div>
+
+<h2 id="s6-2">6.2 for 循环：三件套写在一行</h2>
+<p><code>for</code> 把「初始化、条件、更新」三个部件放进一对括号，中间用分号隔开，是<b>计数循环</b>最常用的写法：</p>
+<pre><span class="cm">/* ch6_02_for.c — for 求和 1+2+...+10 */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int sum = 0;
+    for (int i = 1; i &lt;= 10; i++) {   <span class="cm">/* 初始化; 条件; 更新 */</span>
+        sum += i;
+    }
+    printf("1+2+...+10 = %d\n", sum);
+    return 0;
+}</pre>
+<p class="cmd">运行输出（实测）：1+2+...+10 = 55</p>
+<table>
+<colgroup><col style="width:18%"><col style="width:52%"><col style="width:30%"></colgroup>
+<tr><th>部件</th><th>说明</th><th>示例</th></tr>
+<tr><td>初始化</td><td>进循环前执行一次，通常声明计数器</td><td><code>int i = 1</code></td></tr>
+<tr><td>条件</td><td>每次进入前检查，为真继续</td><td><code>i &lt;= 10</code></td></tr>
+<tr><td>更新</td><td>每轮循环体结束后执行</td><td><code>i++</code></td></tr>
+</table>
+<div class="tip"><b>口诀：</b>「从几开始，到几为止，每次怎么变」——<code>for (开始; 条件; 变化)</code>。C99 起可以在 <code>for</code> 里直接声明 <code>int i</code>，循环结束 i 就"消失"。</div>
+
+<h2 id="s6-3">6.3 do-while：至少做一次</h2>
+<p>有时候你想「先干一次，再问要不要继续」——用 <code>do-while</code>。它和 <code>while</code> 唯一的区别：<b>条件检查在循环体后面</b>，所以循环体<b>至少执行一次</b>。</p>
+<pre><span class="cm">/* ch6_03_dowhile.c — do-while 至少执行一次 */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int n = 10;
+    do {
+        printf("执行了一次，n = %d\n", n);
+        n++;
+    } while (n &lt;= 3);      <span class="cm">/* 条件为假，但循环体已执行过 */</span>
+    return 0;
+}</pre>
+<p class="cmd">运行输出（实测）：执行了一次，n = 10</p>
+
+<h2 id="s6-4">6.4 break 和 continue：循环里的"刹车"和"跳过"</h2>
+<ul>
+<li><b><code>break</code></b>：立即<b>跳出整个循环</b>（不再管条件）；</li>
+<li><b><code>continue</code></b>：跳过<b>本次</b>循环体剩余部分，直接进下一轮。</li>
+</ul>
+<pre><span class="cm">/* ch6_04_breakcont.c — 找第一个能被 7 整除的数（break）/ 只打印偶数（continue）*/</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    for (int i = 1; i &lt;= 100; i++) {
+        if (i % 7 == 0) { printf("第一个 7 的倍数：%d\n", i); break; }
+    }
+    for (int i = 1; i &lt;= 6; i++) {
+        if (i % 2 != 0) continue;   <span class="cm">/* 奇数跳过，不打印 */</span>
+        printf("%d ", i);
+    }
+    printf("\n");
+    return 0;
+}</pre>
+<p class="cmd">运行输出（实测）：第一个 7 的倍数：7　2 4 6</p>
+
+<h2 id="s6-5">6.5 嵌套循环：循环套循环（九九乘法表）</h2>
+<p>循环体里还可以是循环——叫<b>嵌套循环</b>。外层走一步，内层走一整圈。经典例子是打印九九乘法表：</p>
+<pre><span class="cm">/* ch6_05_table.c — 九九乘法表（上半部分）*/</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    for (int i = 1; i &lt;= 3; i++) {          <span class="cm">/* 外层：行 */</span>
+        for (int j = 1; j &lt;= i; j++) {      <span class="cm">/* 内层：列，只到 i */</span>
+            printf("%d*%d=%d  ", j, i, j * i);
+        }
+        printf("\n");
+    }
+    return 0;
+}</pre>
+<p class="cmd">运行输出（实测）：</p>
+<pre class="cmd">1*1=1
+1*2=2  2*2=4
+1*3=3  2*3=6  3*3=9</pre>
+<div class="tip"><b>读法：</b>i=1 时内层跑 1 次；i=2 时内层跑 2 次；i=3 时跑 3 次——"外层控制行，内层控制列"。</div>
+
+<h2 id="s6-6">6.6 新手坑集中营（本章最容易错的 4 件事）</h2>
+<ol>
+<li><b>死循环</b>：忘更新计数器或条件恒真。<code>while (1)</code> 是故意的死循环（嵌入式里常用），别的都是 bug。</li>
+<li><b><code>while</code> 后面多加分号</b>：<code>while (n &lt;= 5); { ... }</code>——分号让循环体变空语句，条件一直不变 → 死循环（或一次都不执行）。</li>
+<li><b>条件写成赋值</b>：<code>while (n = 5)</code> 是把 5 赋给 n（条件恒真）；判断相等要用 <code>==</code>。</li>
+<li><b>for 的三段用逗号</b>：<code>for (int i=1, i&lt;=5, i++)</code> 是语法错误——三段之间是<b>分号</b>，不是逗号。</li>
+</ol>
+
+<h2 id="s6-7">6.7 一分钟自测（答案见练习册）</h2>
+<div class="selfcheck">
+<b>说出结果：</b><br>
+① <code>for (int i=0; i&lt;3; i++) printf("%d", i);</code> 打印 ____<br>
+② <code>int n=5; while (n&lt;5) n++; printf("%d", n);</code> 打印 ____<br>
+③ 下面这段会打印几次 "hi"？<code>for (int i=0; i&lt;5; i++) { if (i==2) continue; printf("hi "); }</code>
+</div>
+
+<h2 id="s6-8">6.8 练习指引</h2>
+<p>做完本章内容后，去练习册完成 Ch6 配套练习；同时打开《C Primer Plus（第6版）》第 6 章，完成<b>复习题 2、3、6</b>（题号对应主教材）。改错题是最有价值的——先自己找，再看答案。</p>
+
+<div class="footer">本讲义为自写原创讲解，仅作课堂伴读；示例代码均可用 <code>gcc -Wall -Wextra</code> 编译，每句「运行输出（实测）」均已实跑核对。原书题目请以正版教材为准。</div>
+</body>
+</html>

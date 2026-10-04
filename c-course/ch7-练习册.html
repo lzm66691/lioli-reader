@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>C 语言伴读练习册 · Ch7 分支和跳转</title>
+<style>
+  :root{
+    --teal:#4D6BFE; --ink:#0f172a; --body:#334155; --muted:#64748b;
+    --line:#e2e8f0; --code-bg:#f1f5f9; --warn-bg:#fff7ed; --warn-border:#fdba74;
+    --tip-bg:#eff6ff; --tip-border:#93c5fd; --ans-bg:#f0fdf4;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:"Noto Sans SC",-apple-system,"Microsoft YaHei",sans-serif;
+    color:var(--body); font-size:14px; line-height:1.75; padding:36px 44px;
+  }
+  h1{font-size:24px;color:var(--ink);margin-bottom:4px}
+  h2{font-size:18px;color:var(--teal);margin:26px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  h3{font-size:15px;color:var(--ink);margin:18px 0 8px}
+  p{margin:8px 0}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+  .kicker{display:inline-block;background:var(--teal);color:#fff;font-size:11px;padding:2px 8px;border-radius:4px;margin-bottom:8px;letter-spacing:1px}
+  pre{
+    background:var(--code-bg);border:1px solid var(--line);border-radius:8px;
+    padding:12px 14px;font-size:12.5px;line-height:1.6;overflow-x:auto;
+    white-space:pre-wrap;word-break:break-all;font-family:Consolas,"Courier New",monospace;
+  }
+  pre .cm{color:#6b7280}
+  .cmd{font-size:12px;color:var(--muted);font-family:Consolas,monospace;margin:4px 0 12px}
+  .warn,.tip,.ans{border-radius:8px;padding:10px 14px;margin:12px 0;font-size:13.5px}
+  .warn{background:var(--warn-bg);border-left:4px solid var(--warn-border)}
+  .tip{background:var(--tip-bg);border-left:4px solid var(--tip-border)}
+  .ans{background:var(--ans-bg);border-left:4px solid #4ade80}
+  .warn b,.tip b,.ans b{color:var(--ink)}
+  .q{font-size:14px;font-weight:700;color:var(--ink);margin:18px 0 6px}
+  .q .tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:10px;margin-right:8px;vertical-align:2px;color:#fff}
+  .tag-f{background:#f59e0b}
+  .tag-b{background:#ef4444}
+  .tag-p{background:#4D6BFE}
+  .tag-s{background:#a855f7}
+  .footer{margin-top:28px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);page-break-before:avoid}
+  @media print{.footer{page-break-inside:avoid}}
+  .ans{page-break-inside:avoid}
+</style>
+</head>
+<body>
+
+<div class="kicker">C 语言伴读练习册 · 第 3 批</div>
+<h1>Ch7 分支和跳转 · 练习</h1>
+<div class="sub">对应《C Primer Plus（第6版）》第 7 章 · 参考答案含「思路 + 常见错法」· 请先独立完成再看答案</div>
+
+<h2 id="p7-1">7-1 填空</h2>
+<div class="q"><span class="tag tag-f">填空</span>① <code>int n=5; if (n=3) printf("A"); else printf("B");</code> 打印 ____（提示：看仔细，这一题有坑）。</div>
+<h2 id="p7-2">7-2 填空</h2>
+<div class="q"><span class="tag tag-f">填空</span>② <code>int x=85; if (x&gt;=60) printf("P"); else if (x&gt;=80) printf("G");</code> 打印 ____。</div>
+<h2 id="p7-3">7-3 填空</h2>
+<div class="q"><span class="tag tag-f">填空</span>③ <code>char c='b'; if (c=='a' || c=='b') printf("yes");</code> 打印 ____。</div>
+
+<h2 id="p7-4">7-4 改错</h2>
+<div class="q"><span class="tag tag-b">改错</span>④ 下面程序想对 85 分输出"良好"，但有 2 处问题（同一行上的两层错）。先自己找，再对照答案。</div>
+<pre><span class="cm">/* debug_exercise_107.c — 找 2 处问题 */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int score = 85;
+    if (score &gt;= 90)
+        printf("优秀\n");
+    else if (score = 80)          <span class="cm">/* 想表示 80 分及以上得"良好" */</span>
+        printf("良好\n");
+    else
+        printf("加油\n");
+    return 0;
+}</pre>
+
+<h2 id="p7-5">7-5 编程</h2>
+<div class="q"><span class="tag tag-p">编程</span>⑤ 写程序：输入一个 0-100 的分数，按 <code>90优秀 / 80良好 / 70中等 / 60及格 / 其余不及格</code> 输出等级。示例输出：
+<pre><span class="cm">ch7_p6_grade.c</span>
+输入分数：72
+中等</pre></div>
+
+<h2 id="p7-6">7-6 编程</h2>
+<div class="q"><span class="tag tag-p">编程</span>⑥ 写程序：用 <code>switch</code> 做<b>简单计算器</b>——读入 <code>数字 运算符 数字</code>（如 <code>3 + 5</code>），按 <code>+ - * /</code> 输出结果，其他运算符提示"不支持的运算符"。示例输出：
+<pre><span class="cm">ch7_p7_calc.c</span>
+输入 数字 运算符 数字（如 3 + 5）：3 + 5
+3.0 + 5.0 = 8.0</pre></div>
+
+<h2 id="p7-7">7-7 专业场景</h2>
+<div class="q"><span class="tag tag-s">专业场景</span>⑦（不需要硬件知识）写程序：用 <code>getchar</code> + 循环读入一行英文（读到换行 <code>\n</code> 结束），统计并打印<b>元音字母</b>（a/e/i/o/u 大小写都算）的个数。示例交互：
+<pre><span class="cm">ch7_p8_vowel.c</span>
+输入一行英文：hello world
+元音共 3 个</pre></div>
+
+<h2 id="p7-8">7-8 索引</h2>
+<div class="q"><span class="tag tag-f">索引</span>⑧ 打开《C Primer Plus（第6版）》第 7 章，完成 <b>复习题 2、4、6</b>（题号对应主教材）。</div>
+
+<h2>参考答案</h2>
+
+<div class="ans"><b>①</b> A。
+<div class="tip"><b>思路：</b><code>n=3</code> 是赋值不是判断（恒为真），所以走 if 打印 A。要判断相等该写 <code>n==3</code>（讲义 7.1 新手坑 1）。</div></div>
+
+<div class="ans"><b>②</b> P。
+<div class="tip"><b>思路：</b>85&gt;=60 第一个条件就为真，后面 <code>else if</code> 不会再查——<b>先写宽条件会吃掉后面的窄条件</b>（讲义 7.2 的顺序坑）。想得 G 应把 <code>&gt;=80</code> 放前面。</div></div>
+
+<div class="ans"><b>③</b> yes。
+<div class="tip"><b>思路：</b>c=='b' 为真，<code>||</code> 一边真即真（讲义 7.4）。</div></div>
+
+<div class="ans"><b>④ 诊断（本机 gcc 16.1.0 实测）：第 9 行 <code>else if (score = 80)</code> 同一行有两层错。</b>
+<ol>
+<li><b>赋值当判断</b>：<code>score = 80</code> 把 80 赋给 score，条件恒真——不管输入多少都走"良好"。gcc 实测报 <code>warning: suggest parentheses around assignment used as truth value [-Wparentheses]</code>（编译能过，逻辑全错）；</li>
+<li><b>范围错</b>：就算把 <code>=</code> 改成 <code>==</code>，85 分 <code>score == 80</code> 为假，会掉到 else 打"加油"。想表达"80 分及以上"应该用 <code>score &gt;= 80</code>。</li>
+</ol>
+<div class="warn"><b>修复 = <code>score = 80</code> → <code>score &gt;= 80</code>（一步同时解决两层错）。修复版输出（实测）：<code>良好</code>。教学点：<b>看到 <code>=</code> 出现在 if 条件里先警惕</b>；另外 <code>==</code> 只能匹配一个精确值，范围判断要用 <code>&gt;=</code>。</div></div>
+
+<div class="ans"><b>⑤ 参考代码：</b>
+<pre><span class="cm">ch7_p6_grade.c</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int score = 72;
+    if (score &gt;= 90)      printf("优秀\n");
+    else if (score &gt;= 80) printf("良好\n");
+    else if (score &gt;= 70) printf("中等\n");
+    else if (score &gt;= 60) printf("及格\n");
+    else                  printf("不及格\n");
+    return 0;
+}</pre>
+<div class="tip"><b>思路：</b>从高到低排（90→80→70→60），第一个满足的生效。<b>常见错法：</b>从低到高排（60→70），72 分会被先判成"及格"。实测输出：中等。</div></div>
+
+<div class="ans"><b>⑥ 参考代码：</b>
+<pre><span class="cm">ch7_p7_calc.c</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    double a, b;
+    char op;
+    printf("输入 数字 运算符 数字（如 3 + 5）：");
+    scanf("%lf %c %lf", &amp;a, &amp;op, &amp;b);
+    switch (op) {
+        case '+': printf("%.1f %c %.1f = %.1f\n", a, op, b, a + b); break;
+        case '-': printf("%.1f %c %.1f = %.1f\n", a, op, b, a - b); break;
+        case '*': printf("%.1f %c %.1f = %.1f\n", a, op, b, a * b); break;
+        case '/': printf("%.1f %c %.1f = %.1f\n", a, op, b, a / b); break;
+        default:  printf("不支持的运算符\n");
+    }
+    return 0;
+}</pre>
+<div class="tip"><b>思路：</b>switch 按字符分流。<b>常见错法：</b>case 后忘 break（掉穿，讲义 7.3 新手坑 2）。实测输出：3.0 + 5.0 = 8.0。</div></div>
+
+<div class="ans"><b>⑦ 参考代码（元音计数）：</b>
+<pre><span class="cm">ch7_p8_vowel.c</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    char ch;
+    int count = 0;
+    printf("输入一行英文：");
+    while ((ch = getchar()) != '\n' &amp;&amp; ch != EOF) {
+        if (ch == 'a' || ch == 'e' || ch == 'i' || ch == 'o' || ch == 'u' ||
+            ch == 'A' || ch == 'E' || ch == 'I' || ch == 'O' || ch == 'U')
+            count++;
+    }
+    printf("元音共 %d 个\n", count);
+    return 0;
+}</pre>
+<div class="tip"><b>思路：</b>循环读字符直到换行，逐个比对元音。<b>常见错法：</b>忘写大小写（只查小写，'E' 漏算）；或把 <code>!= '\n'</code> 写成 <code>==</code>（循环体一次不执行）。实测：hello world 共 3 个元音。</div></div>
+
+<div class="footer">本练习册为自写原创变式题，仅作课堂伴读；改错题请在 <code>gcc -Wall -Wextra</code> 下先实测再对照答案。原书题目请以正版教材为准。</div>
+</body>
+</html>

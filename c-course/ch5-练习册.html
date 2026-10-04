@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>C 语言伴读练习册 · Ch5 运算符、表达式与语句</title>
+<style>
+  :root{
+    --teal:#4D6BFE; --ink:#0f172a; --body:#334155; --muted:#64748b;
+    --line:#e2e8f0; --code-bg:#f1f5f9; --warn-bg:#fff7ed; --warn-border:#fdba74;
+    --tip-bg:#eff6ff; --tip-border:#93c5fd; --ans-bg:#f0fdf4;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:"Noto Sans SC",-apple-system,"Microsoft YaHei",sans-serif;
+    color:var(--body); font-size:14px; line-height:1.75; padding:36px 44px;
+  }
+  h1{font-size:24px;color:var(--ink);margin-bottom:4px}
+  h2{font-size:18px;color:var(--teal);margin:26px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  h3{font-size:15px;color:var(--ink);margin:18px 0 8px}
+  p{margin:8px 0}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+  .kicker{display:inline-block;background:var(--teal);color:#fff;font-size:11px;padding:2px 8px;border-radius:4px;margin-bottom:8px;letter-spacing:1px}
+  pre{
+    background:var(--code-bg);border:1px solid var(--line);border-radius:8px;
+    padding:12px 14px;font-size:12.5px;line-height:1.6;overflow-x:auto;
+    white-space:pre-wrap;word-break:break-all;font-family:Consolas,"Courier New",monospace;
+  }
+  pre .cm{color:#6b7280}
+  .cmd{font-size:12px;color:var(--muted);font-family:Consolas,monospace;margin:4px 0 12px}
+  .warn,.tip,.ans{border-radius:8px;padding:10px 14px;margin:12px 0;font-size:13.5px}
+  .warn{background:var(--warn-bg);border-left:4px solid var(--warn-border)}
+  .tip{background:var(--tip-bg);border-left:4px solid var(--tip-border)}
+  .ans{background:var(--ans-bg);border-left:4px solid #4ade80}
+  .warn b,.tip b,.ans b{color:var(--ink)}
+  .q{font-size:14px;font-weight:700;color:var(--ink);margin:18px 0 6px}
+  .q .tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:10px;margin-right:8px;vertical-align:2px;color:#fff}
+  .tag-f{background:#f59e0b}
+  .tag-b{background:#ef4444}
+  .tag-p{background:#4D6BFE}
+  .tag-s{background:#a855f7}
+  .footer{margin-top:28px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);page-break-before:avoid}
+  @media print{.footer{page-break-inside:avoid}}
+  .ans{page-break-inside:avoid}
+</style>
+</head>
+<body>
+
+<div class="kicker">C 语言伴读练习册 · 第 2 批</div>
+<h1>Ch5 运算符、表达式与语句 · 练习</h1>
+<div class="sub">对应《C Primer Plus（第6版）》第 5 章 · 参考答案含「思路 + 常见错法」· 请先独立完成再看答案</div>
+
+<h2 id="p5-1">5-1 填空</h2>
+<div class="q"><span class="tag tag-f">填空</span>① <code>10 / 4</code> 的值是 ____；<code>10.0 / 4</code> 的值是 ____；<code>10 % 4</code> 的值是 ____。</div>
+<h2 id="p5-2">5-2 填空</h2>
+<div class="q"><span class="tag tag-f">填空</span>② <code>int a = 5; a += 3;</code> 后 a = ____；接着 <code>a *= 2;</code> 后 a = ____。</div>
+<h2 id="p5-3">5-3 填空</h2>
+<div class="q"><span class="tag tag-f">填空</span>③ 想判断整数 n 能否被 7 整除，条件是 <code>____ == 0</code>。</div>
+
+<h2 id="p5-4">5-4 改错</h2>
+<div class="q"><span class="tag tag-b">改错</span>④ 下面程序有 3 处问题：2 处编译错误 + 1 处"输出不对"。先自己找，再对照答案（本机 gcc 16.1.0 实测报错原文见答案）。</div>
+<pre><span class="cm">/* debug_exercise_105.c — 找 3 处问题 */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int num = 7;
+    double half = num / 2;       <span class="cm">/* 想得到 3.5 */</span>
+    printf("7 / 2 = %f\n", half)
+    num = num + 1
+    printf("num = %d\n", num);
+    return 0;
+}</pre>
+
+<h2 id="p5-5">5-5 编程</h2>
+<div class="q"><span class="tag tag-p">编程</span>⑤ 写程序：三门课成绩 C=82.5、Math=91、Eng=78，打印平均分（保留 1 位）。示例输出：
+<pre><span class="cm">ch5_p6_avg.c</span>
+平均分 = 83.8</pre></div>
+
+<h2 id="p5-6">5-6 编程</h2>
+<div class="q"><span class="tag tag-p">编程</span>⑥ 写程序：把 3661 秒换算成"x 小时 y 分 z 秒"打印（用 <code>/</code> 和 <code>%</code>）。示例输出：
+<pre><span class="cm">ch5_p7_time.c</span>
+3661 秒 = 1 小时 1 分 1 秒</pre></div>
+
+<h2 id="p5-7">5-7 专业场景</h2>
+<div class="q"><span class="tag tag-s">专业场景</span>⑦（不需要硬件知识）电路里有个经典<b>电阻分压</b>公式 <code>Vout = Vin × R2 / (R1 + R2)</code>。写程序：<code>Vin=5.0</code>、<code>R1=1000</code>、<code>R2=2000</code>（Ω），打印 Vout（保留 2 位）。提示：注意整数除法陷阱——如果先算 <code>R2 / (R1+R2)</code> 会得 0。示例输出：
+<pre><span class="cm">ch5_p9_divider.c</span>
+Vout = 3.33 V</pre></div>
+
+<h2 id="p5-8">5-8 索引</h2>
+<div class="q"><span class="tag tag-f">索引</span>⑧ 打开《C Primer Plus（第6版）》第 5 章，完成 <b>复习题 1、2、4</b>（题号对应主教材）。</div>
+
+<h2>参考答案</h2>
+
+<div class="ans"><b>①</b> 2；2.5；2。
+<div class="tip"><b>思路：</b><code>10/4</code> 两个 int → 整数除法截断得 2；<code>10.0/4</code> 有 double → 2.5；<code>10%4</code> 余数 2（讲义 5.2）。</div></div>
+
+<div class="ans"><b>②</b> 8；16。
+<div class="tip"><b>思路：</b><code>a += 3</code> 等价 <code>a = a + 3</code>（讲义 5.4）。</div></div>
+
+<div class="ans"><b>③</b> <code>n % 7</code>。
+<div class="tip"><b>思路：</b>整除 ⟺ 余数为 0。口诀：<code>/</code> 取商，<code>%</code> 取余（讲义 5.2）。</div></div>
+
+<div class="ans"><b>④ 诊断（本机 gcc 16.1.0 实测）：2 处编译错误 + 1 处逻辑错误。</b>
+<ol>
+<li>第 8 行 <code>printf("7 / 2 = %f\n", half)</code> 漏分号——gcc 报 <code>error: expected ';' before 'num'</code>，报错行指向第 9 行（漏分号总是"错在下一行"，见 Ch1 讲义 1.4）；</li>
+<li>第 9 行 <code>num = num + 1</code> 漏分号——修复后编译器继续，报 <code>error: expected ';' before '}'</code>；</li>
+<li>第 7 行 <code>num / 2</code> 是<b>整数除法</b>，<code>half</code> 想得 3.5 实际得 3.0（编译不报错，属"输出不对"）。改成 <code>num / 2.0</code>。</li>
+</ol>
+<div class="warn"><b>修复 = </b>两处补 <code>;</code> + <code>num / 2.0</code>。修复版输出（实测）：<code>7 / 2 = 3.500000</code>、<code>num = 8</code>。教学点：<b>先修编译错误（分号），再找逻辑错误（整数除法）</b>——别被编译器带偏，修完能编译 ≠ 程序算对了。</div></div>
+
+<div class="ans"><b>⑤ 参考代码：</b>
+<pre><span class="cm">ch5_p6_avg.c</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    double c = 82.5, math = 91, eng = 78;
+    double avg = (c + math + eng) / 3.0;
+    printf("平均分 = %.1f\n", avg);
+    return 0;
+}</pre>
+<div class="tip"><b>思路：</b>除以 <code>3.0</code>（带 .0）保小数。<b>常见错法：</b>写 <code>/ 3</code>——整数除法会把 251.5/3 截断成 83。实测输出：平均分 = 83.8。</div></div>
+
+<div class="ans"><b>⑥ 参考代码：</b>
+<pre><span class="cm">ch5_p7_time.c</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int total = 3661;
+    int h = total / 3600;
+    int m = (total % 3600) / 60;
+    int s = total % 60;
+    printf("%d 秒 = %d 小时 %d 分 %d 秒\n", total, h, m, s);
+    return 0;
+}</pre>
+<div class="tip"><b>思路：</b>三步拆：总秒数 ÷3600 得小时；余数再 ÷60 得分钟；最后余数即秒。<b>常见错法：</b><code>m = total % 60</code>（把 61 秒算成 1 分 61 秒——分钟不是对 3600 取余后再拆）。实测输出：3661 秒 = 1 小时 1 分 1 秒。</div></div>
+
+<div class="ans"><b>⑦ 参考代码（电阻分压）：</b>
+<pre><span class="cm">ch5_p9_divider.c</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    double vin = 5.0;
+    int r1 = 1000, r2 = 2000;
+    double vout = vin * r2 / (r1 + r2);
+    printf("Vout = %.2f V\n", vout);
+    return 0;
+}</pre>
+<div class="tip"><b>思路：</b>让 <code>vin * r2</code> 先算（int 变 double），再除——避免 <code>r2 / (r1+r2)</code> 先做整数除法得 0。<b>常见错法：</b>照抄公式顺序 <code>r2 / (r1 + r2) * vin</code>——整数除法先执行，Vout 恒为 0。实测输出：Vout = 3.33 V。</div></div>
+
+<div class="footer">本练习册为自写原创变式题，仅作课堂伴读；改错题请在 <code>gcc -Wall -Wextra</code> 下先实测再对照答案。原书题目请以正版教材为准。</div>
+</body>
+</html>

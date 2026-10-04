@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>C 语言伴读练习册 · Ch11 字符串</title>
+<style>
+  :root{
+    --teal:#4D6BFE; --ink:#0f172a; --body:#334155; --muted:#64748b;
+    --line:#e2e8f0; --code-bg:#f1f5f9; --warn-bg:#fff7ed; --warn-border:#fdba74;
+    --tip-bg:#eff6ff; --tip-border:#93c5fd; --ans-bg:#f0fdf4;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:"Noto Sans SC",-apple-system,"Microsoft YaHei",sans-serif;
+    color:var(--body); font-size:14px; line-height:1.75; padding:36px 44px;
+  }
+  h1{font-size:24px;color:var(--ink);margin-bottom:4px}
+  h2{font-size:18px;color:var(--teal);margin:26px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  h3{font-size:15px;color:var(--ink);margin:18px 0 8px}
+  p{margin:8px 0}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+  .kicker{display:inline-block;background:var(--teal);color:#fff;font-size:11px;padding:2px 8px;border-radius:4px;margin-bottom:8px;letter-spacing:1px}
+  pre{
+    background:var(--code-bg);border:1px solid var(--line);border-radius:8px;
+    padding:12px 14px;font-size:12.5px;line-height:1.6;overflow-x:auto;
+    white-space:pre-wrap;word-break:break-all;font-family:Consolas,"Courier New",monospace;
+  }
+  pre .cm{color:#6b7280}
+  .cmd{font-size:12px;color:var(--muted);font-family:Consolas,monospace;margin:4px 0 12px}
+  .warn,.tip,.ans{border-radius:8px;padding:10px 14px;margin:12px 0;font-size:13.5px}
+  .warn{background:var(--warn-bg);border-left:4px solid var(--warn-border)}
+  .tip{background:var(--tip-bg);border-left:4px solid var(--tip-border)}
+  .ans{background:var(--ans-bg);border-left:4px solid #4ade80}
+  .warn b,.tip b,.ans b{color:var(--ink)}
+  ul,ol{margin:8px 0 8px 22px}
+  li{margin:4px 0}
+  .footer{margin-top:28px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);page-break-before:avoid}
+  @media print{.footer{page-break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<div class="kicker">C 语言伴读练习册 · 补全章</div>
+<h1>Ch11 字符串 · 练习册</h1>
+<div class="sub">配套讲义 Ch11 · 题链：填空★ → 改错★★ → 编程★★/★★★ → 专业场景 → 复习题索引 → 参考答案 · 先自己写，再看答案</div>
+
+<h2 id="s11-1">11-1 填空（★）</h2>
+<ol>
+<li>字符串 "ok" 在内存里占 <b>____</b> 个字节（含结尾空字符）。</li>
+<li>函数 <code>strlen(s)</code> 返回的长度<b>不包含</b>____。</li>
+<li>读一整行（含空格）用 <code>____</code>；它读进来的字符串末尾通常带着一个 <b>____</b>。</li>
+<li>比较两个字符串是否相等，要用 <code>strcmp(a, b) == ____</code>，不能用 <code>==</code>。</li>
+<li>char s[8] 最多能存 <b>____</b> 个字符（不含 \0）。</li>
+</ol>
+
+<h2 id="s11-2">11-2 改错（★★，先自己找再对答案）</h2>
+<p>下面程序有 3 处错误，先自己找，再对照答案：</p>
+<pre><span class="cm">/* debug_exercise_111.c — 找 3 处错误 */</span>
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+int main(void)
+{
+    char name[8];
+    char greeting[8] = "";
+
+    printf("你的名字：");
+    scanf("%s", name);              /* ？ */
+    strcpy(greeting, "你好，");
+    strcat(greeting, name);
+
+    printf("%s\n", greeting);
+    return 0;
+}</pre>
+<p>提示：想想输入 "Li Ming"（含空格）会发生什么，再想想 greeting 够不够放。</p>
+
+<h2 id="s11-3">11-3 编程（★★）</h2>
+<p>用 <code>fgets</code> 读入一行（最多 99 字符），去掉结尾换行后打印长度（<code>strlen</code>）。样例：输入 <code>hello</code> → 输出 <code>长度：5</code>。</p>
+
+<h2 id="s11-4">11-4 编程（★★★）</h2>
+<p>读入两个单词（各不超过 31 字符，用 fgets 或 scanf 均可），判断它们是否相同：相同输出 <code>相同</code>，不同输出 <code>不同</code>。要求用 <code>strcmp</code>。</p>
+
+<h2 id="s11-5">11-5 专业场景拓展（★★，不需要硬件知识）</h2>
+<p>串口设备返回的指令是 <code>AT+OK</code>。写程序：读入一行（fgets），若内容是 <code>AT+OK</code>（用 strcmp 判断，记得先去掉 fgets 的换行）输出 <code>设备就绪</code>，否则输出 <code>指令异常</code>。</p>
+
+<h2 id="s11-6">11-6 复习题索引</h2>
+<p>对应《C Primer Plus（第6版）》第 11 章复习题：Q1–Q4 必做（字符串定义）；Q7–Q9（字符串函数）本章已覆盖；Q10+（指针字符串）可留到 Ch10 指针学完再回看。</p>
+
+<h2 id="s11-7">11-7 参考答案（先自己写，再看思路与常见错法）</h2>
+<div class="ans"><b>11-1 填空答案</b>：① 3；② \0（空字符）；③ fgets / 换行 \n；④ 0；⑤ 7。</div>
+<div class="ans"><b>11-2 改错答案</b>：
+<pre>/* debug_exercise_111_fixed.c — 修好的版本 */
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+int main(void)
+{
+    char name[32];                  /* 错误1：数组太小，且 scanf %s 遇空格停 */
+    char greeting[64] = "";         /* 错误2：greeting 装不下"你好，"+ 名字，改 64 */
+
+    printf("你的名字：");
+    fgets(name, sizeof(name), stdin);           /* 错误3：改用 fgets 读整行 */
+    size_t len = strlen(name);
+    if (len &gt; 0 &amp;&amp; name[len - 1] == '\n') name[len - 1] = '\0';
+
+    strcpy(greeting, "你好，");
+    strcat(greeting, name);
+
+    printf("%s\n", greeting);
+    return 0;
+}</pre>
+三处错误：①<code>name[8]</code> 太小 + scanf %s 遇空格停——改用 <code>fgets</code> 且数组放大；②<code>greeting[8]</code> 装不下拼接结果——改 64；③scanf 的缓冲区溢出风险。fixed 版输出：输入 <code>Li Ming</code> → <code>你好，Li Ming</code>。<br>
+<b>本机 gcc 16.1.0 -Wall -Wextra 实测</b>：fixed 版编译零警告。</div>
+<div class="ans"><b>11-3 编程参考</b>：<pre>char s[100];
+fgets(s, sizeof(s), stdin);
+size_t len = strlen(s);
+if (len &gt; 0 &amp;&amp; s[len-1] == '\n') s[len-1] = '\0';
+printf("长度：%zu\n", strlen(s));</pre>常见错法：忘了去掉 \n（长度会多 1）；用 sizeof(s)-1 当长度。</div>
+<div class="ans"><b>11-4 编程参考</b>：<code>if (strcmp(a, b) == 0) printf("相同\n"); else printf("不同\n");</code>。常见错法：用 <code>a == b</code>（比地址，永远不同）。</div>
+<div class="ans"><b>11-5 专业场景参考</b>：<pre>char line[32];
+fgets(line, sizeof(line), stdin);
+size_t len = strlen(line);
+if (len &gt; 0 &amp;&amp; line[len-1] == '\n') line[len-1] = '\0';
+if (strcmp(line, "AT+OK") == 0) printf("设备就绪\n");
+else printf("指令异常\n");</pre>常见错法：fgets 的 \n 没去掉，strcmp 永远不相等；用 == 比较。</div>
+
+<div class="footer">Ch11 练习册 · 本机 gcc 16.1.0 -Wall -Wextra 实测（11-2 fixed 零警告）</div>
+
+</body>
+</html>

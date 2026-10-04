@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>C 语言练习册 · Ch4（样品章）</title>
+<style>
+  :root{
+    --teal:#4D6BFE; --ink:#0f172a; --body:#334155; --muted:#64748b;
+    --line:#e2e8f0; --code-bg:#f1f5f9; --ans-bg:#f0fdf4; --warn-bg:#fff7ed;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:"Noto Sans SC",-apple-system,"Microsoft YaHei",sans-serif;color:var(--body);font-size:14px;line-height:1.75;padding:36px 44px}
+  h1{font-size:24px;color:var(--ink);margin-bottom:4px}
+  h2{font-size:18px;color:var(--teal);margin:26px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  h3{font-size:15px;color:var(--ink);margin:16px 0 8px}
+  p{margin:8px 0}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+  .kicker{display:inline-block;background:var(--teal);color:#fff;font-size:11px;padding:2px 8px;border-radius:4px;margin-bottom:8px;letter-spacing:1px}
+  pre{background:var(--code-bg);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:12.5px;line-height:1.6;white-space:pre-wrap;word-break:break-all;font-family:Consolas,"Courier New",monospace}
+  pre .cm{color:#6b7280}
+  .q{background:#fbfdff;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:14px 0}
+  .q .tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:4px;margin-right:6px;color:#fff}
+  .tag.fill{background:#64748b}.tag.debug{background:#dc2626}.tag.code{background:#4D6BFE}.tag.ex{background:#7c3aed}
+  .q .stars{color:#f59e0b;font-size:12px}
+  .out{background:#0f172a;color:#a5b4fc;border-radius:6px;padding:8px 12px;font-size:12px;font-family:Consolas,monospace;margin:8px 0}
+  .out b{color:#e2e8f0}
+  .ans{background:var(--ans-bg);border-left:4px solid #4ade80;border-radius:8px;padding:10px 14px;margin:12px 0;font-size:13.5px}
+  .ans b{color:var(--ink)}
+  .idx{background:#eff6ff;border-left:4px solid #93c5fd;border-radius:8px;padding:10px 14px;margin:12px 0}
+  .idx b{color:var(--ink)}
+  .footer{margin-top:28px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="kicker">C 语言练习册 · 样品章</div>
+<h1>Ch4 练习：字符串和格式化输入/输出</h1>
+<div class="sub">每章配比：填空 1 → 改错 1 → 编程 2 → 专业场景拓展 1 + 复习题索引。答案给「思路 + 常见错法」，先自己写再看。<br>范围自律：不考位运算、指针高级用法、动态内存。参考编译命令：<code>gcc -Wall -Wextra -o prog.exe prog.c</code></div>
+
+<h2 id="p4-1">4-1 填空（★）</h2>
+<div class="q"><span class="tag fill">填空</span><span class="stars">★</span>
+<p>在横线处填入正确的占位符，使输出符合右侧注释：</p>
+<pre>int    n = 7;
+double pi = 3.14159;
+char   ch = 'A';
+
+printf("____", n);        <span class="cm">/* 输出：7 */</span>
+printf("____", pi);       <span class="cm">/* 输出：3.14 */</span>
+printf("____", ch);       <span class="cm">/* 输出：A */</span>
+printf("____", "hi");     <span class="cm">/* 输出：hi */</span></pre>
+</div>
+
+<h2 id="p4-2">4-2 改错（★★，最有价值的一题）</h2>
+<div class="q"><span class="tag debug">改错</span><span class="stars">★★</span>
+<p>下面的程序有 <b>4 处问题</b>（编译错误、警告或逻辑错误），找出并改正，然后说明每一处属于「编译期报错 / 仅警告 / 静默逻辑错误」中的哪一类：</p>
+<pre>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int    score = 92.5;          <span class="cm">/* ① */</span>
+    char   name[3] = "Lim";       <span class="cm">/* ② */</span>
+
+    printf("分数：%d 及格率：%f", score, 0.85);
+    scanf("%d", score);           <span class="cm">/* ③ */</span>
+    printf("姓名：%s", name)      <span class="cm">/* ④ */</span>
+    return 0;
+}</pre>
+<p>提示：一处静默丢掉小数、一处数组越界（编译器会警告）、一处少了 &amp;、一处少了分号。</p>
+</div>
+
+<h2 id="p4-3">4-3 编程（★★）</h2>
+<div class="q"><span class="tag code">编程</span><span class="stars">★★</span>
+<p>写程序：读入体重（kg，整数）和身高（m，浮点数），输出 BMI = 体重 ÷ 身高²，保留 1 位小数。<br>输出样例：</p>
+<div class="out"><b>请输入体重(kg)和身高(m)：</b>70 1.75<br><b>BMI = 22.9</b></div>
+</div>
+
+<h2 id="p4-4">4-4 编程（★★★）</h2>
+<div class="q"><span class="tag code">编程</span><span class="stars">★★★</span>
+<p>写程序：读入两个整数 a、b，用 <code>%8d</code> 和 <code>%-8d</code> 各打印一行（观察右对齐/左对齐区别），并打印它们的和与积。<br>输出样例：</p>
+<div class="out"><b>请输入两个整数：</b>123 4567<br><b>     123|4567    </b>（8 位右对齐）<br><b>123     |4567    </b>（8 位左对齐）<br><b>和 = 4690  积 = 561741</b></div>
+</div>
+
+<h2 id="p4-5">4-5 专业场景拓展（★★，不需要硬件知识）</h2>
+<div class="q"><span class="tag ex">拓展</span><span class="stars">★★</span>
+<p>串口调试经常要按固定格式打印数据帧。用循环模拟打印 3 帧，格式：<code>帧号=1 数据=xx 校验=0x3f</code>（校验随便算个值即可，这题只练格式化输出）：</p>
+<div class="out"><b>帧号=1 数据=0x12 校验=0x4f</b><br><b>帧号=2 数据=0x34 校验=0x6d</b><br><b>帧号=3 数据=0x56 校验=0x8b</b></div>
+<p>要求：帧号用 <code>%d</code>，数据用 <code>0x%02X</code>（十六进制大写两位）。写完后试把 <code>%02X</code> 改成 <code>%X</code>，观察输出差在哪。</p>
+</div>
+
+<h2 id="p4-6">4-6 复习题索引</h2>
+<div class="idx"><b>打开《C Primer Plus（第6版）》第 4 章，完成复习题 1、3、5。</b>做之前先合上书想 30 秒「printf 和 scanf 各要什么参数」，再对照答案。原书题目不在此重复（版权口径：见练习册说明）。</div>
+
+<h2 id="p4-7">4-7 一分钟自测答案</h2>
+<div class="ans"><b>① 错</b>：%d 配了 double，输出是垃圾值；应用 %f。<br>
+<b>② 错</b>：scanf 读入必须传地址，应写 <code>scanf("%d", &amp;num)</code>。<br>
+<b>③ 对</b>：'O'、'K'、'\0' 共 3 个 char。</div>
+
+<h2 id="p4-8">4-8 参考答案（先自己写，再看思路与常见错法）</h2>
+
+<div class="q"><span class="tag fill">4-1</span>
+<p>依次填：<code>%d</code>、<code>%.2f</code>、<code>%c</code>、<code>%s</code>。<br>
+<b>思路</b>：占位符按「值的类型 + 想要的显示格式」配对——整数 %d、小数 %.2f（保留两位）、单字符 %c、字符串 %s。<br>
+<b>常见错法</b>：把 %f 配 int（输出乱码），或把 %d 配 double；写 %.2f 时忘了小数点前的数字。</p>
+</div>
+
+<div class="q"><span class="tag debug">4-2</span>
+<p>四处问题及分类（<b>莉已用 <code>gcc -Wall -Wextra</code> 实测</b>，诊断与题目一一对应）：</p>
+<pre>① int score = 92.5;   <span class="cm">静默逻辑错：无任何诊断，92.5 被截成 92，小数丢了</span>
+② char name[3] = "Lim";  <span class="cm">仅警告：initializer-string truncates NUL terminator
+   （4 字符装进 3 格，没有 \0 位置，%s 打印会越界）</span>
+③ scanf("%d", score);  <span class="cm">仅警告：format '%d' expects 'int *' but argument is 'int'
+   （少了 &amp;。编译能过但运行时会从无效地址读，直接崩/UB）</span>
+④ printf("姓名：%s", name)  <span class="cm">编译期报错：expected ';' before 'return'（少了分号）</span></pre>
+<p><b>改法</b>：① 改成 <code>double score = 92.5;</code> 并把 %d 换成 %.1f；② 数组开大 <code>char name[8]</code>；③ 写 <code>scanf("%d", &amp;score)</code>；④ 行尾加分号。<br>
+<b>常见错法</b>：以为「编译过了就没问题」——①③ 编译都过但一个是丢数据、一个是运行崩溃，这正是 <code>-Wall -Wextra</code> 存在的意义（③ 会被它抓住）。</p>
+</div>
+
+<div class="q"><span class="tag code">4-3</span>
+<p><b>思路</b>：先 <code>scanf</code> 读入两个值（注意 <code>%d</code> 读 int、<code>%lf</code> 读 double），再算 <code>bmi = w / (h*h)</code>，用 <code>%.1f</code> 输出。</p>
+<pre>#include &lt;stdio.h&gt;
+int main(void){
+    int w; double h, bmi;
+    printf("请输入体重(kg)和身高(m)：");
+    scanf("%d%lf", &amp;w, &amp;h);
+    bmi = w / (h * h);
+    printf("BMI = %.1f\n", bmi);
+    return 0;
+}</pre>
+<p><b>常见错法</b>：<code>scanf("%d%lf", &amp;w, &amp;h)</code> 写成 <code>%f</code> 读 double（scanf 不会像 printf 那样自动提升）；或忘写 &amp;；或算 BMI 时 int 除 int 得整数（这里 w 是 int、h*h 是 double，自动转 double，没踩这个坑）。</p>
+</div>
+
+<div class="q"><span class="tag code">4-4</span>
+<p><b>思路</b>：读入后用 <code>printf("%8d %-8d\n", a, b)</code> 观察两种对齐，再打印和与积。</p>
+<pre>#include &lt;stdio.h&gt;
+int main(void){
+    int a, b;
+    printf("请输入两个整数：");
+    scanf("%d%d", &amp;a, &amp;b);
+    printf("%8d %8d\n", a, b);   <span class="cm">/* 右对齐 */</span>
+    printf("%-8d %-8d\n", a, b); <span class="cm">/* 左对齐 */</span>
+    printf("和 = %d  积 = %d\n", a + b, a * b);
+    return 0;
+}</pre>
+<p><b>常见错法</b>：把 <code>%-8d</code> 写成 <code>-%8d</code>；忘了宽度数字是「最小宽度」，数字超出时不会截断。</p>
+</div>
+
+<div class="q"><span class="tag ex">4-5</span>
+<p><b>思路</b>：数据写进数组（或直接循环用 <code>0x12 / 0x34 / 0x56</code>），<code>%02X</code> 保证十六进制两位（不足补 0），帧号用 <code>%d</code>。</p>
+<pre>#include &lt;stdio.h&gt;
+int main(void){
+    unsigned char data[3] = {0x12, 0x34, 0x56};
+    int i;
+    for (i = 1; i &lt;= 3; i++)
+        printf("帧号=%d 数据=0x%02X 校验=0x%02X\n", i, data[i-1], (unsigned char)(data[i-1] * 3 + 1));
+    return 0;
+}</pre>
+<p><b>常见错法</b>：用 <code>%X</code> 时 0x12 会显示成「12」（丢前导 0）；<code>%02X</code> 与 <code>%02x</code> 大小写不同——数据帧协议常约定大写。<br>
+<b>试做后观察</b>：把 <code>%02X</code> 改成 <code>%X</code> 后，帧里的 0x12 会变成 1 个字符「12」（原本占两位），输出不再整齐。</p>
+</div>
+
+<div class="idx"><b>4-6 复习题索引</b>：去书上做 Ch4 复习题 1、3、5（题号对应主教材，原题不入本册）。</div>
+
+<div class="footer">本练习册为自写原创变式题与自写参考讲解，不入原书题目原文；原书题号索引对应人民邮电出版社《C Primer Plus（第6版）》。</div>
+</body>
+</html>

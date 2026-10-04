@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>C 语言练习册 · Ch10 数组和指针</title>
+<style>
+  :root{
+    --teal:#4D6BFE; --ink:#0f172a; --body:#334155; --muted:#64748b;
+    --line:#e2e8f0; --code-bg:#f1f5f9; --ans-bg:#f0fdf4; --warn-bg:#fff7ed;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:"Noto Sans SC",-apple-system,"Microsoft YaHei",sans-serif;color:var(--body);font-size:14px;line-height:1.75;padding:32px 40px}
+  h1{font-size:24px;color:var(--ink);margin-bottom:4px}
+  h2{font-size:18px;color:var(--teal);margin:24px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line);page-break-before:auto}
+  h3{font-size:15px;color:var(--ink);margin:16px 0 8px}
+  p{margin:8px 0}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+  .kicker{display:inline-block;background:var(--teal);color:#fff;font-size:11px;padding:2px 8px;border-radius:4px;margin-bottom:8px;letter-spacing:1px}
+  pre{background:var(--code-bg);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:12.5px;line-height:1.6;white-space:pre-wrap;word-break:break-all;font-family:Consolas,"Courier New",monospace}
+  pre .cm{color:#6b7280}
+  .q{background:#fbfdff;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:14px 0;page-break-inside:avoid}
+  .q .tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:4px;margin-right:6px;color:#fff}
+  .tag.fill{background:#64748b}.tag.debug{background:#dc2626}.tag.code{background:#4D6BFE}.tag.ex{background:#7c3aed}
+  .q .stars{color:#f59e0b;font-size:12px}
+  .out{background:#0f172a;color:#a5b4fc;border-radius:6px;padding:8px 12px;font-size:12px;font-family:Consolas,monospace;margin:8px 0;white-space:pre-wrap}
+  .out b{color:#e2e8f0}
+  .ans{background:var(--ans-bg);border-left:4px solid #4ade80;border-radius:8px;padding:10px 14px;margin:12px 0;font-size:13.5px}
+  .ans b{color:var(--ink)}
+  .idx{background:#eff6ff;border-left:4px solid #93c5fd;border-radius:8px;padding:10px 14px;margin:12px 0}
+  .idx b{color:var(--ink)}
+  .diag{background:#fff7ed;border-left:4px solid #fdba74;border-radius:8px;padding:8px 12px;margin:8px 0;font-size:12.5px;font-family:Consolas,monospace;white-space:pre-wrap}
+  .footer{margin-top:28px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);page-break-before:avoid}
+  @media print{.footer{page-break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<div class="kicker">C 语言练习册 · 重点章</div>
+<h1>Ch10 练习：数组和指针</h1>
+<div class="sub">重点章 · 6 题：填空 1 → 改错 1 → 编程 3 → 专业场景拓展 1 + 复习题索引（索引与参考答案区不计题数）。改错题诊断均为本机 <code>gcc -Wall -Wextra</code> 16.1.0 实测。<br>范围自律：不考指针高级用法（函数指针/指针数组/多级指针）。编译命令：<code>gcc -Wall -Wextra -o prog.exe prog.c</code></div>
+
+<h2 id="p10-1">10-1 填空（★）</h2>
+<div class="q"><span class="tag fill">填空</span><span class="stars">★</span>
+<p>补全代码，使注释成立：</p>
+<pre>int a[4] = {5, 10, 15, 20};
+
+printf("%d", ____);    <span class="cm">/* 输出：15 */</span>
+int *p = ____;         <span class="cm">/* p 指向数组开头 */</span>
+printf("%d", *(p+1));  <span class="cm">/* 输出：____ */</span>
+printf("%d", a[4]);    <span class="cm">/* 危险！这属于____（越界/合法访问）*/</span></pre>
+</div>
+
+<h2 id="p10-2">10-2 改错（★★，先自己找再对答案）</h2>
+<div class="q"><span class="tag debug">改错</span><span class="stars">★★</span>
+<p>下面程序有 <b>4 处问题</b>，找出并改正，分类为「编译期报错 / 仅警告 / 静默逻辑错」：</p>
+<pre>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int a[3] = {1, 2, 3};
+    int *p;              <span class="cm">/* ① */</span>
+    *p = 10;
+    printf("地址 %d\n", &amp;a[0]);   <span class="cm">/* ② */</span>
+    printf("a[3] = %d\n", a[3]);  <span class="cm">/* ③ */</span>
+    int *q = 100;        <span class="cm">/* ④ */</span>
+    return 0;
+}</pre>
+<p>提示：野指针 / 格式串类型不匹配 / 下标越界 / 整数赋给指针。</p>
+</div>
+
+<h2 id="p10-3">10-3 编程（★★）</h2>
+<div class="q"><span class="tag code">编程</span><span class="stars">★★</span>
+<p>写程序：读入 5 个整数存进数组，输出<b>最大值</b>和<b>平均值</b>（保留 1 位小数）。<br>输出样例：</p>
+<div class="out"><b>请输入 5 个整数：</b>3 8 1 9 4
+<b>最大值 = 9  平均值 = 5.0</b></div>
+</div>
+
+<h2 id="p10-4">10-4 编程（★★★）</h2>
+<div class="q"><span class="tag code">编程</span><span class="stars">★★★</span>
+<p>写程序：用<b>指针</b>遍历数组（不许用下标），把数组 {4, 2, 9, 7, 1} 逆序打印。<br>要求：至少用到 <code>p++</code> 和 <code>*p</code>。<br>输出样例：</p>
+<div class="out"><b>1 7 9 2 4</b></div>
+</div>
+
+<h2 id="p10-5">10-5 编程（★★★）</h2>
+<div class="q"><span class="tag code">编程</span><span class="stars">★★★</span>
+<p>写程序：定义函数 <code>void fill(int arr[], int n, int v)</code>，把数组全部元素设成 v，然后在 main 里声明 <code>int a[6]</code> 调用它填成 7 并打印。验证函数里改动确实影响外面。</p>
+</div>
+
+<h2 id="p10-6">10-6 专业场景拓展（★★★，不需要硬件知识）</h2>
+<div class="q"><span class="tag ex">拓展</span><span class="stars">★★★</span>
+<p>ADC 采样场景：传感器 1 秒采样 10 次，值范围 0-1023。用数组存 10 个采样值（自定数据），写程序找<b>最大值对应的下标</b>并输出「第 N 次采样最大」。（这题只练数组遍历 + 找极值，不需要硬件知识。）<br>输出样例：</p>
+<div class="out"><b>采样：512 780 333 910 456 820 999 120 650 780</b>
+<b>第 7 次采样最大 = 999</b></div>
+</div>
+
+<h2 id="p10-7">10-7 复习题索引</h2>
+<div class="idx"><b>打开《C Primer Plus（第6版）》第 10 章，完成复习题 2、4、6。</b>题号对应主教材，原题不入本册。做完对照本书 10.4 的等价公式 <code>a[i] == *(a+i)</code> 再检查一遍。</div>
+
+<h2 id="p10-8">10-8 参考答案（先自己写，再看思路与常见错法）</h2>
+
+<div class="q"><span class="tag fill">10-1</span>
+<p>依次填：<code>a[2]</code>、<code>a</code>（或 <code>&amp;a[0]</code>）、<code>10</code>、<b>越界</b>。<br>
+<b>思路</b>：下标从 0 开始，a[2] 是第 3 个元素；数组名就是首元素地址。<br>
+<b>常见错法</b>：写 a[3] 找 15（那是第 4 个）；以为 a[4] 合法（它已经出界了）。</p>
+</div>
+
+<div class="q"><span class="tag debug">10-2</span>
+<p>四处问题及实测诊断（<b>gcc 16.1.0 -Wall -Wextra 实测</b>）：</p>
+<pre>① int *p; *p = 10;        <span class="cm">野指针：单独编译（其余修好）会报
+   warning: 'p' is used uninitialized [-Wuninitialized]；本题整段因 ④ 的硬错误
+   编译器未进入该分析故看不到。解引用写内存 = 运行期崩溃/UB（恰好没崩只是运气）</span>
+② printf("地址 %d\n", &amp;a[0]);  <span class="cm">仅警告：format '%d' expects 'int' but
+   argument has type 'int *' [-Wformat=]（地址要用 %p）</span>
+③ a[3] 越界              <span class="cm">静默逻辑错：无诊断。C 不检查下标，
+   读到数组后面的垃圾内存</span>
+④ int *q = 100;          <span class="cm">编译期报错：makes pointer from integer
+   without a cast [-Wint-conversion]</span></pre>
+<p><b>改法</b>：① <code>int *p = &amp;a[0];</code>（或先指向数组再解引用）；② <code>printf("地址 %p\n", (void*)&amp;a[0]);</code>；③ 循环边界写 <code>i &lt; 3</code>（读 a[0..2]）；④ <code>int *q = &amp;a[0];</code>。<br>
+<b>常见错法</b>：把「没报错」当「没问题」——②④ 一定报；① 在隔离编译时也会被 <code>-Wuninitialized</code> 抓到，但整段含硬错误时可能看不到，所以<b>不能靠「有没有警告」判断野指针</b>；③ 越界任何时候都不报，只能靠自己的边界意识。</p>
+</div>
+
+<div class="q"><span class="tag code">10-3</span>
+<p><b>思路</b>：循环读入存数组；max 初始为 a[0] 再逐个比；平均值 = 总和 / 5（<code>%.1f</code>）。</p>
+<pre>#include &lt;stdio.h&gt;
+int main(void){
+    int a[5], i, max, sum = 0;
+    printf("请输入 5 个整数：");
+    for (i = 0; i &lt; 5; i++) scanf("%d", &amp;a[i]);
+    max = a[0];
+    for (i = 1; i &lt; 5; i++) if (a[i] &gt; max) max = a[i];
+    for (i = 0; i &lt; 5; i++) sum += a[i];
+    printf("最大值 = %d  平均值 = %.1f\n", max, sum / 5.0);
+    return 0;
+}</pre>
+<p><b>常见错法</b>：max 初始化成 0（数组可能全是负数）；<code>sum / 5</code> 整数除法丢小数（要 <code>5.0</code>）；下标写成 <code>&lt;= 5</code> 越界。</p>
+</div>
+
+<div class="q"><span class="tag code">10-4</span>
+<p><b>思路</b>：指针从数组末尾开始往前挪（<code>p--</code>），或先把 p 移到末尾再倒走。</p>
+<pre>#include &lt;stdio.h&gt;
+int main(void){
+    int a[5] = {4, 2, 9, 7, 1};
+    int *p;
+    for (p = a + 4; p &gt;= a; p--)
+        printf("%d ", *p);
+    printf("\n");
+    return 0;
+}</pre>
+<p><b>常见错法</b>：指针比较用 <code>p &gt;= a</code> 是允许的（同一数组内）；把 <code>a+4</code> 写成 <code>a[4]</code> 就成值不是地址了。</p>
+</div>
+
+<div class="q"><span class="tag code">10-5</span>
+<p><b>思路</b>：形参写 <code>int arr[]</code>，函数里 <code>arr[i] = v</code> 直接改外面（传的是地址）。</p>
+<pre>#include &lt;stdio.h&gt;
+void fill(int arr[], int n, int v){
+    int i;
+    for (i = 0; i &lt; n; i++) arr[i] = v;
+}
+int main(void){
+    int a[6], i;
+    fill(a, 6, 7);
+    for (i = 0; i &lt; 6; i++) printf("%d ", a[i]);
+    printf("\n");
+    return 0;
+}</pre>
+<p><b>常见错法</b>：以为形参数组是副本、改不动外面——这正是本章最该破除的误解。</p>
+</div>
+
+<div class="q"><span class="tag ex">10-6</span>
+<p><b>思路</b>：遍历数组记录「当前最大值的下标」，遇到更大的更新。</p>
+<pre>#include &lt;stdio.h&gt;
+int main(void){
+    int s[10] = {512, 780, 333, 910, 456, 820, 999, 120, 650, 780};
+    int i, idx = 0;
+    for (i = 1; i &lt; 10; i++)
+        if (s[i] &gt; s[idx]) idx = i;
+    printf("第 %d 次采样最大 = %d\n", idx + 1, s[idx]);
+    return 0;
+}</pre>
+<p><b>常见错法</b>：输出 <code>idx</code> 而不 +1（人类数「第 1 次」是下标 0）；并列最大值只取第一个（若题目要求全部列出需另写）。</p>
+</div>
+
+<div class="idx"><b>10-7 复习题索引</b>：去书上做 Ch10 复习题 2、4、6（题号对应主教材，原题不入本册）。</div>
+
+<h2 id="p10-9">10-9 一分钟自测答案（对应讲义 10.9）</h2>
+
+<div class="q"><span class="tag fill">自测 ①</span>
+<p><b>正解：不会。</b><code>a[5]</code> 已经越界——<code>int a[5]</code> 的合法下标只有 <code>0</code>–<code>4</code>。它读到的是数组<b>后面</b>那块内存，值不确定（可能是别的变量，也可能是垃圾值）。<br>
+<b>常见错解</b>：「会，因为 a[5] 是第 5 个元素。」——错在把「第 5 个」当成 <code>a[5]</code>；第一个元素是 <code>a[0]</code>，第 5 个是 <code>a[4]</code>。<br>
+<b>为什么容易错</b>：日常语言从 1 数起，C 从 0 数起；而且越界<b>不报错</b>，写错的人常常「看起来能跑」。</p>
+</div>
+
+<div class="q"><span class="tag debug">自测 ②</span>
+<p><b>正解：语法合法，但行为未定义（UB），不能这么写。</b><code>p</code> 没有初始化，里面是残留值，<code>*p = 10</code> 等于往一块不知道属于谁的内存里写。<br>
+<b>常见错解</b>：「编译能过就是合法。」——错在混淆「编译通过」与「行为正确」；C 里这两件事经常不一致，这也是本章反复强调「看编译器警告」的原因。<br>
+<b>本机实测</b>：单独编译这一段，gcc 16.1.0 报 <code>warning: 'p' is used uninitialized [-Wuninitialized]</code>（开不开 <code>-O2</code> 都报）。<br>
+<b>正确做法</b>：先让指针有明确指向（<code>int n; int *p = &amp;n;</code>），或指向动态内存（Ch12）。</p>
+</div>
+
+<div class="q"><span class="tag code">自测 ③</span>
+<p><b>正解：实际是 <code>int *arr</code>；<code>sizeof(arr)</code> 是指针大小（本机 64 位 = 8），不是整个数组。</b><br>
+<b>常见错解</b>：「是数组，sizeof 应该等于元素个数 × 4。」——错在把形参当成了数组本体：数组名作实参时会「退化」成指向首元素的指针，函数拿到的是地址，不是副本。<br>
+<b>交叉验证</b>（讲义 10.3 实验二实测）：<code>main</code> 里 <code>sizeof(a) = 20</code>，同一个数组传进函数后 <code>sizeof(arr) = 8</code>。</p>
+</div>
+
+<div class="footer">本练习册为自写原创变式题与自写参考讲解；改错题诊断为本机 MinGW-W64 gcc 16.1.0 实测输出。原书题号索引对应人民邮电出版社《C Primer Plus（第6版）》。</div>
+</body>
+</html>

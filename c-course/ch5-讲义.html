@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>C 语言伴读讲义 · Ch5 运算符、表达式与语句</title>
+<style>
+  :root{
+    --teal:#4D6BFE; --ink:#0f172a; --body:#334155; --muted:#64748b;
+    --line:#e2e8f0; --code-bg:#f1f5f9; --warn-bg:#fff7ed; --warn-border:#fdba74;
+    --tip-bg:#eff6ff; --tip-border:#93c5fd; --ans-bg:#f0fdf4;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:"Noto Sans SC",-apple-system,"Microsoft YaHei",sans-serif;
+    color:var(--body); font-size:14px; line-height:1.75; padding:36px 44px;
+  }
+  h1{font-size:24px;color:var(--ink);margin-bottom:4px}
+  h2{font-size:18px;color:var(--teal);margin:26px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  h3{font-size:15px;color:var(--ink);margin:18px 0 8px}
+  p{margin:8px 0}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+  .kicker{display:inline-block;background:var(--teal);color:#fff;font-size:11px;padding:2px 8px;border-radius:4px;margin-bottom:8px;letter-spacing:1px}
+  pre{
+    background:var(--code-bg);border:1px solid var(--line);border-radius:8px;
+    padding:12px 14px;font-size:12.5px;line-height:1.6;overflow-x:auto;
+    white-space:pre-wrap;word-break:break-all;font-family:Consolas,"Courier New",monospace;
+  }
+  pre .cm{color:#6b7280}
+  .cmd{font-size:12px;color:var(--muted);font-family:Consolas,monospace;margin:4px 0 12px}
+  .warn,.tip,.ans{border-radius:8px;padding:10px 14px;margin:12px 0;font-size:13.5px}
+  .warn{background:var(--warn-bg);border-left:4px solid var(--warn-border)}
+  .tip{background:var(--tip-bg);border-left:4px solid var(--tip-border)}
+  .ans{background:var(--ans-bg);border-left:4px solid #4ade80}
+  .warn b,.tip b,.ans b{color:var(--ink)}
+  table{border-collapse:collapse;margin:12px 0;width:100%;table-layout:fixed}
+  th,td{border:1px solid var(--line);padding:7px 10px;font-size:13px;text-align:left}
+  th{background:var(--code-bg);color:var(--ink)}
+  ul,ol{margin:8px 0 8px 22px}
+  li{margin:4px 0}
+  .selfcheck{background:#faf5ff;border-left:4px solid #a855f7;border-radius:8px;padding:10px 14px;margin:12px 0}
+  .selfcheck b{color:#7e22ce}
+  .footer{margin-top:28px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);page-break-before:avoid}
+  @media print{.footer{page-break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<div class="kicker">C 语言伴读讲义 · 第 2 批</div>
+<h1>Ch5 运算符、表达式与语句</h1>
+<div class="sub">对应《C Primer Plus（第6版）》第 5 章 · 本章目标：30 分钟读懂 + 60 分钟练完 · 不覆盖：位运算、三目运算符</div>
+
+<h2 id="s5-1">5.1 运算符：让程序"会算数"</h2>
+<p>上一章我们让程序"记住"了数据（变量），这一章让程序<b>算起来</b>。运算符就是告诉计算机"怎么算"的符号。最常用的五个：</p>
+<table>
+<colgroup><col style="width:16%"><col style="width:14%"><col style="width:30%"><col style="width:40%"></colgroup>
+<tr><th>运算符</th><th>含义</th><th>示例</th><th>结果</th></tr>
+<tr><td><code>+</code></td><td>加</td><td><code>10 + 3</code></td><td>13</td></tr>
+<tr><td><code>-</code></td><td>减</td><td><code>10 - 3</code></td><td>7</td></tr>
+<tr><td><code>*</code></td><td>乘</td><td><code>10 * 3</code></td><td>30</td></tr>
+<tr><td><code>/</code></td><td>除</td><td><code>10 / 3</code></td><td>3（int 除法，见 5.2）</td></tr>
+<tr><td><code>%</code></td><td>求模（取余数）</td><td><code>10 % 3</code></td><td>1</td></tr>
+</table>
+<pre><span class="cm">/* ch5_01_basic.c — 加减乘除（int）*/</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int a = 10, b = 3;
+    printf("%d + %d = %d\n", a, b, a + b);
+    printf("%d - %d = %d\n", a, b, a - b);
+    printf("%d * %d = %d\n", a, b, a * b);
+    printf("%d / %d = %d\n", a, b, a / b);
+    return 0;
+}</pre>
+<p class="cmd">编译：gcc -Wall -Wextra -o ch5_01_basic.exe ch5_01_basic.c　运行：.\ch5_01_basic.exe</p>
+<p class="cmd">运行输出（实测）：10 + 3 = 13　10 - 3 = 7　10 * 3 = 30　10 / 3 = 3</p>
+
+<h2 id="s5-2">5.2 整数除法会"丢尾巴"：/ 和 % 是一对</h2>
+<p>两个 <code>int</code> 相除，结果<b>还是 int</b>——小数部分直接丢掉（不是四舍五入，是<b>截断</b>）。<code>10 / 3 = 3</code>，剩下的那 1 就是余数，用 <code>%</code> 取出来。</p>
+<div class="tip"><b>口诀：</b><code>/</code> 取商，<code>%</code> 取余。判断"能不能整除"就看 <code>n % m == 0</code>。想保留小数？让<b>其中一个数是 double</b>（见 5.7）。</div>
+<pre><span class="cm">/* ch5_02_divmod.c — 整数除法 + 求模 */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int minutes = 125;
+    printf("125 分钟 = %d 小时 %d 分钟\n", minutes / 60, minutes % 60);
+
+    int n = 17;
+    if (n % 2 == 0) printf("%d 是偶数\n", n);
+    else            printf("%d 是奇数\n", n);
+    return 0;
+}</pre>
+<p class="cmd">运行输出（实测）：125 分钟 = 2 小时 5 分钟　17 是奇数</p>
+
+<h2 id="s5-3">5.3 自增 ++ 自减 --：写代码偷懒的常用手段</h2>
+<p><code>n++</code> 等价于 <code>n = n + 1</code>，<code>n--</code> 等价于 <code>n = n - 1</code>。它们还能"边用边变"：</p>
+<table>
+<colgroup><col style="width:24%"><col style="width:38%"><col style="width:38%"></colgroup>
+<tr><th>写法</th><th>含义</th><th>例子（n 初值 5）</th></tr>
+<tr><td><code>n++</code>（后缀）</td><td>先取 n 的旧值用，用完再加 1</td><td><code>x = n++;</code> → x=5，n=6</td></tr>
+<tr><td><code>++n</code>（前缀）</td><td>先加 1，再取新值用</td><td><code>x = ++n;</code> → n=6，x=6</td></tr>
+</table>
+<div class="warn"><b>新手坑：一个语句里别对同一个变量又 ++ 又用。</b><code>printf("%d %d\n", n, n++);</code> 这种"边打印边改"的结果在 C 里<b>不确定</b>（不同编译器结果可能不同）。规矩：<code>++</code>/<code>--</code> 单独成行用，别混进别的表达式里。</div>
+<pre><span class="cm">/* ch5_03_incdec.c — 前缀/后缀的区别 */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int a = 5;
+    int x = a++;      <span class="cm">/* x 先拿 a 的旧值 5，然后 a 变成 6 */</span>
+    int y = ++a;      <span class="cm">/* a 先变成 7，然后 y 拿新值 7 */</span>
+    printf("a=%d x=%d y=%d\n", a, x, y);
+    return 0;
+}</pre>
+<p class="cmd">运行输出（实测）：a=7 x=5 y=7</p>
+
+<h2 id="s5-4">5.4 赋值 = 与复合赋值：+= -= *= /=</h2>
+<p><code>=</code> 是把右边的值"放进"左边的盒子（变量）。注意：<b>左边必须是变量</b>，不能是 <code>a + b</code> 这种表达式。</p>
+<p>想"把变量自己加 5"，可以写 <code>score = score + 5;</code>，更短的写法是 <code>score += 5;</code>——这叫<b>复合赋值</b>：</p>
+<pre><span class="cm">/* ch5_04_compound.c — 复合赋值 */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int score = 80;
+    score += 10;    <span class="cm">/* score = 90 */</span>
+    score -= 5;     <span class="cm">/* score = 85 */</span>
+    score *= 2;     <span class="cm">/* score = 170 */</span>
+    printf("score = %d\n", score);
+    return 0;
+}</pre>
+<p class="cmd">运行输出（实测）：score = 170</p>
+
+<h2 id="s5-5">5.5 优先级：先乘除后加减，别靠猜</h2>
+<p>数学里"先乘除后加减"，C 也一样。拿不准的时候<b>加括号</b>，括号优先级最高。</p>
+<pre><span class="cm">/* ch5_05_preced.c — 优先级与括号 */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int r = 2 + 3 * 4;       <span class="cm">/* 先乘：3*4=12，再加 2 → 14 */</span>
+    int s = (2 + 3) * 4;     <span class="cm">/* 括号先算：5*4 → 20 */</span>
+    printf("r=%d s=%d\n", r, s);
+    return 0;
+}</pre>
+<p class="cmd">运行输出（实测）：r=14 s=20</p>
+<table>
+<colgroup><col style="width:34%"><col style="width:66%"></colgroup>
+<tr><th>优先级（高→低，本章够用）</th><th>说明</th></tr>
+<tr><td><code>( )</code></td><td>括号最高</td></tr>
+<tr><td><code>++ --</code></td><td>自增自减</td></tr>
+<tr><td><code>* / %</code></td><td>乘、除、求模（同级，从左往右）</td></tr>
+<tr><td><code>+ -</code></td><td>加、减（同级，从左往右）</td></tr>
+<tr><td><code>= += -= ...</code></td><td>赋值（最低）</td></tr>
+</table>
+<div class="tip"><b>一句话：</b>只要表达式里混着 >2 种运算符，就多用括号表达你的意图——既防错，别人（和考试判卷）也看得懂。</div>
+
+<h2 id="s5-6">5.6 表达式与语句：分号是关键</h2>
+<p><b>表达式</b>是"能算出值的一串东西"：<code>2 + 3</code>、<code>a * b</code>、<code>n++</code> 都是表达式。<b>语句</b>是"完整的一句话"，结尾必须带 <code>;</code>。最常见的语句就是"表达式 + 分号"：</p>
+<pre><span class="cm">/* 表达式 vs 语句 */</span>
+2 + 3;          <span class="cm">/* 合法但没用的语句：算完就扔了 */</span>
+a = b + c;      <span class="cm">/* 赋值语句（也是表达式加分号）*/</span>
+printf("hi");   <span class="cm">/* 函数调用语句 */</span></pre>
+<div class="warn"><b>新手坑：多余的分号。</b>在 <code>if</code> 后面多加一个分号会改变程序逻辑（第 6 章循环会再遇到）。判断"这里该不该有分号"：这句话是不是一个完整动作？是——加分号。</div>
+
+<h2 id="s5-7">5.7 类型转换：int 和 double 混着算</h2>
+<p>整数和小数混在一起算，C 会把 <code>int</code> 自动"升级"成 <code>double</code> 再算（小的往大的转，不丢精度）。反过来 <code>double</code> 想存进 <code>int</code>，小数部分会被<b>截断</b>（这是警告级别的问题，开 <code>-Wall</code> 会提示）。</p>
+<pre><span class="cm">/* ch5_06_type.c — int/double 混合运算（练习册 ③ 有对应题）*/</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int a = 7;
+    double half = a / 2.0;      <span class="cm">/* a 是 int，2.0 是 double → 结果是 3.5 */</span>
+    int trunc = a / 2;          <span class="cm">/* 两个 int → 3，小数被截断 */</span>
+    printf("half=%.1f trunc=%d\n", half, trunc);
+    return 0;
+}</pre>
+<p class="cmd">运行输出（实测）：half=3.5 trunc=3</p>
+
+<h2 id="s5-8">5.8 新手坑集中营（本章最容易错的 4 件事）</h2>
+<ol>
+<li><b>整数除法丢小数</b>：<code>5 / 2 = 2</code> 不是 2.5。想保留小数：让任一操作数是 <code>double</code>（<code>5 / 2.0</code>）。</li>
+<li><b>自增自减混进表达式</b>：<code>printf("%d", n++)</code> 结果不确定。单独成行用。</li>
+<li><b>赋值方向写反</b>：<code>=</code> 是把右边给左边。<code>5 = a;</code> 编译就报错（左边必须是变量）。</li>
+<li><b>拿不准优先级不加括号</b>：混着算的表达式都加括号，别赌记忆。</li>
+</ol>
+
+<h2 id="s5-9">5.9 一分钟自测（答案见练习册）</h2>
+<div class="selfcheck">
+<b>写出结果：</b><br>
+① <code>int n = 10; printf("%d", n / 3);</code><br>
+② <code>int m = 5; int r = m++; printf("%d %d", m, r);</code><br>
+③ <code>double x = 7; printf("%.2f", x / 2);</code>
+</div>
+
+<h2 id="s5-10">5.10 练习指引</h2>
+<p>做完本章内容后，去练习册完成 Ch5 配套练习；同时打开《C Primer Plus（第6版）》第 5 章，完成<b>复习题 1、2、4</b>（题号对应主教材）。改错题是最有价值的——先自己找，再看答案。</p>
+
+<div class="footer">本讲义为自写原创讲解，仅作课堂伴读；示例代码均可用 <code>gcc -Wall -Wextra</code> 编译，每句「运行输出（实测）」均已实跑核对。原书题目请以正版教材为准。</div>
+</body>
+</html>

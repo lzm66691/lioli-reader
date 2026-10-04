@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>C 语言伴读讲义 · Ch4 字符串和格式化输入/输出</title>
+<style>
+  /* ===== 讲义打印样式（A4，Edge headless print-to-pdf）===== */
+  :root{
+    --teal:#4D6BFE; --ink:#0f172a; --body:#334155; --muted:#64748b;
+    --line:#e2e8f0; --code-bg:#f1f5f9; --warn-bg:#fff7ed; --warn-border:#fdba74;
+    --tip-bg:#eff6ff; --tip-border:#93c5fd; --ans-bg:#f0fdf4;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:"Noto Sans SC",-apple-system,"Microsoft YaHei",sans-serif;
+    color:var(--body); font-size:14px; line-height:1.75; padding:36px 44px;
+  }
+  h1{font-size:24px;color:var(--ink);margin-bottom:4px}
+  h2{font-size:18px;color:var(--teal);margin:26px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  h3{font-size:15px;color:var(--ink);margin:18px 0 8px}
+  p{margin:8px 0}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+  .kicker{display:inline-block;background:var(--teal);color:#fff;font-size:11px;padding:2px 8px;border-radius:4px;margin-bottom:8px;letter-spacing:1px}
+  pre{
+    background:var(--code-bg);border:1px solid var(--line);border-radius:8px;
+    padding:12px 14px;font-size:12.5px;line-height:1.6;overflow-x:auto;
+    white-space:pre-wrap;word-break:break-all;font-family:Consolas,"Courier New",monospace;
+  }
+  pre .cm{color:#6b7280}
+  .cmd{font-size:12px;color:var(--muted);font-family:Consolas,monospace;margin:4px 0 12px}
+  .warn,.tip,.ans{border-radius:8px;padding:10px 14px;margin:12px 0;font-size:13.5px}
+  .warn{background:var(--warn-bg);border-left:4px solid var(--warn-border)}
+  .tip{background:var(--tip-bg);border-left:4px solid var(--tip-border)}
+  .ans{background:var(--ans-bg);border-left:4px solid #4ade80}
+  .warn b,.tip b,.ans b{color:var(--ink)}
+  table{border-collapse:collapse;margin:12px 0;width:100%;table-layout:fixed}
+  th,td{border:1px solid var(--line);padding:7px 10px;font-size:13px;text-align:left}
+  th{background:var(--code-bg);color:var(--ink)}
+  ul,ol{margin:8px 0 8px 22px}
+  li{margin:4px 0}
+  .selfcheck{background:#faf5ff;border-left:4px solid #a855f7;border-radius:8px;padding:10px 14px;margin:12px 0}
+  .selfcheck b{color:#7e22ce}
+  .footer{margin-top:28px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);page-break-before:avoid}
+  @media print{.footer{page-break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<div class="kicker">C 语言伴读讲义 · 样品章</div>
+<h1>Ch4 字符串和格式化输入/输出</h1>
+<div class="sub">对应《C Primer Plus（第6版）》第 4 章 · 本章目标：30 分钟读懂 + 60 分钟练完 · 不覆盖：位运算、指针高级用法</div>
+
+<h2 id="s4-1">4.1 先把程序框架摆正</h2>
+<p>每一个 C 程序都长这样（先背下来，后面所有章节都在这个骨架里加东西）：</p>
+<pre><span class="cm">/* ch4_01_framework.c — 程序基本框架 */</span>
+#include &lt;stdio.h&gt;          <span class="cm">/* 引入输入输出函数（printf/scanf 都在这里）*/</span>
+
+int main(void)               <span class="cm">/* 程序入口：从这里开始执行 */</span>
+{
+    printf("Hello, C!\n");   <span class="cm">/* 输出一行文字 */</span>
+    return 0;                <span class="cm">/* 告诉系统"正常结束" */</span>
+}</pre>
+<p class="cmd">编译：gcc -Wall -Wextra -o hello.exe hello.c　运行：.\hello.exe</p>
+<div class="tip"><b>为什么要 -Wall -Wextra？</b>它让编译器把「可疑但没报错」的写法也提示出来。初学者的 90% 低级错误（变量没初始化、类型不匹配）靠它提前暴露。养成习惯：写代码就开这两个选项，看到警告先修掉再运行。</div>
+
+<h2 id="s4-2">4.2 printf：把东西"打印"到屏幕上</h2>
+<p>printf 的完整格式是 <code>printf("格式字符串", 要输出的值们)</code>。格式字符串里用 <b>%占位符</b> 表示「这里放一个值」，后面的值按顺序对号入座：</p>
+<table>
+<colgroup><col style="width:22%"><col style="width:30%"><col style="width:48%"></colgroup>
+<tr><th>占位符</th><th>含义</th><th>示例输出</th></tr>
+<tr><td>%d</td><td>整数（int）</td><td>printf("%d", 42); → 42</td></tr>
+<tr><td>%f</td><td>小数（float/double，默认 6 位小数）</td><td>printf("%f", 3.14); → 3.140000</td></tr>
+<tr><td>%.2f</td><td>小数，保留 2 位</td><td>printf("%.2f", 3.14159); → 3.14</td></tr>
+<tr><td>%c</td><td>单个字符</td><td>printf("%c", 'A'); → A</td></tr>
+<tr><td>%s</td><td>字符串</td><td>printf("%s", "hi"); → hi</td></tr>
+</table>
+<p>还可以控制宽度：<code>%5d</code> 表示「至少占 5 个字符位，右对齐」；<code>%-5d</code> 左对齐。转义字符 <code>\n</code>（换行）、<code>\t</code>（制表）也在这里用。</p>
+<pre><span class="cm">/* ch4_02_printf.c — 格式化输出练习 */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int    age  = 19;
+    double temp = 36.5;
+
+    printf("我 %d 岁\n", age);
+    printf("体温 %.1f 度\n", temp);
+    printf("%-8s|%8s\n", "left", "right");   <span class="cm">/* %-8s 左对齐占8位（ASCII 演示）*/</span>
+    return 0;
+}</pre>
+<div class="warn"><b>新手坑 4：中文对齐不按「字数」算。</b><code>%10s</code> 的宽度单位是<b>字节</b>，中文一个字 3 字节（UTF-8），"左对齐"3 个字已占 9 字节 → 想对齐得放大宽度，或用 ASCII 演示。上面示例特意用 "left"/"right" 演示对齐——换中文试试，竖线就对不齐了。</div>
+
+<h2 id="s4-3">4.3 scanf：让程序"读"你输入的东西</h2>
+<p>scanf 和 printf 长得像，但有一个<b>最容易翻车</b>的差别：给变量传值时，变量名前面要加 <b>&amp;</b>（取地址符号）。</p>
+<pre><span class="cm">/* ch4_03_scanf.c — 读取键盘输入 */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int num;
+    printf("请输入一个整数：");
+    scanf("%d", &amp;num);          <span class="cm">/* 注意 &amp; ！没有它程序会崩或乱读 */</span>
+    printf("你输入的是 %d\n", num);
+    return 0;
+}</pre>
+<div class="warn"><b>新手坑 1：忘了 &amp;。</b>scanf 需要知道「把值存到哪个内存地址」，<code>%d</code> 配 <code>&amp;num</code>。忘了写，轻则警告、重则段错误（程序崩溃）。<br><b>新手坑 2：%s 读不进空格。</b><code>scanf("%s", name)</code> 遇到空格就停，输入 "Li Ming" 只会读到 "Li"。要读一整行，用 <code>fgets(name, sizeof(name), stdin)</code>（第 11 章细讲）。<br><b>新手坑 3：缓冲区残留换行。</b>连续 scanf 时，上一次按回车留下的 <code>\n</code> 可能被下一次 scanf 直接消费，表现为「没让我输入就跳过了」。入门阶段先记住：<code>%c</code> 前面加个空格（<code>scanf(" %c", &amp;ch)</code>）能吞掉残留换行。</div>
+
+<h2 id="s4-4">4.4 字符串：其实就是字符数组</h2>
+<p>C 语言没有独立的「字符串类型」。字符串就是一个<b>以 \0（空字符）结尾的 char 数组</b>——最后一个元素一定是 \0，用来标记「字符串到这里结束」。</p>
+<pre><span class="cm">/* ch4_04_string.c — 字符串的本质 */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    char name[20] = "F-VIS";   <span class="cm">/* 数组长度20，实际用了6个：F-V-I-S-\0 */</span>
+    printf("名称：%s\n", name);
+    printf("第1个字符：%c\n", name[0]);   <span class="cm">/* 数组下标从 0 开始 */</span>
+    return 0;
+}</pre>
+<div class="tip"><b>一句话理解内存：</b>数组名 <code>name</code> 本身是「数组起始位置的地址」。<code>name[0]</code> 是第一个元素、<code>name[1]</code> 是第二个……这段「地址 + 下标」的心智模型，是第 10 章指针的地基——现在先种下。</div>
+
+<h2 id="s4-5">4.5 新手坑集中营（本章最容易错的 4 件事）</h2>
+<ol>
+<li><b>%d 配 double / %f 配 int</b>：格式字符串和值类型对不上，输出是乱码。printf 里 float 会自动转 double，但 scanf 不会——<code>%f</code> 读 float，<code>%lf</code> 读 double。</li>
+<li><b>scanf 忘记 &amp;</b>（见 4.3）。</li>
+<li><b>字符串数组不够大</b>：<code>char s[4] = "hello"</code>——GCC 直接报警告 <code>initializer-string too long</code>，而且数组里没有 <code>\0</code> 的位置，<code>%s</code> 打印会越界读内存。开 <code>-Wall -Wextra</code> 让编译器提前拦住它。</li>
+<li><b>\n 忘写</b>：输出全部挤在一行，看不出结构。</li>
+</ol>
+
+<h2 id="s4-6">4.6 一分钟自测（答案见练习册）</h2>
+<div class="selfcheck">
+<b>判断对错：</b><br>
+① <code>printf("%d", 3.14);</code> 是合法的，会正常输出 3。<br>
+② <code>scanf("%d", num);</code> 是正确的读入写法。<br>
+③ 字符串 "OK" 实际占 3 个 char 的位置（含 \0）。
+</div>
+
+<h2 id="s4-7">4.7 练习指引</h2>
+<p>做完本章内容后，去练习册完成 Ch4 配套练习；同时打开《C Primer Plus（第6版）》第 4 章，完成<b>复习题 1、3、5</b>（题号对应主教材）。改错题是练习册里最有价值的部分——先自己找 bug，再看答案的思路讲解。</p>
+
+<div class="footer">本讲义为自写原创讲解，仅作课堂伴读；示例代码均可用 <code>gcc -Wall -Wextra</code> 编译。原书题目请以正版教材为准。</div>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>C 语言伴读讲义 · Ch7 分支和跳转</title>
+<style>
+  :root{
+    --teal:#4D6BFE; --ink:#0f172a; --body:#334155; --muted:#64748b;
+    --line:#e2e8f0; --code-bg:#f1f5f9; --warn-bg:#fff7ed; --warn-border:#fdba74;
+    --tip-bg:#eff6ff; --tip-border:#93c5fd; --ans-bg:#f0fdf4;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:"Noto Sans SC",-apple-system,"Microsoft YaHei",sans-serif;
+    color:var(--body); font-size:14px; line-height:1.75; padding:36px 44px;
+  }
+  h1{font-size:24px;color:var(--ink);margin-bottom:4px}
+  h2{font-size:18px;color:var(--teal);margin:26px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  h3{font-size:15px;color:var(--ink);margin:18px 0 8px}
+  p{margin:8px 0}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+  .kicker{display:inline-block;background:var(--teal);color:#fff;font-size:11px;padding:2px 8px;border-radius:4px;margin-bottom:8px;letter-spacing:1px}
+  pre{
+    background:var(--code-bg);border:1px solid var(--line);border-radius:8px;
+    padding:12px 14px;font-size:12.5px;line-height:1.6;overflow-x:auto;
+    white-space:pre-wrap;word-break:break-all;font-family:Consolas,"Courier New",monospace;
+  }
+  pre .cm{color:#6b7280}
+  .cmd{font-size:12px;color:var(--muted);font-family:Consolas,monospace;margin:4px 0 12px}
+  .warn,.tip,.ans{border-radius:8px;padding:10px 14px;margin:12px 0;font-size:13.5px}
+  .warn{background:var(--warn-bg);border-left:4px solid var(--warn-border)}
+  .tip{background:var(--tip-bg);border-left:4px solid var(--tip-border)}
+  .ans{background:var(--ans-bg);border-left:4px solid #4ade80}
+  .warn b,.tip b,.ans b{color:var(--ink)}
+  table{border-collapse:collapse;margin:12px 0;width:100%;table-layout:fixed}
+  th,td{border:1px solid var(--line);padding:7px 10px;font-size:13px;text-align:left}
+  th{background:var(--code-bg);color:var(--ink)}
+  ul,ol{margin:8px 0 8px 22px}
+  li{margin:4px 0}
+  .selfcheck{background:#faf5ff;border-left:4px solid #a855f7;border-radius:8px;padding:10px 14px;margin:12px 0}
+  .selfcheck b{color:#7e22ce}
+  .footer{margin-top:28px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);page-break-before:avoid}
+  @media print{.footer{page-break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<div class="kicker">C 语言伴读讲义 · 第 3 批</div>
+<h1>Ch7 分支和跳转</h1>
+<div class="sub">对应《C Primer Plus（第6版）》第 7 章 · 本章目标：30 分钟读懂 + 60 分钟练完 · 不覆盖：goto、条件运算符嵌套</div>
+
+<h2 id="s7-1">7.1 if / else：让程序"做选择"</h2>
+<p>循环让程序会<b>重复</b>，分支让程序会<b>判断</b>。最基础的是 <code>if</code>：条件为真做一件事，否则做另一件事。</p>
+<pre><span class="cm">/* ch7_01_if.c — if / else 判断成绩是否及格 */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int score = 76;
+    if (score &gt;= 60) {
+        printf("及格，继续加油！\n");
+    } else {
+        printf("不及格，需要补考\n");
+    }
+    return 0;
+}</pre>
+<p class="cmd">运行输出（实测）：及格，继续加油！</p>
+<div class="warn"><b>新手坑 1：<code>==</code> 和 <code>=</code> 写反。</b>判断相等要用 <code>==</code>（两个等号）。写 <code>if (score = 60)</code> 是把 60 赋给 score——结果恒为"真"，编译器通常只给 warning，程序逻辑完全错。这是 C 初学者最经典的一坑。</div>
+
+<h2 id="s7-2">7.2 else if：多分支"排队判断"</h2>
+<p>判断不止两种情况时，用 <code>else if</code> 一路排下去，从上到下第一个为真的分支执行，其余跳过。</p>
+<pre><span class="cm">/* ch7_02_elseif.c — 成绩等级 */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int score = 85;
+    if (score &gt;= 90)      printf("A\n");
+    else if (score &gt;= 80) printf("B\n");
+    else if (score &gt;= 70) printf("C\n");
+    else if (score &gt;= 60) printf("D\n");
+    else                  printf("F\n");
+    return 0;
+}</pre>
+<p class="cmd">运行输出（实测）：B</p>
+<div class="tip"><b>读法：</b>从上往下问"够不够 90？够不够 80？"——第一个"够"就停。条件有顺序：先写大的再写小的（如果先写 <code>&gt;=60</code> 再写 <code>&gt;=90</code>，90 分会被误判成 D）。</div>
+
+<h2 id="s7-3">7.3 switch-case：按值"一键分路"</h2>
+<p>当判断的是"一个变量的值等于几"（而不是大小比较），<code>switch</code> 比一串 <code>else if</code> 更清晰。注意：<b>每个 case 末尾都要 <code>break</code></b>，否则会"掉下去"执行下一个 case。</p>
+<pre><span class="cm">/* ch7_03_switch.c — 菜单选择 */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int choice = 2;
+    switch (choice) {
+        case 1: printf("打开文件\n"); break;
+        case 2: printf("保存文件\n"); break;
+        case 3: printf("退出程序\n"); break;
+        default: printf("无效选择\n");
+    }
+    return 0;
+}</pre>
+<p class="cmd">运行输出（实测）：保存文件</p>
+<div class="warn"><b>新手坑 2：case 里忘写 break。</b>写 <code>case 1: printf("打开");</code> 不加 <code>break</code>，选 1 会把"保存文件"也打出来（fall-through 掉穿）。多数情况下这是 bug。</div>
+
+<h2 id="s7-4">7.4 逻辑运算符：&& || !</h2>
+<p>把多个条件组合起来：</p>
+<table>
+<colgroup><col style="width:18%"><col style="width:44%"><col style="width:38%"></colgroup>
+<tr><th>运算符</th><th>含义</th><th>示例</th></tr>
+<tr><td><code>&amp;&amp;</code></td><td>并且（两边都为真才真）</td><td><code>score&gt;=60 &amp;&amp; score&lt;100</code></td></tr>
+<tr><td><code>||</code></td><td>或者（一边为真就真）</td><td><code>ch=='y' || ch=='Y'</code></td></tr>
+<tr><td><code>!</code></td><td>取反（真变假，假变真）</td><td><code>!done</code></td></tr>
+</table>
+<pre><span class="cm">/* ch7_04_logic.c — 判断闰年（能被4整除且不被100整除，或能被400整除）*/</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int year = 2024;
+    if ((year % 4 == 0 &amp;&amp; year % 100 != 0) || year % 400 == 0)
+        printf("%d 是闰年\n", year);
+    else
+        printf("%d 不是闰年\n", year);
+    return 0;
+}</pre>
+<p class="cmd">运行输出（实测）：2024 是闰年</p>
+
+<h2 id="s7-5">7.5 字符输入：getchar 与"字符判断"</h2>
+<p>程序还能读单个字符并判断。常用的 <code>getchar()</code> 读一个字符，返回它的 ASCII 值。字符在 C 里就是数字，可以直接比较。</p>
+<pre><span class="cm">/* ch7_05_getchar.c — 读字符判断是数字还是字母 */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    printf("输入一个字符：");
+    char ch = getchar();
+    if (ch &gt;= '0' &amp;&amp; ch &lt;= '9')
+        printf("是数字\n");
+    else if ((ch &gt;= 'a' &amp;&amp; ch &lt;= 'z') || (ch &gt;= 'A' &amp;&amp; ch &lt;= 'Z'))
+        printf("是字母\n");
+    else
+        printf("是其他字符\n");
+    return 0;
+}</pre>
+<p class="cmd">运行输出（实测，输入 5）：是数字</p>
+<div class="tip"><b>原理：</b>字符 '0'~'9' 的 ASCII 是 48~57，'a'~'z' 是 97~122，'A'~'Z' 是 65~90（Ch3 讲过）。<code>ch &gt;= '0'</code> 就是拿数字比较，无需背 ASCII 码表。</div>
+
+<h2 id="s7-6">7.6 新手坑集中营（本章最容易错的 4 件事）</h2>
+<ol>
+<li><b><code>==</code> 写成 <code>=</code></b>（见 7.1）——判断相等用双等号。</li>
+<li><b>switch 忘 break</b>（见 7.3）——case 会掉穿。</li>
+<li><b>悬空 else</b>：<code>else</code> 跟<b>最近的</b>那个 <code>if</code> 配对，不是跟缩进对齐的那个。拿不准就加大括号。</li>
+<li><b>else if 顺序颠倒</b>（见 7.2）——先写宽条件会把后面的窄条件吃掉。</li>
+</ol>
+
+<h2 id="s7-7">7.7 一分钟自测（答案见练习册）</h2>
+<div class="selfcheck">
+<b>说出结果：</b><br>
+① <code>int n=5; if (n=3) printf("A"); else printf("B");</code> 打印 ____<br>
+② <code>int x=85; if (x&gt;=60) printf("P"); else if (x&gt;=80) printf("G");</code> 打印 ____<br>
+③ <code>char c='b'; if (c=='a' || c=='b') printf("yes");</code> 打印 ____
+</div>
+
+<h2 id="s7-8">7.8 练习指引</h2>
+<p>做完本章内容后，去练习册完成 Ch7 配套练习；同时打开《C Primer Plus（第6版）》第 7 章，完成<b>复习题 2、4、6</b>（题号对应主教材）。改错题是最有价值的——先自己找，再看答案。</p>
+
+<div class="footer">本讲义为自写原创讲解，仅作课堂伴读；示例代码均可用 <code>gcc -Wall -Wextra</code> 编译，每句「运行输出（实测）」均已实跑核对。原书题目请以正版教材为准。</div>
+</body>
+</html>

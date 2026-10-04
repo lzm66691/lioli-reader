@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>C 语言伴读练习册 · Ch3 数据和C</title>
+<style>
+  :root{
+    --teal:#4D6BFE; --ink:#0f172a; --body:#334155; --muted:#64748b;
+    --line:#e2e8f0; --code-bg:#f1f5f9; --warn-bg:#fff7ed; --warn-border:#fdba74;
+    --tip-bg:#eff6ff; --tip-border:#93c5fd; --ans-bg:#f0fdf4;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:"Noto Sans SC",-apple-system,"Microsoft YaHei",sans-serif;
+    color:var(--body); font-size:14px; line-height:1.75; padding:36px 44px;
+  }
+  h1{font-size:24px;color:var(--ink);margin-bottom:4px}
+  h2{font-size:18px;color:var(--teal);margin:26px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  h3{font-size:15px;color:var(--ink);margin:18px 0 8px}
+  p{margin:8px 0}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+  .kicker{display:inline-block;background:var(--teal);color:#fff;font-size:11px;padding:2px 8px;border-radius:4px;margin-bottom:8px;letter-spacing:1px}
+  pre{
+    background:var(--code-bg);border:1px solid var(--line);border-radius:8px;
+    padding:12px 14px;font-size:12.5px;line-height:1.6;overflow-x:auto;
+    white-space:pre-wrap;word-break:break-all;font-family:Consolas,"Courier New",monospace;
+  }
+  pre .cm{color:#6b7280}
+  .cmd{font-size:12px;color:var(--muted);font-family:Consolas,monospace;margin:4px 0 12px}
+  .warn,.tip,.ans{border-radius:8px;padding:10px 14px;margin:12px 0;font-size:13.5px}
+  .warn{background:var(--warn-bg);border-left:4px solid var(--warn-border)}
+  .tip{background:var(--tip-bg);border-left:4px solid var(--tip-border)}
+  .ans{background:var(--ans-bg);border-left:4px solid #4ade80}
+  .warn b,.tip b,.ans b{color:var(--ink)}
+  .q{font-size:14px;font-weight:700;color:var(--ink);margin:18px 0 6px}
+  .q .tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:10px;margin-right:8px;vertical-align:2px;color:#fff}
+  .tag-f{background:#f59e0b}
+  .tag-b{background:#ef4444}
+  .tag-p{background:#4D6BFE}
+  .tag-s{background:#a855f7}
+  .footer{margin-top:28px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);page-break-before:avoid}
+  @media print{.footer{page-break-inside:avoid}}
+  .ans{page-break-inside:avoid}
+</style>
+</head>
+<body>
+
+<div class="kicker">C 语言伴读练习册 · 第 1 批</div>
+<h1>Ch3 数据和C · 练习</h1>
+<div class="sub">对应《C Primer Plus（第6版）》第 3 章 · 参考答案含「思路 + 常见错法」· 请先独立完成再看答案</div>
+
+<h2 id="p3-1">3-1 填空</h2>
+<div class="q"><span class="tag tag-f">填空</span>① <code>int</code> 在多数机器占 ____ 字节；能装的最大值约为 ____ 亿。</div>
+<h2 id="p3-2">3-2 填空</h2>
+<div class="q"><span class="tag tag-f">填空</span>② <code>scanf</code> 读 <code>double</code> 必须用占位符 ____；读 <code>float</code> 用 ____。</div>
+<h2 id="p3-3">3-3 填空</h2>
+<div class="q"><span class="tag tag-f">填空</span>③ 字符 <code>'A'</code> 的 ASCII 数字是 ____；<code>'A' + 1</code> 等于字符 ____。</div>
+
+<h2 id="p3-4">3-4 改错</h2>
+<div class="q"><span class="tag tag-b">改错</span>④ 下面程序想打印"我的身高 1.75 米"，但输出不对。找 2 处问题 + 1 条格式建议，先自己找，再对照答案。</div>
+<pre><span class="cm">/* debug_exercise_103.c — 找 2 处问题 + 1 条格式建议 */</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int height = 1.75;
+    printf("我的身高 %f 米\n", height);
+    return 0;
+}</pre>
+
+<h2 id="p3-5">3-5 编程</h2>
+<div class="q"><span class="tag tag-p">编程</span>⑤ 写程序：定义 <code>double</code> 变量 <code>r=5.5</code>，用 <code>const double PI=3.14159</code>，打印圆面积（公式 <code>PI*r*r</code>）。示例输出：
+<pre><span class="cm">ch3_p5_circle.c</span>
+r = 5.5, 圆面积 = 95.033097</pre></div>
+
+<h2 id="p3-6">3-6 编程</h2>
+<div class="q"><span class="tag tag-p">编程</span>⑥ 写程序：定义两个 <code>double</code>，从键盘读入身高和体重，打印 BMI（<code>体重 / (身高米)^2</code>）。示例输出：
+<pre><span class="cm">ch3_p6_bmi.c</span>
+输入身高(米)和体重(kg)：1.75 70
+BMI = 22.86</pre></div>
+
+<h2 id="p3-7">3-7 专业场景</h2>
+<div class="q"><span class="tag tag-s">专业场景</span>⑦（不需要硬件知识）嵌入式里采集 ADC 电压值，存到一个 <code>unsigned int</code> 的 <code>adc</code>（范围 0~4095）。写程序：定义 <code>adc=2048</code>，换算电压 = <code>adc / 4095.0 * 3.3</code>，打印电压（保留 2 位）。</div>
+
+<h2 id="p3-8">3-8 索引</h2>
+<div class="q"><span class="tag tag-f">索引</span>⑧ 打开《C Primer Plus（第6版）》第 3 章，完成 <b>复习题 1、3、5</b>（题号对应主教材）。</div>
+
+<h2>参考答案</h2>
+
+<div class="ans"><b>①</b> 4 字节；约 21 亿（2147483647）。
+<div class="tip"><b>思路：</b>32 位 = 4 字节。上界 2^31-1。</div></div>
+
+<div class="ans"><b>②</b> <code>%lf</code>；<code>%f</code>。
+<div class="tip"><b>思路：</b>scanf 里 double→%lf、float→%f，写反读出来乱码（讲义 3.6）。</div></div>
+
+<div class="ans"><b>③</b> 65；'B'（66）。
+<div class="tip"><b>思路：</b>字符就是 ASCII 数字，'A'+1='B'（讲义 3.4）。</div></div>
+
+<div class="ans"><b>④ 诊断（本机 gcc 16.1.0 实测）：本题编译能过（exit=0），但有 1 个警告 + 2 处"看起来对实际错"。</b>
+<ol>
+<li>第 6 行 <code>int height = 1.75;</code>——<b>用 int 存小数，1.75 被"静默截断"成 1</b>。这是数据错误，gcc 默认 <code>-Wall -Wextra</code> 不报（需 <code>-Wconversion</code> 才提示），属"静默"类，最危险。应 <code>double height = 1.75;</code>；</li>
+<li>第 7 行 <code>printf("我的身高 %f 米\n", height)</code>——<code>%f</code> 配 <code>int</code>，gcc 报 <code>warning: format '%f' expects 'double' but argument has type 'int' [-Wformat=]</code>（编译期可见的"警告"）；</li>
+<li>第 7 行 <code>%f</code> 默认 6 位小数，会打出 <code>1.750000</code>——若想打 <code>1.75</code> 用 <code>%.2f</code>（格式问题，不算错但体验差）。</li>
+</ol>
+<div class="warn"><b>结论：</b>本题编译能过 ≠ 程序正确。<b>修复</b> = <code>double height = 1.75;</code> + <code>printf("我的身高 %.2f 米
+", height)</code>，输出「我的身高 1.75 米」。教学点：<b>int 存小数的"静默截断"编译器默认发现不了</b>——error/仅警告/静默三类里最难防的一类。</div></div>
+
+<div class="ans"><b>⑤ 参考代码：</b>
+<pre><span class="cm">ch3_p5_circle.c</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    const double PI = 3.14159;
+    double r = 5.5;
+    printf("r = %g, 圆面积 = %f\n", r, PI * r * r);
+    return 0;
+}</pre>
+<div class="tip"><b>思路：</b>const 防止手滑改 PI。<b>常见错法：</b>给 PI 用 <code>%d</code>（乱码）；或忘加 <code>const</code>。</div></div>
+
+<div class="ans"><b>⑥ 参考代码：</b>
+<pre><span class="cm">ch3_p6_bmi.c</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    double h, w;
+    printf("输入身高(米)和体重(kg)：");
+    scanf("%lf %lf", &amp;h, &amp;w);
+    printf("BMI = %.2f\n", w / (h * h));
+    return 0;
+}</pre>
+<div class="tip"><b>思路：</b>一次 scanf 读两个值，中间空格分隔。<b>常见错法：</b>用 <code>%f</code> 读 double（乱码，讲义 3.6）。</div></div>
+
+<div class="ans"><b>⑦ 参考代码（ADC 电压换算）：</b>
+<pre><span class="cm">ch3_p7_adc.c</span>
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    unsigned int adc = 2048;
+    double volt = adc / 4095.0 * 3.3;
+    printf("ADC=%u, 电压 = %.2f V\n", adc, volt);
+    return 0;
+}</pre>
+<div class="tip"><b>思路：</b>除以 <code>4095.0</code>（带 .0）强制转成浮点运算，否则 <code>adc/4095</code> 是整数除法会得 0。这是嵌入式最经典的整数除法坑。<b>常见错法：</b>写 <code>adc / 4095 * 3.3</code>——整数除法先算，结果恒 0。</div></div>
+
+<div class="footer">本练习册为自写原创变式题，仅作课堂伴读；改错题请在 <code>gcc -Wall -Wextra</code> 下先实测再对照答案。原书题目请以正版教材为准。</div>
+</body>
+</html>
