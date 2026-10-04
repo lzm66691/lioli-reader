@@ -1,1 +1,12 @@
-﻿papers/mat-*.pdf
+papers/mat-*.pdf
+papers/fvis*.pdf
+
+# 本地/构建产物——禁止提交
+_shots/
+*.exe
+OCR-POC.md
+.deploy/
+digests/_edge_profile/
+c-course/tools/
+阅读器_v32备份.html
+阅读器项目.html
