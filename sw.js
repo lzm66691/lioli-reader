@@ -1,7 +1,7 @@
 /* PWA Service Worker — 莉萝阅读器 v70：线代速查 P11 上架试水（2026-10-04）
-   外壳缓存 reader-p2-dg-v72（含 pdf.js 全套 + KaTeX）；PDF 缓存 reader-pdf-v3（按需 cache-first）
+   外壳缓存 reader-p2-dg-v73（含 pdf.js 全套 + KaTeX）；PDF 缓存 reader-pdf-v3（按需 cache-first）
    升级纪律：改外壳/pdf.js → 同时改缓存名 */
-var CACHE_SHELL = "reader-p2-dg-v72";
+var CACHE_SHELL = "reader-p2-dg-v73";
 var CACHE_PDF   = "reader-pdf-v3";
 var CACHE_CRUNNER = "reader-crun-v1";
 
