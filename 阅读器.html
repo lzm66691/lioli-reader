@@ -547,7 +547,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v74</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v75</span></div>
 
   <div class="spacer"></div>
 
@@ -2216,6 +2216,7 @@ if (!BOOKS.length) {
         }
 
         renderAnnotations();
+        window.__mks = { list: marks, save: saveMarks, render: renderAnnotations };   /* v75：暴露标注接口给划词浮层 */
 
           try { if (pdfFrame.contentWindow.setPenMode) pdfFrame.contentWindow.setPenMode(!!window.__penMode); } catch(e){}   /* load 后同步画笔状态 */
 
@@ -3056,17 +3057,30 @@ if (!BOOKS.length) {
 
 </script>
 
-<script src="c-course/c-practice-v74.js?v=20261004e" data-base="."></script>
+<script src="c-course/c-practice-v75.js?v=20261004f" data-base="."></script>
 
 <script>
-/* v66：AI 助手浮层（萝 C 路线：复制选中 → 一键打开 DeepSeek/豆包网页版；零密钥·零成本·零风险） */
+/* v75：划词浮层升级（UI 报告第二阶段①）——高亮三色 + 复制 + 问 AI；支持 PDF 内（iframe）选区；高亮复用 marks 标注体系（萝 C 路线零密钥） */
 (function(){
-  var el = null;
-  function hide(){ if (el) { el.remove(); el = null; } }
+  var el = null, curRange = null, curDoc = null;
+  function hide(){ if (el) { el.remove(); el = null; } curRange = null; curDoc = null; }
   function show(x, y, text){
     hide();
     el = document.createElement("div");
     el.style.cssText = "position:fixed;z-index:99999;left:" + x + "px;top:" + y + "px;display:flex;gap:8px;padding:8px 10px;background:rgba(15,23,42,.92);border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.35);backdrop-filter:blur(8px);";
+    var colors = [["黄","#FBDA83",1],["粉","#E4938E",2],["蓝","#8DBBFF",3]];
+    colors.forEach(function(c){
+      var b = document.createElement("button");
+      b.title = "高亮（" + c[0] + "）";
+      b.style.cssText = "height:24px;width:24px;border-radius:6px;border:none;cursor:pointer;background:" + c[1] + ";opacity:.88";
+      b.onclick = function(){ doHighlight(c[2]); };
+      el.appendChild(b);
+    });
+    var cp = document.createElement("button");
+    cp.textContent = "复制";
+    cp.style.cssText = "height:28px;padding:0 10px;font-size:12px;border-radius:8px;border:none;cursor:pointer;color:#fff;background:rgba(255,255,255,.14)";
+    cp.onclick = function(){ try { if (navigator.clipboard) navigator.clipboard.writeText(text); } catch(e){} hide(); };
+    el.appendChild(cp);
     function mk(label, url, bg){
       var b = document.createElement("button");
       b.textContent = label;
@@ -3095,16 +3109,54 @@ if (!BOOKS.length) {
     el.appendChild(close);
     document.body.appendChild(el);
   }
+  function doHighlight(color){
+    if (!curRange || !curDoc) { hide(); return; }
+    try {
+      var node = curRange.startContainer.nodeType === 1 ? curRange.startContainer : curRange.startContainer.parentElement;
+      while (node && node.nodeType === 1 && !(node.classList && node.classList.contains("page"))) node = node.parentElement;
+      if (!node) { hide(); return; }
+      var pno = Number(node.getAttribute("data-page-number"));
+      var r = curRange.getBoundingClientRect();
+      var pr = node.getBoundingClientRect();
+      if (!pr.width || !pr.height || !window.__mks) { hide(); return; }
+      window.__mks.list.push({ id: "m" + Date.now() + Math.floor(Math.random() * 999), page: pno, x: (r.left - pr.left) / pr.width * 100, y: (r.top - pr.top) / pr.height * 100, w: r.width / pr.width * 100, h: r.height / pr.height * 100, color: color, text: curRange.toString().slice(0, 120) });
+      window.__mks.save();
+      window.__mks.render();
+    } catch(e){}
+    hide();
+  }
+  function probeSelection(){
+    var f = document.getElementById("pdfFrame");
+    var d = f && f.contentDocument ? f.contentDocument : null;
+    if (d) {
+      var sel = d.getSelection ? d.getSelection() : null;
+      if (sel && !sel.isCollapsed) {
+        var t = (sel.toString() || "").trim();
+        if (t && t.length <= 2000) {
+          var r = sel.getRangeAt(0).getBoundingClientRect();
+          var fr = f.getBoundingClientRect();
+          return { text: t, range: sel.getRangeAt(0), doc: d, x: fr.left + r.left, y: fr.top + r.top };
+        }
+      }
+    }
+    var sel2 = window.getSelection();
+    if (sel2 && !sel2.isCollapsed) {
+      var t2 = (sel2.toString() || "").trim();
+      if (t2 && t2.length <= 2000) {
+        var r2 = sel2.getRangeAt(0).getBoundingClientRect();
+        return { text: t2, range: sel2.getRangeAt(0), doc: document, x: r2.left, y: r2.top };
+      }
+    }
+    return null;
+  }
   document.addEventListener("mouseup", function(){
     setTimeout(function(){
-      var sel = window.getSelection();
-      if (!sel || sel.isCollapsed) { hide(); return; }
-      var t = (sel.toString() || "").trim();
-      if (!t || t.length > 2000) { hide(); return; }
-      var r = sel.getRangeAt(0).getBoundingClientRect();
-      var x = Math.min(Math.max(r.left, 8), window.innerWidth - 340);
-      var y = Math.max(r.top - 48, 8);
-      show(x, y, t);
+      var info = probeSelection();
+      if (!info) { hide(); return; }
+      var x = Math.min(Math.max(info.x, 8), window.innerWidth - 360);
+      var y = Math.max(info.y - 46, 8);
+      curRange = info.range; curDoc = info.doc;
+      show(x, y, info.text);
     }, 10);
   });
   document.addEventListener("mousedown", function(e){ if (el && !el.contains(e.target)) setTimeout(hide, 120); });
