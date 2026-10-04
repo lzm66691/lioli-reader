@@ -1,7 +1,7 @@
-/* PWA Service Worker — 莉萝阅读器 v67：C 语言思维导图 + 画面自适应（c-practice-v67）（2026-10-04）
-   外壳缓存 reader-p2-dg-v67（含 pdf.js 全套 + KaTeX）；PDF 缓存 reader-pdf-v3（按需 cache-first）
+/* PWA Service Worker — 莉萝阅读器 v68：刷题板块（侧边栏 tab：C 题库 / 线代筹备 / 自由写）（2026-10-04）
+   外壳缓存 reader-p2-dg-v68（含 pdf.js 全套 + KaTeX）；PDF 缓存 reader-pdf-v3（按需 cache-first）
    升级纪律：改外壳/pdf.js → 同时改缓存名 */
-var CACHE_SHELL = "reader-p2-dg-v67";
+var CACHE_SHELL = "reader-p2-dg-v68";
 var CACHE_PDF   = "reader-pdf-v3";
 var CACHE_CRUNNER = "reader-crun-v1";
 

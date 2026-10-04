@@ -1036,6 +1036,7 @@ int main(void){
       body.dark .cp-in{background:rgba(60,60,60,.6);color:#eee}
       .cp-btn{border:none;border-radius:7px;padding:6px 14px;font-size:13px;cursor:pointer;font-weight:700}
       .cp-run{background:var(--teal,#4D6BFE);color:#fff}
+      .cp-save{background:linear-gradient(135deg,#0E9F6E,#0d9488);color:#fff}
       .cp-run:disabled{opacity:.5;cursor:wait}
       .cp-ghost{background:var(--glass-hover, rgba(255,255,255,.4));color:var(--ink,#0f172a);border:1px solid var(--line,#e2e8f0)}
       .cp-out{margin:0 14px 10px;border:1px solid var(--line,#e2e8f0);border-radius:8px;padding:8px 10px;font-family:Consolas,monospace;font-size:12.5px;line-height:1.6;white-space:pre-wrap;max-height:38%;overflow:auto;background:var(--code-bg,#f8fafc);color:var(--ink,#0f172a);min-height:40px}
@@ -1048,9 +1049,11 @@ int main(void){
       body.dark .cp-ref pre{background:#0e1f16;border-color:#166534}
       .cp-hint{display:none;margin:6px 0 0;font-size:12.5px;color:var(--muted,#64748b);background:var(--tip-bg,#eff6ff);border-left:3px solid #93c5fd;padding:6px 10px;border-radius:4px}
       .cp-load{position:fixed;inset:0;z-index:7000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;background:rgba(10,14,30,.55);color:#fff;font-size:14px;backdrop-filter:blur(3px)}
+      .cp-load[hidden]{display:none}
       .cp-load .bar{width:280px;height:6px;background:rgba(255,255,255,.2);border-radius:3px;overflow:hidden}
       .cp-load .fill{height:100%;width:0%;background:#4D6BFE;transition:width .2s}
       .cp-review{position:fixed;inset:0;z-index:6000;background:#f7f8fa;display:flex;flex-direction:column}
+      .cp-review[hidden]{display:none}
       body.dark .cp-review{background:#101018}
       .cp-rv-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line,#e2e8f0)}
       .cp-rv-head b{font-size:15px;color:var(--ink,#0f172a)}
@@ -1109,10 +1112,14 @@ int main(void){
             <label>输入(stdin)</label>
             <input class="cp-in" placeholder="程序里用到 scanf 时填在这里，如 3 + 5">
             <button class="cp-btn cp-run">▶ 运行</button>
+            <button class="cp-btn cp-save" data-act="save" title="把当前代码命名保存，可保留多份">💾 保存</button>
+            <button class="cp-btn cp-ghost" data-act="lib" title="查看/载入/删除已保存的代码">📚 我的代码</button>
             <button class="cp-btn cp-ghost" data-act="ref">参考答案</button>
             <button class="cp-btn cp-ghost" data-act="hint">提示</button>
             <button class="cp-btn cp-ghost" data-act="reset">重置</button>
             <button class="cp-btn cp-ghost" data-act="deck" style="border-color:#f59e0b">错题本</button>
+            <button class="cp-btn cp-ghost" data-act="cards" style="border-color:#8b5cf6">知识点卡</button>
+            <button class="cp-btn cp-ghost" data-act="mindmap" style="border-color:#10b981">思维导图</button>
             <button class="cp-btn cp-ghost" data-act="review">复习</button>
           </div>
           <div class="cp-out"><span class="meta">运行结果将显示在这里。点「▶ 运行」编译并执行你的代码（首次会加载编译内核，约 28MB，请稍候）。</span></div>
@@ -1121,6 +1128,10 @@ int main(void){
       <div class="cp-load" hidden><div>正在加载 C 编译内核…</div><div class="bar"><div class="fill"></div></div><div class="meta" style="font-size:12px;color:rgba(255,255,255,.75)"></div></div>
       <div class="cp-review" hidden>
         <div class="cp-rv-head"><b>错题复习</b><span class="cnt"></span><button class="exit" title="退出">✕</button></div>
+        <div class="cp-rv-body"></div>
+      </div>
+      <div class="cp-review cp-lib" hidden>
+        <div class="cp-rv-head"><b>我的代码</b><span class="cnt"></span><button class="exit" title="关闭">✕</button></div>
         <div class="cp-rv-body"></div>
       </div>
     `;
@@ -1135,7 +1146,9 @@ int main(void){
       const g = cpRoot.querySelector(".cp-gutter"); if (g) g.scrollTop = ta.scrollTop;
     }
     function onEdit() {
-      const q = curQ(); if (!q) return;
+      const q = curQ();
+      if (cpCur === "__free") { try { localStorage.setItem("cp-free-code", ta.value); } catch(e){} return; }
+      if (!q) return;
       save(q.id, ta.value);
       renderHighlight(q, ta.value);
       updateGutter(); updateCurline();
@@ -1166,12 +1179,21 @@ int main(void){
       ta.value = q.starter; save(q.id, ta.value); renderHighlight(q, ta.value); updateGutter(); updateCurline();
     });
     cpRoot.querySelector(".cp-run").addEventListener("click", run);
+    cpRoot.querySelector('[data-act="save"]').addEventListener("click", saveFree);
+    cpRoot.querySelector('[data-act="lib"]').addEventListener("click", showFreeLib);
+    const libBox = cpRoot.querySelector(".cp-lib");
+    if (libBox) libBox.querySelector(".exit").addEventListener("click", function(){ libBox.hidden = true; });
     cpRoot.querySelector("[data-act=deck]").addEventListener("click", () => {
       const q = curQ(); if (!q) return;
       toggleCard(q.id);
       refreshDeckBtn(q.id);
     });
     cpRoot.querySelector("[data-act=review]").addEventListener("click", openReview);
+    cpRoot.querySelector("[data-act=cards]").addEventListener("click", openCards);
+    cpRoot.querySelector("[data-act=mindmap]").addEventListener("click", function(){
+      var base = document.currentScript && document.currentScript.getAttribute("data-base") || ".";
+      window.open(base + "/c-course/c-mindmap.html", "_blank");
+    });
     cpRoot.querySelector(".cp-review .exit").addEventListener("click", () => { cpRoot.querySelector(".cp-review").hidden = true; });
     buildList();
   }
@@ -1179,6 +1201,13 @@ int main(void){
   function buildList() {
     const list = cpRoot.querySelector(".cp-qlist");
     list.innerHTML = "";
+    /* v59：自由写代码入口（独立于题目，任意 C 代码本地保存，可真实编译运行） */
+    const free = document.createElement("button");
+    free.className = "cp-qitem cp-free";
+    free.dataset.id = "__free";
+    free.innerHTML = '<span class="tag" style="background:linear-gradient(135deg,#4D6BFE,#8B5CF6);color:#fff">自由</span>📝 自由写代码';
+    free.addEventListener("click", () => selectFree());
+    list.appendChild(free);
     for (const ch of CHAPTER_ORDER) {
       const items = QUESTIONS.filter(q => q.ch === ch);
       if (!items.length) continue;
@@ -1194,6 +1223,176 @@ int main(void){
       }
       list.appendChild(sec);
     }
+  }
+
+  /* v59：自由写代码模式——不绑定题目，代码存 localStorage("cp-free-code") */
+  function selectFree() {
+    cpCur = "__free";
+    cpRoot.querySelectorAll(".cp-qitem").forEach(el => el.classList.toggle("active", el.dataset.id === "__free"));
+    const desc = cpRoot.querySelector(".cp-desc");
+    desc.innerHTML = '<div><span class="tag" style="background:linear-gradient(135deg,#4D6BFE,#8B5CF6);color:#fff">自由</span> '
+      + '<b>自由写代码</b> <span class="meta" style="color:var(--muted,#64748b)">任意 C 代码 · 本地自动保存 · 不计入进度 · 不参与复习</span></div>';
+    const ta = cpRoot.querySelector("textarea");
+    let saved = "";
+    try { saved = localStorage.getItem("cp-free-code") || ""; } catch(e){}
+    ta.value = saved || '#include <stdio.h>\n\nint main(void)\n{\n    printf("Hello, Lioli!\\n");\n    return 0;\n}\n';
+    renderHighlight(null, ta.value);
+    updateGutter(); updateCurline();
+  }
+
+  /* v60：自由写代码——命名保存多份（cp-free-lib）+ 我的代码列表 */
+  function freeLib() {
+    try { var l = JSON.parse(localStorage.getItem("cp-free-lib") || "[]"); return Array.isArray(l) ? l : []; } catch(e){ return []; }
+  }
+  function outMsg(html){ const out = cpRoot.querySelector(".cp-out"); if (out) out.innerHTML = html; }
+  function saveFree() {
+    if (cpCur !== "__free") { outMsg('<div class="meta">仅自由写代码模式可保存（题目自动保存，无需手动）。</div>'); return; }
+    const ta = cpRoot.querySelector("textarea");
+    const code = ta.value;
+    if (!code.trim()) { outMsg('<div class="err">编辑器是空的，先写点代码再保存。</div>'); return; }
+    /* v62：内联命名（萝 096：平板 prompt 体验差）——mini 浮层，重名二次点击覆盖 */
+    const lib = freeLib();
+    const dlg = document.createElement("div");
+    dlg.style.cssText = "position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,.45);display:flex;align-items:center;justify-content:center";
+    const card = document.createElement("div");
+    card.style.cssText = "width:min(360px,86vw);background:var(--card,#fff);border-radius:14px;padding:18px;box-shadow:0 20px 50px rgba(0,0,0,.3);font-family:inherit;color:var(--text,#0f172a)";
+    card.innerHTML = '<div style="font-weight:700;font-size:14px;margin-bottom:10px">💾 保存代码</div>'
+      + '<input style="width:100%;box-sizing:border-box;height:36px;padding:0 10px;font-size:13px;border:1px solid var(--line,#cbd5e1);border-radius:8px;background:var(--bg,#fff);color:var(--text,#0f172a);outline:none" maxlength="30">'
+      + '<div class="saveNameTip" style="font-size:11px;color:var(--muted,#64748b);margin:6px 2px;min-height:14px"></div>'
+      + '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px">'
+      + '<button data-act="cancel" style="height:32px;padding:0 14px;font-size:12px;border-radius:8px;border:1px solid rgba(0,0,0,.15);background:#fff;cursor:pointer">取消</button>'
+      + '<button data-act="ok" style="height:32px;padding:0 14px;font-size:12px;border-radius:8px;border:none;background:var(--teal,#4D6BFE);color:#fff;cursor:pointer">保存</button></div>';
+    dlg.appendChild(card);
+    document.body.appendChild(dlg);
+    const inp = card.querySelector("input");
+    const tip = card.querySelector(".saveNameTip");
+    inp.value = "代码 " + (lib.length + 1);
+    let over = false;
+    function doSave(){
+      const n = (inp.value || "").trim() || "未命名";
+      const l = freeLib();
+      const d = l.findIndex(x => x.name === n);
+      if (d >= 0 && !over) { over = true; tip.innerHTML = '⚠ 已存在「<b>' + escHtml(n) + '</b>」，再次点击将覆盖它'; card.querySelector('[data-act=ok]').textContent = "覆盖保存"; return; }
+      if (d >= 0) l.splice(d, 1);
+      l.push({ name: n, code: code, t: Date.now() });
+      try { localStorage.setItem("cp-free-lib", JSON.stringify(l)); } catch(e){ dlg.remove(); outMsg('<div class="err">保存失败（本地存储已满？）：' + escHtml(String(e)) + '</div>'); return; }
+      dlg.remove();
+      outMsg('<div class="ok">✓ 已保存：「' + escHtml(n) + '」 · 共 ' + l.length + ' 份（点「📚 我的代码」可载入/重命名/导出）</div>');
+    }
+    card.querySelector('[data-act=ok]').onclick = doSave;
+    card.querySelector('[data-act=cancel]').onclick = function(){ dlg.remove(); };
+    inp.addEventListener("keydown", function(e){ if (e.key === "Enter") { e.preventDefault(); doSave(); } });
+    inp.focus(); inp.select();
+  }
+  function showFreeLib() {
+    const lib = freeLib();
+    const box = cpRoot.querySelector(".cp-lib");
+    if (!box) return;
+    if (!lib.length) { alert("还没有保存的代码。写完点「💾 保存」即可保留。"); return; }
+    const body = box.querySelector(".cp-rv-body");
+    body.innerHTML = "";
+    box.querySelector(".cnt").textContent = lib.length + " 份";
+    /* v62：备份/迁移行（导出全部 JSON + 导入 JSON）——萝 096：localStorage 只算暂存，导出才是真留档 */
+    const impRow = document.createElement("div");
+    impRow.style.cssText = "display:flex;gap:8px;padding:8px 14px;border-bottom:1px solid var(--line,#e2e8f0);align-items:center";
+    impRow.innerHTML = '<span style="font-size:12px;color:var(--muted,#64748b)">留档：</span>'
+      + '<button data-i="exp" style="height:26px;padding:0 10px;font-size:12px;border-radius:6px;border:1px solid rgba(0,0,0,.15);background:#fff;cursor:pointer">📤 导出全部</button>'
+      + '<button data-i="imp" style="height:26px;padding:0 10px;font-size:12px;border-radius:6px;border:1px solid rgba(0,0,0,.15);background:#fff;cursor:pointer">📥 导入 JSON</button>';
+    body.appendChild(impRow);
+    impRow.querySelector('[data-i=exp]').onclick = function(){
+      const l = freeLib(); if (!l.length) { alert("还没有保存的代码。"); return; }
+      const blob = new Blob([JSON.stringify(l, null, 1)], { type: "application/json" });
+      const u = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = u; a.download = "lioli-我的代码.json";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(u); }, 10000);
+    };
+    const fInp = document.createElement("input");
+    fInp.type = "file"; fInp.accept = ".json,application/json"; fInp.style.display = "none";
+    document.body.appendChild(fInp);
+    impRow.querySelector('[data-i=imp]').onclick = function(){ fInp.click(); };
+    fInp.onchange = function(){
+      const f = fInp.files && fInp.files[0]; if (!f) return;
+      const rd = new FileReader();
+      rd.onload = function(){
+        try {
+          const arr = JSON.parse(rd.result);
+          if (!Array.isArray(arr)) { alert("格式不对：应为代码数组 JSON（可直接用「导出全部」得到的文件）。"); return; }
+          const cur = freeLib();
+          let add = 0;
+          arr.forEach(function(it){
+            if (!it || typeof it.code !== "string" || !it.code.trim()) return;
+            const n = (it.name || "").trim() || "未命名";
+            if (!cur.some(x => x.name === n)) { cur.push({ name: n, code: it.code, t: it.t || Date.now() }); add++; }
+          });
+          try { localStorage.setItem("cp-free-lib", JSON.stringify(cur)); } catch(e){ alert("导入失败（本地存储已满？）：" + e); return; }
+          alert("导入完成：新增 " + add + " 份（重名自动跳过）");
+          showFreeLib();
+        } catch(e){ alert("解析失败：" + e); }
+        fInp.value = "";
+      };
+      rd.readAsText(f);
+    };
+    lib.forEach((item, i) => {
+      const row = document.createElement("div");
+      row.style.cssText = "display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line,#e2e8f0);background:var(--card,#fff)";
+      const meta = document.createElement("div");
+      meta.style.cssText = "flex:1;min-width:0";
+      meta.innerHTML = '<div style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escHtml(item.name) + '</div>'
+        + '<div style="font-size:11px;color:var(--muted,#64748b)">' + new Date(item.t).toLocaleString() + ' · ' + item.code.split("\n").length + ' 行</div>';
+      const loadB = document.createElement("button");
+      loadB.textContent = "载入";
+      loadB.style.cssText = "height:26px;padding:0 12px;font-size:12px;border-radius:6px;border:none;background:var(--teal,#4D6BFE);color:#fff;cursor:pointer";
+      loadB.onclick = function(){
+        const ta = cpRoot.querySelector("textarea");
+        if (ta.value && ta.value !== item.code) {
+          if (!confirm("当前编辑器内容与这份代码不同，载入将覆盖。继续？")) return;
+        }
+        ta.value = item.code;
+        renderHighlight(null, item.code);
+        updateGutter(); updateCurline();
+        try { localStorage.setItem("cp-free-code", item.code); } catch(e){}
+        box.hidden = true;
+        outMsg('<div class="ok">✓ 已载入：「' + escHtml(item.name) + '」（自动保存已同步）</div>');
+      };
+      const renB = document.createElement("button");
+      renB.textContent = "✏️";
+      renB.title = "重命名";
+      renB.style.cssText = "height:26px;width:30px;font-size:12px;border-radius:6px;border:1px solid rgba(0,0,0,.15);background:#fff;cursor:pointer";
+      renB.onclick = function(){
+        const n = prompt("重命名「" + item.name + "」为：", item.name);
+        if (n === null) return;
+        const nn = (n || "").trim(); if (!nn) { alert("名字不能为空。"); return; }
+        const l = freeLib(); const idx = l.findIndex(x => x.name === nn);
+        if (idx >= 0 && idx !== i) { alert("已存在「" + nn + "」。"); return; }
+        l[i].name = nn; l[i].t = Date.now();
+        try { localStorage.setItem("cp-free-lib", JSON.stringify(l)); } catch(e){}
+        showFreeLib();
+      };
+      const dlB = document.createElement("button");
+      dlB.textContent = "⬇";
+      dlB.title = "下载 .c 源码";
+      dlB.style.cssText = "height:26px;width:30px;font-size:12px;border-radius:6px;border:1px solid rgba(0,0,0,.15);background:#fff;cursor:pointer";
+      dlB.onclick = function(){
+        const blob = new Blob([item.code], { type: "text/plain;charset=utf-8" });
+        const u = URL.createObjectURL(blob);
+        const a = document.createElement("a"); a.href = u; a.download = (item.name.replace(/[\\/:*?"<>|]/g, "_") || "code") + ".c";
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function(){ URL.revokeObjectURL(u); }, 10000);
+      };
+      const delB = document.createElement("button");
+      delB.textContent = "删除";
+      delB.style.cssText = "height:26px;padding:0 12px;font-size:12px;border-radius:6px;border:1px solid rgba(0,0,0,.15);background:#fff;cursor:pointer;color:#d64545";
+      delB.onclick = function(){
+        if (!confirm("删除「" + item.name + "」？")) return;
+        const l = freeLib(); l.splice(i, 1);
+        try { localStorage.setItem("cp-free-lib", JSON.stringify(l)); } catch(e){}
+        showFreeLib();
+      };
+      row.appendChild(meta); row.appendChild(loadB); row.appendChild(renB); row.appendChild(dlB); row.appendChild(delB);
+      body.appendChild(row);
+    });
+    box.hidden = false;
   }
 
   function curQ() { return cpCur ? QUESTIONS.find(q => q.id === cpCur) : null; }
@@ -1291,7 +1490,7 @@ int main(void){
   function toggleCard(qid) {
     const o = cardsStore();
     if (o[qid]) delete o[qid];
-    else o[qid] = { due: Date.now(), interval: 0, ef: 2.5, reps: 0, lapses: 0 };
+    else o[qid] = { S: 0.01, D: 5.5, R: 0.9, due: Date.now(), reps: 0, lapses: 0 };
     saveCards(o);
     return !!o[qid];
   }
@@ -1301,14 +1500,29 @@ int main(void){
   }
   function scheduleCard(qid, rating) {
     const o = cardsStore(); const c = o[qid]; if (!c) return;
-    if (rating === 0) { c.interval = 1; c.reps = 0; c.lapses++; c.ef = Math.max(1.3, c.ef - 0.2); }
-    else if (rating === 1) { c.interval = Math.max(c.interval * c.ef, 2); c.reps++; }
-    else if (rating === 2) { c.interval = c.reps === 0 ? 1 : Math.max(c.interval * c.ef, 3); c.reps++; }
-    else { c.interval = c.reps === 0 ? 3 : Math.max(c.interval * c.ef * 1.3, 7); c.reps++; }
-    if (rating >= 2) c.ef = Math.min(2.8, c.ef + 0.1);
-    else if (rating <= 0) c.ef = Math.max(1.3, c.ef - 0.2);
-    c.due = Date.now() + c.interval * DAY_MS;
+    /* 旧卡迁移：无 S/D 字段（v66 前的 ef/interval 旧结构）→ 初始化 FSRS 字段 */
+    if (!("S" in c)) { c.S = Math.max(c.interval || 0, 0.01); c.D = 5.5; }
+    fsrsSchedule(c, rating);
     saveCards(o);
+  }
+  /* ---------------- FSRS-4.5（简化无优化器，默认权重）：稳定性 S（天）+ 难度 D（1-10）+ 保留率 R ---------------- */
+  const FSRS_W = [0.40255,1.18385,3.173,15.69105,7.1949,0.5345,1.4604,0.0046,1.54575,0.1192,1.01925,1.9395,0.11,0.29605,2.2698,0.2315,2.9898,0.51655,0.6621];
+  const FSRS_DECAY = -0.5, FSRS_FACTOR = 19 / 81;
+  function fsrsR(S, t) { return Math.pow(1 + FSRS_FACTOR * t / Math.max(S, 0.1), FSRS_DECAY); }
+  function fsrsInit() { return { S: 0.01, D: 5.5, R: 0.9, due: Date.now(), reps: 0, lapses: 0 }; }
+  function fsrsSchedule(c, rating) {
+    const w = FSRS_W, D0 = 5.5;
+    const ivl = Math.max(c.S || 0, 0.01);
+    const meanR = fsrsR(c.S || 0.01, ivl);
+    let D = Math.min(10, Math.max(1, w[7] * D0 + (1 - w[7]) * ((c.D || D0) + w[8] * (0.5 - meanR))));
+    let S = c.S || 0.01;
+    if (rating === 0) { S = w[10] * Math.pow(D, -w[9]) * (Math.pow(S + 1, w[11]) - 1) * Math.pow(meanR, w[13]); c.lapses++; }
+    else if (rating === 1) { S = S * Math.exp(w[12] * (D - D0) * Math.exp(-w[13] * meanR) * Math.pow(S + 1, w[14]) * Math.pow(meanR, w[15])); }
+    else if (rating === 2) { S = S * (1 + Math.exp(w[16]) * (11 - D) * Math.pow(S, -w[17]) * (Math.exp((1 - meanR) * w[18]) - 1)); }
+    else { S = S * Math.exp(w[16] * (11 - D) * Math.pow(S, -w[17]) * (Math.exp((1 - meanR) * w[18]) - 1) * 1.5); }
+    c.S = Math.max(0.1, Math.min(3650, S)); c.D = D; c.reps++;
+    const days = Math.max(1, Math.round(c.S));
+    c.due = Date.now() + days * DAY_MS; c.R = fsrsR(c.S, days);
   }
   function refreshDeckBtn(qid) {
     const deckBtn = cpRoot.querySelector("[data-act=deck]");
@@ -1319,6 +1533,67 @@ int main(void){
     deckBtn.textContent = on ? "已加入错题本" : "错题本";
     deckBtn.title = on ? "点击移出错题本" : "加入错题本，供间隔重复复习";
   }
+  /* ---------------- 知识点卡（预置 C 各章核心知识点，FSRS 调度；进度独立存储） ---------------- */
+  const CP_FLASH = [
+    { id: "f9-1", ch: "ch9 函数", q: "C 程序从哪里开始执行？函数原型（声明）与定义有什么区别？", a: "从 main() 开始执行。原型只是声明（返回类型+名+参数），告诉编译器函数存在；定义才是函数体。不写原型会触发警告，正规写法：先声明后定义。" },
+    { id: "f9-2", ch: "ch9 函数", q: "为什么用 int 而非 void 定义 main()？return 0 是什么？", a: "int main() 表示程序返回一个整数给操作系统；return 0 表示正常结束（0 = 成功）。void main() 不规范，作业/竞赛里可能被判格式错误。" },
+    { id: "f9-3", ch: "ch9 函数", q: "形参和实参是什么？函数内改形参会改实参吗？", a: "形参是函数定义里的参数（实参的副本），实参是调用时传入的值。C 是值传递：函数内改形参不影响实参，想改原变量要传指针。" },
+    { id: "f9-4", ch: "ch9 函数", q: "数组名当函数参数传的是什么？为什么函数内 sizeof(arr) 不对？", a: "数组名作参数会退化为指针（传首地址），函数内 sizeof(arr) 得到指针大小而不是数组大小。要传长度：void f(int a[], int n);" },
+    { id: "f9-5", ch: "ch9 函数", q: "全局变量与局部变量同名时优先用哪个？", a: "局部优先（遮蔽全局）。尽量少用全局变量：可读性差、多文件易冲突；需要共享用传参/返回值更清晰。" },
+    { id: "f10-1", ch: "ch10 数组", q: "int a[5]; 的下标范围是？越界会怎样？", a: "0 到 4（共 5 个）。越界读写是未定义行为：可能不报错但悄悄破坏其他变量，或崩溃/安全漏洞。C 不检查下标。" },
+    { id: "f10-2", ch: "ch10 数组", q: "int a[5] = {1,2}; 剩下的元素是什么？", a: "自动补 0：1,2,0,0,0。只初始化部分元素时，其余为 0。" },
+    { id: "f10-3", ch: "ch10 数组", q: "sizeof(a)/sizeof(a[0]) 为什么能算出元素个数？", a: "sizeof(a) 是整个数组字节数，sizeof(a[0]) 是单个元素字节数，相除得个数。只在数组定义处有效，传参退化为指针后就失效。" },
+    { id: "f10-4", ch: "ch10 数组", q: "二维数组 int a[3][4] 在内存里怎么排？a[0] 是什么？", a: "按行优先连续排（12 个 int 连成一段）。a[0] 是第 0 行首地址，类型为 int*（一行数组名退化为指针）。" },
+    { id: "f11-1", ch: "ch11 字符串", q: "C 字符串怎么存储？\"hi\" 实际占几个字节？", a: "char 数组 + 结尾 '\\0'。\"hi\" 占 3 字节（h i \\0）。忘记给 \\0 留空间是新手最常见的溢出原因。" },
+    { id: "f11-2", ch: "ch11 字符串", q: "scanf(\"%s\") 和 fgets() 读字符串有什么差别？", a: "scanf %s 遇空格就停、不检查长度（超长溢出）；fgets 读整行、可限长度（fgets(b, sizeof b, stdin) 最多读 sizeof-1 个）。读一行用 fgets。" },
+    { id: "f11-3", ch: "ch11 字符串", q: "strcpy / strcmp / strcat / strlen 各自干嘛？", a: "strcpy(dst,src) 复制；strcmp(a,b) 比较（0 相等，<0 a 小）；strcat(dst,src) 拼接；strlen(s) 求长度（不含 \\0）。都在 <string.h>。" },
+    { id: "f11-4", ch: "ch11 字符串", q: "清 scanf 缓冲区为什么必须判断 EOF？", a: "scanf 后残留回车要用 getchar() 清掉；但输入被重定向/结束时 getchar() 一直返回 EOF → 死循环。标准写法：int c; while ((c=getchar()) != '\\n' && c != EOF);" }
+  ];
+  const CP_FLASH_KEY = "cp-flash-progress";
+  function flashStore() { try { return JSON.parse(localStorage.getItem(CP_FLASH_KEY) || "{}"); } catch(e){ return {}; } }
+  function flashDue() { const o = flashStore(); const now = Date.now(); return CP_FLASH.filter(f => !o[f.id] || o[f.id].due <= now); }
+  function openCards() {
+    const rv = cpRoot.querySelector(".cp-review");
+    rv.hidden = false;
+    renderFlashQueue(flashDue(), 0);
+  }
+  function renderFlashQueue(q, i) {
+    const body = cpRoot.querySelector(".cp-rv-body");
+    const cnt = cpRoot.querySelector(".cp-review .cnt");
+    cnt.textContent = q.length ? (i + 1) + " / " + q.length : "";
+    if (i >= q.length) {
+      body.innerHTML = q.length
+        ? '<div class="cp-rv-done">今日知识点卡复习完成 ✓</div>'
+        : '<div class="cp-rv-empty">今天没有到期的知识点卡。学完一章点开「知识点卡」，按 忘记/困难/良好/容易 自评，算法会自动安排下次复习。</div>';
+      return;
+    }
+    const f = q[i];
+    body.innerHTML =
+      '<div class="cp-rv-card">'
+      + '<span class="cp-rv-tag" style="background:#8b5cf6;color:#fff">' + escHtml(f.ch) + '</span>'
+      + '<div class="cp-rv-front"><b>' + escHtml(f.q) + '</b></div>'
+      + '<button class="cp-rv-flip">显示答案</button>'
+      + '<div class="cp-rv-back" hidden><pre style="white-space:pre-wrap">' + escHtml(f.a) + '</pre></div>'
+      + '<div class="cp-rv-actions" hidden>'
+      + '<button class="cp-rv-btn cp-rv-again" data-rating="0">忘记</button>'
+      + '<button class="cp-rv-btn cp-rv-hard" data-rating="1">困难</button>'
+      + '<button class="cp-rv-btn cp-rv-good" data-rating="2">良好</button>'
+      + '<button class="cp-rv-btn cp-rv-easy" data-rating="3">容易</button>'
+      + '</div></div>';
+    body.querySelector(".cp-rv-flip").addEventListener("click", () => {
+      body.querySelector(".cp-rv-back").hidden = false;
+      body.querySelector(".cp-rv-actions").hidden = false;
+    });
+    body.querySelectorAll(".cp-rv-btn").forEach(b => b.addEventListener("click", () => {
+      const o = flashStore();
+      const c = o[f.id] || fsrsInit();
+      fsrsSchedule(c, parseInt(b.dataset.rating, 10));
+      o[f.id] = c;
+      try { localStorage.setItem(CP_FLASH_KEY, JSON.stringify(o)); } catch(e){}
+      renderFlashQueue(q, i + 1);
+    }));
+  }
+
   function openReview() {
     const rv = cpRoot.querySelector(".cp-review");
     rv.hidden = false;
@@ -1372,6 +1647,7 @@ int main(void){
   function save(id, code) { try { localStorage.setItem(CP_KEY + id, code); } catch (e) {} }
 
   /* ---------------- 编译内核加载 ---------------- */
+  /* v57: 双源测速选优——Range 探测内核首块选最快源，失败自动切换，不干等单源超时 */
   function loadCompiler(forceDirect) {
     if (cpComp) return Promise.resolve(cpComp);
     if (cpLoading) return cpLoading;
@@ -1380,26 +1656,57 @@ int main(void){
     loadEl.hidden = false;
     cpLoading = new Promise((resolve, reject) => {
       const base = document.currentScript && document.currentScript.getAttribute("data-base");
-      const baseUrl = "https://cdn.jsdelivr.net/gh/lzm66691/lioli-reader@main/vendor/c-runner/assets/"; /* GitHub Pages 直发 36KB/s，改 jsDelivr CDN 加速（实测 1.7MB/s） */
+      const fallbackUrl = (base || ".") + "/vendor/c-runner/assets/";
+      const CDN_URL = "https://cdn.jsdelivr.net/gh/lzm66691/lioli-reader@main/vendor/c-runner/assets/";
+      const PAGES_URL = "https://lzm66691.github.io/lioli-reader/vendor/c-runner/assets/";
+      const sources = forceDirect
+        ? [{ label: "直连", url: fallbackUrl }]
+        : [
+            { label: "本地", url: "http://localhost:8926/assets/" },
+            { label: "CDN", url: CDN_URL },
+            { label: "Pages", url: PAGES_URL },
+            { label: "直连", url: fallbackUrl }
+          ];
       const script = document.createElement("script");
       script.src = (base || ".") + "/vendor/c-runner/clang-wasm.global.js";
       script.onload = async () => {
         try {
           if (!window.clangWasm) throw new Error("clangWasm 未加载");
-          var fallbackUrl = (base || ".") + "/vendor/c-runner/assets/";
-          /* v53: forceDirect=true 仅走直连（重试按钮）；默认仅走 CDN，快速失败进入模拟输出 */
-          var sources = forceDirect
-            ? [{ label: "直连", url: fallbackUrl }]
-            : [{ label: "CDN", url: baseUrl }];
-          var lastErr = null;
-          var done = false;
-          var withTimeout = function(promise, ms, label) {
-            return Promise.race([promise, new Promise(function(_, rej){ setTimeout(function(){ rej(new Error(label + "超时")); }, ms); })]);
+          /* 双源测速：Range 取 clang.wasm.gz 首 1KB，4s 超时，选响应最快的源 */
+          var best = null;
+          if (!forceDirect) {
+            var probeMs = 4000;
+            var probes = sources.map(function (s) {
+              return new Promise(function (res) {
+                var t0 = Date.now();
+                var ac = new AbortController();
+                try {
+                  fetch(s.url + "bin/clang.wasm.gz", { headers: { Range: "bytes=0-1023" }, signal: ac.signal })
+                    .then(function (r) { res({ label: s.label, url: s.url, ms: Date.now() - t0, ok: r.ok || r.status === 206 }); })
+                    .catch(function () { res({ label: s.label, url: s.url, ms: probeMs + 1, ok: false }); })
+                    .finally(function () { try { ac.abort(); } catch (e) {} });
+                } catch (e) { res({ label: s.label, url: s.url, ms: probeMs + 1, ok: false }); }
+              });
+            });
+            var results = await Promise.race([
+              Promise.all(probes),
+              new Promise(function (res) { setTimeout(function () { res("timeout"); }, probeMs + 800); })
+            ]);
+            if (results !== "timeout") {
+              var okOnes = results.filter(function (p) { return p.ok; }).sort(function (a, b) { return a.ms - b.ms; });
+              if (okOnes.length) { best = okOnes[0]; }
+              if (loadEl) loadEl.querySelector(".meta") && (loadEl.querySelector(".meta").textContent = "源测速: " + results.map(function(p){ return p.label + (p.ok ? " " + p.ms + "ms" : " ✗"); }).join(" | ") + (best ? " → 选 " + best.label : " → 全部不通，逐源直试"));
+            }
+          }
+          var ordered = best ? [best].concat(sources.filter(function (s) { return s.label !== best.label; })) : sources;
+          var lastErr = null, done = false;
+          var withTimeout = function (promise, ms, label) {
+            return Promise.race([promise, new Promise(function (_, rej) { setTimeout(function () { rej(new Error(label + "超时")); }, ms); })]);
           };
-          for (var si = 0; si < sources.length && !done; si++) {
-            var src = sources[si];
-            var timeoutMs = (src.label === "直连" ? 600000 : 25000);
-            for (var attempt = 1; attempt <= (src.label === "CDN" ? 3 : 1); attempt++) {
+          for (var si = 0; si < ordered.length && !done; si++) {
+            var src = ordered[si];
+            var timeoutMs = (src.label === "直连" ? 600000 : 60000);
+            for (var attempt = 1; attempt <= (src.label === "CDN" ? 2 : 1); attempt++) {
               try {
                 cpComp = await withTimeout(window.clangWasm.createCompiler("c", {
                   baseUrl: new URL(src.url, location.href),
@@ -1412,12 +1719,9 @@ int main(void){
                 return;
               } catch (e) {
                 lastErr = e;
-                if (src.label === "CDN" && attempt === 1) {
-                  if (loadEl) loadEl.querySelector(".meta") && (loadEl.querySelector(".meta").textContent = "CDN 下载失败或超时，即将进入模拟输出模式。可点输出区「直连重试」按钮尝试真实编译（首次约 10 分钟）…");
-                }
-                if (!(src.label === "CDN" && attempt < 3)) break;
                 if (fill) fill.style.width = "0%";
-                await new Promise((r) => setTimeout(r, 1500));
+                if (attempt < 2) { await new Promise((r) => setTimeout(r, 1200)); continue; }
+                break;
               }
             }
           }
@@ -1465,7 +1769,9 @@ int main(void){
 
   /* ---------------- 运行 ---------------- */
   async function run() {
-    const q = curQ(); if (!q) return;
+    const q = curQ();
+    const isFree = (cpCur === "__free");
+    if (!q && !isFree) return;
     const btn = cpRoot.querySelector(".cp-run");
     const out = cpRoot.querySelector(".cp-out");
     const ta = cpRoot.querySelector("textarea");
@@ -1474,6 +1780,30 @@ int main(void){
     btn.textContent = "编译中…";
     try {
       if (!cpComp) {
+        if (isFree) {
+          /* v59：自由模式无参考答案——引导下载内核真实编译 */
+          out.innerHTML = '<div class="err">自由写代码需要真实编译内核（约 28MB）。点击下方按钮下载后即可运行：</div>'
+            + '<button class="cp-dir-retry">⚡ 下载编译内核 · 真实编译</button>';
+          var bF = out.querySelector(".cp-dir-retry");
+          if (bF) bF.onclick = async function () {
+            bF.disabled = true;
+            bF.textContent = "下载内核中（约 20-30 秒，请稍候）…";
+            try {
+              btn.textContent = "运行中…";
+              var c0 = await loadCompiler();
+              var r0 = await c0.run(ta.value, inp.value || "");
+              renderRun(r0);
+            } catch (e0) {
+              var w0 = e0 && e0.message ? e0.message : String(e0);
+              out.innerHTML = '<div class="err">内核下载/编译失败：' + escHtml(w0) + '</div>'
+                + '<div class="meta">可再次点击下方按钮重试，或刷新页面后重试。</div>'
+                + '<button class="cp-dir-retry">🔄 重试下载内核</button>';
+              var b1 = out.querySelector(".cp-dir-retry");
+              if (b1) b1.onclick = arguments.callee;
+            }
+          };
+          return;
+        }
         /* v54: 内核未就绪 -> 直接模拟输出（0 等待），真实编译改按钮（不再等下载） */
         var q0 = curQ();
         if (q0 && q0.refOut) {

@@ -547,7 +547,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v67</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v68</span></div>
 
   <div class="spacer"></div>
 
@@ -616,6 +616,8 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
       <button id="tabShelf">书架</button>
 
+      <button id="tabPractice">刷题</button>
+
 
 
     </div>
@@ -635,6 +637,62 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
     <div class="side-body" id="shelfBody" style="display:none">
 
       <div class="empty-tip">书架：点选要阅读的书。版权书（如教材）请用「＋ 导入 PDF」本地阅读，数据只存本机浏览器，不公开。</div>
+
+    </div>
+
+    <div class="side-body" id="practiceBody" style="display:none">
+
+      <div class="empty-tip" style="font-size:12px;margin-bottom:8px">刷题板块：选题库开始练习。代码在浏览器内编译运行，进度与代码仅存本机。</div>
+
+      <div style="display:flex;flex-direction:column;gap:8px;padding:2px">
+
+        <div class="shelf-item" id="pbCardC" title="打开 C 语言练习面板" style="cursor:pointer;background:linear-gradient(135deg,rgba(77,107,254,.14),rgba(139,92,246,.12));border:1px solid var(--glass-border);border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:10px">
+
+          <span style="font-size:22px">🖥</span>
+
+          <div style="flex:1;min-width:0">
+
+            <div style="font-weight:700;font-size:13.5px">C 语言题库</div>
+
+            <div style="font-size:11.5px;color:var(--muted)" id="pbCProgress">已练习 0 题</div>
+
+          </div>
+
+          <span style="color:var(--teal-dark);font-size:16px">›</span>
+
+        </div>
+
+        <div class="shelf-item" style="cursor:pointer;background:linear-gradient(135deg,rgba(16,185,129,.12),rgba(77,107,254,.10));border:1px solid var(--glass-border);border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:10px;opacity:.9">
+
+          <span style="font-size:22px">📐</span>
+
+          <div style="flex:1;min-width:0">
+
+            <div style="font-weight:700;font-size:13.5px">线性代数题库</div>
+
+            <div style="font-size:11.5px;color:var(--muted)">筹备中 · 线代 2.1-2.3 速查产出后上线</div>
+
+          </div>
+
+        </div>
+
+        <div class="shelf-item" id="pbCardFree" title="打开自由写代码页" style="cursor:pointer;background:rgba(255,255,255,.04);border:1px dashed var(--glass-border);border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:10px">
+
+          <span style="font-size:22px">📝</span>
+
+          <div style="flex:1;min-width:0">
+
+            <div style="font-weight:700;font-size:13.5px">自由写代码</div>
+
+            <div style="font-size:11.5px;color:var(--muted)">打开空白编辑页，随便写 C 代码运行</div>
+
+          </div>
+
+          <span style="color:var(--teal-dark);font-size:16px">›</span>
+
+        </div>
+
+      </div>
 
     </div>
 
@@ -1877,29 +1935,50 @@ if (!BOOKS.length) {
 
   document.getElementById("tabToc").addEventListener("click", function(){
 
-    this.classList.add("active"); document.getElementById("tabBookmarks").classList.remove("active"); document.getElementById("tabShelf").classList.remove("active");
+    this.classList.add("active"); document.getElementById("tabBookmarks").classList.remove("active"); document.getElementById("tabShelf").classList.remove("active"); document.getElementById("tabPractice").classList.remove("active");
 
-    tocBody.style.display = ""; bmBody.style.display = "none"; shelfBody.style.display = "none"; searchBody.classList.remove("open");
+    tocBody.style.display = ""; bmBody.style.display = "none"; shelfBody.style.display = "none"; practiceBody.style.display = "none"; searchBody.classList.remove("open");
 
   });
 
   document.getElementById("tabBookmarks").addEventListener("click", function(){
 
-    this.classList.add("active"); document.getElementById("tabToc").classList.remove("active"); document.getElementById("tabShelf").classList.remove("active");
+    this.classList.add("active"); document.getElementById("tabToc").classList.remove("active"); document.getElementById("tabShelf").classList.remove("active"); document.getElementById("tabPractice").classList.remove("active");
 
-    tocBody.style.display = "none"; bmBody.style.display = ""; shelfBody.style.display = "none"; searchBody.classList.remove("open");
+    tocBody.style.display = "none"; bmBody.style.display = ""; shelfBody.style.display = "none"; practiceBody.style.display = "none"; searchBody.classList.remove("open");
 
   });
 
   document.getElementById("tabShelf").addEventListener("click", function(){
 
-    this.classList.add("active"); document.getElementById("tabToc").classList.remove("active"); document.getElementById("tabBookmarks").classList.remove("active");
+    this.classList.add("active"); document.getElementById("tabToc").classList.remove("active"); document.getElementById("tabBookmarks").classList.remove("active"); document.getElementById("tabPractice").classList.remove("active");
 
-    tocBody.style.display = "none"; bmBody.style.display = "none"; shelfBody.style.display = ""; searchBody.classList.remove("open");
+    tocBody.style.display = "none"; bmBody.style.display = "none"; shelfBody.style.display = ""; practiceBody.style.display = "none"; searchBody.classList.remove("open");
 
     renderShelf();
 
   });
+
+  document.getElementById("tabPractice").addEventListener("click", function(){
+
+    this.classList.add("active"); document.getElementById("tabToc").classList.remove("active"); document.getElementById("tabBookmarks").classList.remove("active"); document.getElementById("tabShelf").classList.remove("active");
+
+    tocBody.style.display = "none"; bmBody.style.display = "none"; shelfBody.style.display = "none"; practiceBody.style.display = ""; searchBody.classList.remove("open");
+
+    renderPracticeBoard();
+
+  });
+
+  function renderPracticeBoard(){
+    var n = 0;
+    try { for (var k in localStorage) { if (k.indexOf("reader-app-cpractice:") === 0) n++; } } catch(e){}
+    var el = document.getElementById("pbCProgress");
+    if (el) el.textContent = "已练习 " + n + " 题（保存过代码）";
+  }
+  var _pbC = document.getElementById("pbCardC");
+  if (_pbC) _pbC.addEventListener("click", function(){ if (window.initCPractice) window.initCPractice(); });
+  var _pbF = document.getElementById("pbCardFree");
+  if (_pbF) _pbF.addEventListener("click", function(){ if (window.openCPFree) window.openCPFree(); else if (window.initCPractice) window.initCPractice(); });
 
   var markBtn = document.getElementById("markBtn");
 
@@ -1940,9 +2019,9 @@ if (!BOOKS.length) {
   })();
 
   function showSearch(){
-    document.getElementById("tabToc").classList.remove("active"); document.getElementById("tabBookmarks").classList.remove("active"); document.getElementById("tabShelf").classList.remove("active");
+    document.getElementById("tabToc").classList.remove("active"); document.getElementById("tabBookmarks").classList.remove("active"); document.getElementById("tabShelf").classList.remove("active"); document.getElementById("tabPractice").classList.remove("active");
 
-    tocBody.style.display = "none"; bmBody.style.display = "none"; shelfBody.style.display = "none"; searchBody.classList.add("open");
+    tocBody.style.display = "none"; bmBody.style.display = "none"; shelfBody.style.display = "none"; practiceBody.style.display = "none"; searchBody.classList.add("open");
 
     try { searchInput.focus(); } catch(e){}
   }
@@ -2957,7 +3036,7 @@ if (!BOOKS.length) {
 
 </script>
 
-<script src="c-course/c-practice-v67.js?v=20261004" data-base="."></script>
+<script src="c-course/c-practice-v67.js?v=20261004b" data-base="."></script>
 
 <script>
 /* v66：AI 助手浮层（萝 C 路线：复制选中 → 一键打开 DeepSeek/豆包网页版；零密钥·零成本·零风险） */

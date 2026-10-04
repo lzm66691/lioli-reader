@@ -1892,4 +1892,5 @@ int main(void){
   // 暴露给阅读器
   window.initCPractice = function () { show(); };
   window.toggleCPractice = toggle;
+  window.openCPFree = function () { if (!cpRoot) buildPanel(); selectFree(); show(); };
 })();
