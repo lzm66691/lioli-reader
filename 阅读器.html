@@ -508,6 +508,20 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 }
 
+/* v67：画面自适应增强（平板/手机：练习册单栏 + 工具箱/顶栏适配） */
+@media (max-width:720px){
+  .cp-body{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+  .cp-left{border-right:none;border-bottom:1px solid var(--line,#e2e8f0);max-height:180px}
+  .cp-head .cp-btn{padding:0 10px;font-size:12px}
+  .cp-modal .cp-body{min-height:0}
+}
+@media (max-width:480px){
+  .topbar{padding:0 8px}
+  .toolbox-panel{width:calc(100vw - 24px);right:12px;top:54px;max-height:calc(100vh - 70px)}
+  .cp-head .cp-btn{padding:0 8px;font-size:11px}
+  .cp-left{max-height:150px}
+}
+
 
 /* P16/v30：顶栏精简——隐藏收纳进工具箱的按钮（萝方案：顶栏留 目录/标注/搜索/工具箱+页码） */
 #markBtn,#noteBtn,#selModeBtn,#darkBtn,#fullBtn,#sysOpen,.tool-group a.tool-btn[href="guide.html"]{display:none!important}
@@ -533,7 +547,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v66</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v67</span></div>
 
   <div class="spacer"></div>
 
@@ -2943,7 +2957,7 @@ if (!BOOKS.length) {
 
 </script>
 
-<script src="c-course/c-practice-v66.js?v=20261004" data-base="."></script>
+<script src="c-course/c-practice-v67.js?v=20261004" data-base="."></script>
 
 <script>
 /* v66：AI 助手浮层（萝 C 路线：复制选中 → 一键打开 DeepSeek/豆包网页版；零密钥·零成本·零风险） */
