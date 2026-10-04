@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>线代速查 · 2.2 转置·对称·反对称</title>
+<style>
+  :root{
+    --teal:#4D6BFE; --ink:#0f172a; --body:#334155; --muted:#64748b;
+    --line:#e2e8f0; --warn-bg:#fff7ed; --warn-border:#fdba74;
+    --tip-bg:#eff6ff; --tip-border:#93c5fd;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:"Noto Sans SC",-apple-system,"Microsoft YaHei",sans-serif;
+    color:var(--body); font-size:14px; line-height:1.75; padding:28px 20px;
+  }
+  h1{font-size:22px;color:var(--ink);margin-bottom:4px}
+  h2{font-size:17px;color:var(--teal);margin:22px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  p{margin:8px 0}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:14px}
+  .kicker{display:inline-block;background:var(--teal);color:#fff;font-size:11px;padding:2px 8px;border-radius:4px;margin-bottom:8px;letter-spacing:1px}
+  table{border-collapse:collapse;margin:12px 0;width:100%;table-layout:fixed}
+  th,td{border:1px solid var(--line);padding:7px 9px;font-size:12.5px;text-align:left;vertical-align:top;word-break:break-word}
+  th{background:var(--code-bg,#f1f5f9);color:var(--ink)}
+  tr:nth-child(even) td{background:#fafbff}
+  .warn,.tip{border-radius:8px;padding:10px 14px;margin:12px 0;font-size:13px}
+  .warn{background:var(--warn-bg);border-left:4px solid var(--warn-border)}
+  .tip{background:var(--tip-bg);border-left:4px solid var(--tip-border)}
+  .warn b,.tip b{color:var(--ink)}
+  .note{color:var(--muted);font-size:12.5px}
+  .footer{margin-top:26px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+  @media (max-width:600px){ body{padding:18px 12px} table{font-size:12px} th,td{padding:5px 6px} }
+</style>
+</head>
+<body>
+
+<div class="kicker">线代速查 · 矩阵</div>
+<h1>2.2 转置 · 对称 · 反对称</h1>
+<div class="sub">宋浩《线性代数》3.0 第 2.2 节 · 视频总长 22:25 · 重点：(AB)ᵀ=BᵀAᵀ 顺序反转 / 对称 Aᵀ=A / 反对称 Aᵀ=−A 且主对角线全 0</div>
+
+<h2>记号</h2>
+<table>
+<colgroup><col style="width:24%"><col style="width:46%"><col style="width:30%"></colgroup>
+<tr><th>记号</th><th>含义</th><th>备注</th></tr>
+<tr><td>Aᵀ</td><td>矩阵 A 的转置</td><td>行变列、列变行（行列互换）</td></tr>
+<tr><td>Aᵢⱼ</td><td>第 i 行第 j 列元素</td><td>对称/反对称定义用</td></tr>
+</table>
+
+<h2>要点（带视频时间点）</h2>
+<table>
+<colgroup><col style="width:13%"><col style="width:87%"></colgroup>
+<tr><th>时间点</th><th>要点</th></tr>
+<tr><td>00:00</td><td>转置定义引入（回顾行列式转置：转置再转置转回去、转置值不变）+ <b>矩阵转置定义</b>：把原矩阵的行做成列（行列互换），符号也是右上角 T</td></tr>
+<tr><td>01:25</td><td><b>(Aᵀ)ᵀ = A</b>：转置再转置回到原矩阵</td></tr>
+<tr><td>02:15</td><td><b>转置的形状</b>：A 是 m×n，Aᵀ 是 n×m（行列互换）；例 A 2×3 → Aᵀ 3×2；B 3×1 → Bᵀ 1×3</td></tr>
+<tr><td>03:34</td><td><b>(A+B)ᵀ = Aᵀ + Bᵀ 与 (kA)ᵀ = kAᵀ（同段含第二、第三条）</b>：相加的转置朝里带直接分开；数乘的转置数直接朝外提（提公因子只提一次）</td></tr>
+<tr><td>05:27</td><td><b>(AB)ᵀ = BᵀAᵀ 引入（第一大坑）</b>：相乘的转置朝里带，<b>里边的矩阵要交换顺序</b></td></tr>
+<tr><td>06:20</td><td>(AB)ᵀ 的<b>形状证明</b>：A 2×3、B 3×5 时，AᵀBᵀ 是 3×2 × 5×3 中间不等<b>不能乘</b>；BᵀAᵀ 是 5×3 × 3×2 能乘</td></tr>
+<tr><td>07:12</td><td><b>(ABC)ᵀ = CᵀBᵀAᵀ</b>：三个矩阵相乘的转置，顺序全部反转（ABC → CBA）</td></tr>
+<tr><td>08:19</td><td><b>(Aᵏ)ᵀ = (Aᵀ)ᵏ</b>：例 (A³)ᵀ = (AAA)ᵀ = AᵀAᵀAᵀ = (Aᵀ)³——先幂再转置与先转置再幂一样</td></tr>
+<tr><td>09:17</td><td>反对称行列式复习（主对角线为轴上下对应成相反数、主对角线元素全 0）+ <b>奇数阶反对称行列式值 = 0</b>（第一章性质）+ <b>对称矩阵定义</b>：Aᵢⱼ = Aⱼᵢ</td></tr>
+<tr><td>11:12</td><td><b>对称定义举例</b>：Aᵢⱼ = Aⱼᵢ（例 A₂₃ = A₃₂）；主对角线元素 Aᵢᵢ = Aᵢᵢ 恒成立</td></tr>
+<tr><td>12:59</td><td><b>A 与 Aᵀ 完全一样 ⟹ Aᵀ = A + 对称矩阵主对角线元素为任意数</b>；随后引入反对称矩阵定义：Aᵢⱼ = −Aⱼᵢ</td></tr>
+<tr><td>14:17</td><td><b>反对称矩阵主对角线元素必须全为 0 的推导</b>：Aᵢᵢ = −Aᵢᵢ ⟹ 2Aᵢᵢ = 0 ⟹ Aᵢᵢ = 0</td></tr>
+<tr><td>15:33</td><td><b>反对称矩阵常用判定：Aᵀ = −A</b>（逐元素差一个负号）+ 口诀：说对称想 Aᵀ=A，说反对称想 Aᵀ=−A</td></tr>
+<tr><td>16:11</td><td>性质①：A、B 同阶对称 ⟹ <b>A±B 对称</b>；性质③（同段）：A、B 同阶对称，<b>AB 对称 ⟺ AB=BA（可交换）</b></td></tr>
+<tr><td>18:35</td><td>性质④：<b>AᵀA 与 AAᵀ 必对称</b>（A 为任意 m×n 矩阵，无需对称）</td></tr>
+<tr><td>19:30</td><td><b>反对称矩阵的幂</b>：A 反对称，(Aᵏ)ᵀ = (Aᵀ)ᵏ = (−A)ᵏ = (−1)ᵏAᵏ——<b>k 偶 → Aᵏ 对称，k 奇 → Aᵏ 反对称</b></td></tr>
+<tr><td>21:20</td><td>例证：A 反对称 → A¹⁰ 对称（(−1)¹⁰=+1）、A¹⁵ 反对称（(−1)¹⁵=−1）</td></tr>
+</table>
+
+<h2>速查表（适用条件 · 结论 · 常见错用）</h2>
+<table>
+<colgroup><col style="width:22%"><col style="width:44%"><col style="width:34%"></colgroup>
+<tr><th>适用条件</th><th>结论</th><th>常见错用</th></tr>
+<tr><td>A 任意矩阵</td><td>(Aᵀ)ᵀ = A；A 是 m×n ⟹ Aᵀ 是 n×m</td><td>把转置后形状记反</td></tr>
+<tr><td>A、B 同型</td><td>(A+B)ᵀ = Aᵀ+Bᵀ</td><td>忘了转置可分开</td></tr>
+<tr><td>k 为常数</td><td>(kA)ᵀ = kAᵀ</td><td>把数也"转置"或提两次</td></tr>
+<tr><td>AB 可乘</td><td><b>(AB)ᵀ = BᵀAᵀ（顺序反转！）</b></td><td>写成 AᵀBᵀ（往往连乘都乘不了）</td></tr>
+<tr><td>ABC 可乘</td><td>(ABC)ᵀ = CᵀBᵀAᵀ</td><td>只反最后一个</td></tr>
+<tr><td>Aᵏ（方阵）</td><td>(Aᵏ)ᵀ = (Aᵀ)ᵏ</td><td>无</td></tr>
+<tr><td>对称矩阵</td><td>Aᵀ=A ⟺ Aᵢⱼ=Aⱼᵢ；主对角线任意数</td><td>以为主对角线必须为 0</td></tr>
+<tr><td>反对称矩阵</td><td>Aᵀ=−A ⟺ Aᵢⱼ=−Aⱼᵢ；<b>主对角线全 0</b></td><td>忽略主对角线全 0 条件</td></tr>
+<tr><td>A、B 同阶对称</td><td>A±B 对称；AB 对称 ⟺ AB=BA</td><td>默认 AB 一定对称</td></tr>
+<tr><td>A 任意 m×n</td><td>AᵀA、AAᵀ 必对称</td><td>要求 A 先对称</td></tr>
+<tr><td>A 反对称、k 正整数</td><td>k 偶 → Aᵏ 对称；k 奇 → Aᵏ 反对称</td><td>忘了看 k 奇偶性</td></tr>
+<tr><td>奇数阶反对称行列式</td><td>值 = 0</td><td>忽略"奇数阶"前提</td></tr>
+<tr><td>A 任意方阵</td><td>可拆 A = (A+Aᵀ)/2 + (A−Aᵀ)/2——<b>补充（非课程内容）</b></td><td>无</td></tr>
+</table>
+
+<div class="tip"><b>记忆口诀：</b>说对称想 Aᵀ=A，说反对称想 Aᵀ=−A；相乘的转置要<b>交换顺序</b>。</div>
+<div class="warn"><b>第一大坑：</b>(AB)ᵀ 写成 AᵀBᵀ——A、B 阶数不匹配时根本乘不了，必须先反成 BᵀAᵀ。</div>
+
+<div class="footer">本材料为自写学习整理：基于宋浩《线性代数》3.0 课程的学习索引，不含原课程素材。</div>
+
+</body>
+</html>
