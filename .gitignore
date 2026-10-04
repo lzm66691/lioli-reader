@@ -10,3 +10,7 @@ digests/_edge_profile/
 c-course/tools/
 阅读器_v32备份.html
 阅读器项目.html
+
+# 源 HTML 与构建脚本——build 过滤，不公开
+math-course/*.html
+math-course/*.ps1
