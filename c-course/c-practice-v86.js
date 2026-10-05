@@ -2443,7 +2443,7 @@ int main(void)
     html += '</div></div>';
     m.innerHTML = html;
     /* 初始隐藏全部二级节点与连线 */
-    var cvs = document.getElementById("kgCanvas");
+    var cvs = m.querySelector("#kgCanvas");
     Array.prototype.slice.call(cvs.querySelectorAll('.kgNode')).forEach(function(x){
       var idn = parseInt(x.getAttribute("data-id"), 10);
       if (idn >= 11) { x.style.display = "none"; }
