@@ -3120,7 +3120,7 @@ if (!BOOKS.length) {
 
 </script>
 
-<script src="c-course/c-practice-v89.js?v=20261005i" data-base="."></script>
+<script src="c-course/c-practice-v90.js?v=20261005j" data-base="."></script>
 
 <script>
 /* v75：划词浮层升级（UI 报告第二阶段①）——高亮三色 + 复制 + 问 AI；支持 PDF 内（iframe）选区；高亮复用 marks 标注体系（萝 C 路线零密钥） */
@@ -3341,18 +3341,7 @@ if (!BOOKS.length) {
     if (b && window.switchBook) window.switchBook(bid);
   };
 
-  var gb = document.getElementById("tabGraph");
-  if (gb) {
-    gb.addEventListener("click", function(){
-      this.classList.add("active");
-      ["tabToc","tabBookmarks","tabShelf","tabPractice"].forEach(function(id){ document.getElementById(id).classList.remove("active"); });
-      ["tocBody","bmBody","shelfBody","practiceBody","graphBody"].forEach(function(id){
-        var el = document.getElementById(id); if (el) el.style.display = (id === "graphBody") ? "" : "none";
-      });
-      var sb = document.getElementById("searchBody"); if (sb) sb.classList.remove("open");
-      renderGraph();
-    });
-  }
+  /* 图谱 Tab 统一由 c-practice 的全屏发散图谱接管（openKnowledgeGraph） */
 })();
 </script>
 </body>
