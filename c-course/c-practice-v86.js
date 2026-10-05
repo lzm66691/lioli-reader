@@ -2402,12 +2402,12 @@ int main(void)
 
   function esc3(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
-  function linkLine(n, isLv2){
+  function linkLine(n, isLv2, nid){
     var p = NODES[n.parent];
     var x1 = p.x, y1 = p.y + (p.r === 1 ? 8 : 7), x2 = n.x, y2 = n.y - 7;
     var midx = (x1 + x2) / 2, midy = (y1 + y2) / 2;
     var tag = n.tag ? '<span class="kgLTag" style="position:absolute;left:' + midx + '%;top:' + midy + '%;transform:translate(-50%,-50%);background:rgba(12,8,28,.9);color:' + TAG_COLOR[n.tag] + ';font-size:10px;padding:1px 7px;border-radius:20px;border:1px solid ' + TAG_COLOR[n.tag] + '44">' + esc3(n.tag) + '</span>' : "";
-    return '<svg class="kgLine" style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible" data-from="' + n.parent + '" data-to="' + n.id + '" data-lv2="' + (isLv2 ? 1 : 0) + '"><line x1="' + x1 + '%" y1="' + y1 + '%" x2="' + x2 + '%" y2="' + y2 + '%" stroke="rgba(139,92,246,.45)" stroke-width="1.6" stroke-dasharray="4 3"/></svg>' + tag;
+    return '<svg class="kgLine" style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible" data-from="' + n.parent + '" data-to="' + nid + '" data-lv2="' + (isLv2 ? 1 : 0) + '"><line x1="' + x1 + '%" y1="' + y1 + '%" x2="' + x2 + '%" y2="' + y2 + '%" stroke="rgba(139,92,246,.45)" stroke-width="1.6" stroke-dasharray="4 3"/></svg>' + tag;
   }
 
   function nodeCard(id){
@@ -2435,7 +2435,7 @@ int main(void)
     html += '<div style="font-size:11.5px;color:#94a3b8;margin-bottom:8px">点击模块节点展开子知识点（虚线=关联 · 橙色=前置 · 绿色=包含）· 点击「跳转课件」直达对应讲义</div>';
     html += '<div id="kgCanvas" style="position:relative;width:100%;height:920px">';
     html += nodeCard(0);
-    LV1.forEach(function(i){ html += linkLine(NODES[i], false); html += nodeCard(i); });
+    LV1.forEach(function(i){ html += linkLine(NODES[i], false, i); html += nodeCard(i); });
     html += '</div></div>';
     m.innerHTML = html;
     m.querySelector("#kgBack").onclick = function(){ m.remove(); };
@@ -2469,7 +2469,7 @@ int main(void)
           card = document.createElement("div"); card.innerHTML = nodeCard(k); card = card.firstChild;
           card.style.opacity = "0"; card.style.transform = "translate(-50%,-50%) translateY(-10px)";
           canvas.appendChild(card);
-          var lw = document.createElement("div"); lw.innerHTML = linkLine(n, true); 
+          var lw = document.createElement("div"); lw.innerHTML = linkLine(n, true, k); 
           while (lw.firstChild) canvas.insertBefore(lw.firstChild, card);
           canvas.querySelector('.kgLine[data-to="' + k + '"]').style.opacity = "0";
         }
@@ -2479,7 +2479,7 @@ int main(void)
           setTimeout(function(){ card.style.display = "none"; if (l2) l2.style.display = "none"; }, 300);
         } else {
           card.style.display = ""; var l3 = canvas.querySelector('.kgLine[data-to="' + k + '"]'); if (l3) l3.style.display = "";
-          requestAnimationFrame(function(){ card.style.opacity = "1"; card.style.transform = "translate(-50%,-50%) translateY(0)"; if (l3) l3.style.opacity = "1"; });
+          setTimeout(function(){ card.style.opacity = "1"; card.style.transform = "translate(-50%,-50%) translateY(0)"; if (l3) l3.style.opacity = "1"; }, 16);
         }
       });
     });
