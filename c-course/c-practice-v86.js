@@ -2439,7 +2439,8 @@ int main(void)
     m.innerHTML = html;
     m.querySelector("#kgBack").onclick = function(){ m.remove(); };
     m.addEventListener("click", function(e){
-      var go = e.target.closest ? e.target.closest(".kgGo") : null;
+      var tar = e.target && e.target.nodeType === 3 ? e.target.parentNode : e.target;
+      var go = tar && tar.closest ? tar.closest(".kgGo") : null;
       if (go) {
         var nd = go.closest(".kgNode");
         var n = NODES[nd.getAttribute("data-id")];
@@ -2449,7 +2450,7 @@ int main(void)
         }
         return;
       }
-      var nd2 = e.target.closest ? e.target.closest(".kgNode") : null;
+      var nd2 = tar && tar.closest ? tar.closest(".kgNode") : null;
       if (!nd2) return;
       var id = nd2.getAttribute("data-id");
       var kids = CHILDREN[id];
