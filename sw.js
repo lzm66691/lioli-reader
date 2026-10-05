@@ -1,7 +1,7 @@
-/* PWA Service Worker — 莉萝阅读器 v91：知识图谱 v2（放射状网络图 + 连线 + 课件跳转按钮）（c-practice-v102）（2026-10-05）
-   外壳缓存 reader-p2-dg-v102（含 pdf.js 全套 + KaTeX）；PDF 缓存 reader-pdf-v3（按需 cache-first）
+/* PWA Service Worker — 莉萝阅读器 v91：知识图谱 v2（放射状网络图 + 连线 + 课件跳转按钮）（c-practice-v103）（2026-10-05）
+   外壳缓存 reader-p2-dg-v103（含 pdf.js 全套 + KaTeX）；PDF 缓存 reader-pdf-v3（按需 cache-first）
    升级纪律：改外壳/pdf.js → 同时改缓存名 */
-var CACHE_SHELL = "reader-p2-dg-v102";
+var CACHE_SHELL = "reader-p2-dg-v103";
 var CACHE_PDF   = "reader-pdf-v3";
 var CACHE_CRUNNER = "reader-crun-v1";
 
@@ -20,7 +20,7 @@ var SHELL_URLS = [
   "./阅读器.html",
   "./阅读器注入.css",
   "./config.json",
-  "./c-course/c-practice-v102.js",
+  "./c-course/c-practice-v103.js",
   "./c-course/c-mindmap.html",
   "./manifest.json",
   "./vendor/pdfjs/LICENSE",
