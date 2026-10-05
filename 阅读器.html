@@ -547,7 +547,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v88</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v89</span></div>
 
   <div class="spacer"></div>
 
@@ -714,6 +714,14 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
       </div>
 
+    </div>
+
+    <div class="side-body" id="graphBody" style="display:none">
+      <div class="empty-tip" style="font-size:12px;margin-bottom:8px">知识图谱：线代全课程知识网络。橙虚线=前置关系，蓝实线=包含关系。点击节点跳转对应讲义。</div>
+      <div id="graphWrap" style="position:relative;border-radius:14px;overflow:hidden">
+        <svg id="graphSvg" viewBox="0 0 640 640" style="width:100%;height:auto;display:block"></svg>
+      </div>
+      <div class="empty-tip" style="font-size:11px;margin-top:6px">图谱数据由课程讲义结构维护 · 视觉稿设计中</div>
     </div>
 
     <div class="side-body search-res" id="searchBody">
@@ -3232,6 +3240,119 @@ if (!BOOKS.length) {
   bindIframe();
   document.addEventListener("mousedown", function(e){ if (el && !el.contains(e.target)) setTimeout(hide, 120); });
   document.addEventListener("scroll", function(){ hide(); }, true);
+})();
+</script>
+<script>
+/* ===== v89: knowledge graph board ===== */
+(function(){
+  var mapData = [{
+    "id":"lam","title":"线性代数",
+    "nodes":[
+      {"id":"root","label":"线性代数","lvl":0,"n":4},
+      {"id":"c1","label":"行列式","lvl":1,"n":5,"book":"lam1"},
+      {"id":"c2","label":"矩阵","lvl":1,"n":3,"book":"lam7"},
+      {"id":"c3","label":"向量组","lvl":1,"n":5,"book":"lam9"},
+      {"id":"c4","label":"线性方程组","lvl":1,"n":3,"book":"lam12"},
+      {"id":"c1a","label":"二阶/三阶行列式","lvl":2,"par":"c1","book":"lam1"},
+      {"id":"c1b","label":"n阶行列式","lvl":2,"par":"c1","book":"lam2"},
+      {"id":"c1c","label":"方阵幂/转置","lvl":2,"par":"c1","book":"lam3"},
+      {"id":"c1d","label":"伴随矩阵","lvl":2,"par":"c1","book":"lam4"},
+      {"id":"c1e","label":"逆矩阵","lvl":2,"par":"c1","book":"lam5"},
+      {"id":"c2a","label":"初等变换求逆","lvl":2,"par":"c2","book":"lam7"},
+      {"id":"c2b","label":"分块矩阵","lvl":2,"par":"c2","book":"lam8"},
+      {"id":"c2c","label":"矩阵的秩","lvl":2,"par":"c2","book":"lam8"},
+      {"id":"c3a","label":"向量概念与运算","lvl":2,"par":"c3","book":"lam9"},
+      {"id":"c3b","label":"线性组合与表示","lvl":2,"par":"c3","book":"lam9"},
+      {"id":"c3c","label":"线性相关性","lvl":2,"par":"c3","book":"lam10"},
+      {"id":"c3d","label":"极大线性无关组","lvl":2,"par":"c3","book":"lam10"},
+      {"id":"c3e","label":"向量组的秩","lvl":2,"par":"c3","book":"lam11"},
+      {"id":"c4a","label":"方程组表示与解","lvl":2,"par":"c4","book":"lam12"},
+      {"id":"c4b","label":"齐次方程组","lvl":2,"par":"c4","book":"lam12"},
+      {"id":"c4c","label":"解的结构与求法","lvl":2,"par":"c4","book":"lam13"}
+    ],
+    "edges":[
+      {"from":"root","to":"c1","t":"包含"},{"from":"root","to":"c2","t":"包含"},{"from":"root","to":"c3","t":"包含"},{"from":"root","to":"c4","t":"包含"},
+      {"from":"c1","to":"c1a","t":"包含"},{"from":"c1a","to":"c1b","t":"前置"},{"from":"c1b","to":"c1c","t":"前置"},{"from":"c1c","to":"c1d","t":"前置"},{"from":"c1d","to":"c1e","t":"前置"},
+      {"from":"c2","to":"c2a","t":"包含"},{"from":"c2a","to":"c2b","t":"前置"},{"from":"c2b","to":"c2c","t":"前置"},
+      {"from":"c3","to":"c3a","t":"包含"},{"from":"c3a","to":"c3b","t":"前置"},{"from":"c3b","to":"c3c","t":"前置"},{"from":"c3c","to":"c3d","t":"前置"},{"from":"c3d","to":"c3e","t":"前置"},
+      {"from":"c4","to":"c4a","t":"包含"},{"from":"c4a","to":"c4b","t":"前置"},{"from":"c4b","to":"c4c","t":"前置"}
+    ]
+  }];
+
+  function renderGraph(){
+    var svg = document.getElementById("graphSvg");
+    if (!svg) return;
+    var map = mapData[0];
+    var W = 640, H = 640, cx = W/2, cy = H/2, R1 = 200, R2 = 76;
+    var pos = {};
+    var l1 = map.nodes.filter(function(n){ return n.lvl === 1; });
+    l1.forEach(function(n, i){
+      var a = -Math.PI/2 + i * 2*Math.PI / l1.length;
+      pos[n.id] = { x: cx + R1*Math.cos(a), y: cy + R1*Math.sin(a) };
+    });
+    var byPar = {};
+    map.nodes.filter(function(n){ return n.lvl === 2; }).forEach(function(n){ (byPar[n.par] = byPar[n.par] || []).push(n); });
+    Object.keys(byPar).forEach(function(par){
+      var kids = byPar[par], p = pos[par];
+      kids.forEach(function(n, i){
+        var a = -Math.PI/2 + (i + 0.5) * 2*Math.PI / kids.length;
+        pos[n.id] = { x: p.x + R2*Math.cos(a), y: p.y + R2*Math.sin(a) };
+      });
+    });
+    pos["root"] = { x: cx, y: cy };
+    var g = "";
+    map.edges.forEach(function(e){
+      var p1 = pos[e.from], p2 = pos[e.to];
+      if (!p1 || !p2) return;
+      var dash = e.t === "前置" ? ' stroke-dasharray="6 5"' : "";
+      var col = e.t === "前置" ? "#f5a742" : "#4D9FFF";
+      g += '<line x1="'+p1.x+'" y1="'+p1.y+'" x2="'+p2.x+'" y2="'+p2.y+'" stroke="'+col+'" stroke-width="1.6"'+dash+'/>';
+      g += '<text x="'+((p1.x+p2.x)/2)+'" y="'+((p1.y+p2.y)/2)+'" font-size="10" fill="'+col+'" text-anchor="middle" style="opacity:.95">'+e.t+'</text>';
+    });
+    map.nodes.forEach(function(n){
+      var p = pos[n.id]; if (!p) return;
+      var r = n.lvl === 0 ? 46 : (n.lvl === 1 ? 36 : 25);
+      var col = n.lvl === 0 ? "#5b2a8c" : (n.lvl === 1 ? "#3d1f66" : "#24113f");
+      var st = n.lvl === 0 ? "#c77dff" : (n.lvl === 1 ? "#9d6bff" : "#6b4bd0");
+      var fs = n.lvl === 2 ? 10.5 : 13;
+      var label = n.label;
+      g += '<g style="cursor:pointer" onclick="openGraphBook(\''+n.book+'\')">';
+      g += '<circle cx="'+p.x+'" cy="'+p.y+'" r="'+r+'" fill="'+col+'" stroke="'+st+'" stroke-width="1.5"/>';
+      if (label.length > 7 && n.lvl === 2) {
+        var half = Math.ceil(label.length/2), l1 = label.slice(0, half), l2 = label.slice(half);
+        g += '<text x="'+p.x+'" y="'+(p.y-5)+'" font-size="'+fs+'" fill="#fff" text-anchor="middle" style="pointer-events:none">'+l1+'</text>';
+        g += '<text x="'+p.x+'" y="'+(p.y+7)+'" font-size="'+fs+'" fill="#fff" text-anchor="middle" style="pointer-events:none">'+l2+'</text>';
+      } else {
+        g += '<text x="'+p.x+'" y="'+p.y+'" font-size="'+fs+'" fill="#fff" text-anchor="middle" dominant-baseline="central" style="pointer-events:none">'+label+'</text>';
+      }
+      if (n.n) {
+        g += '<circle cx="'+(p.x+r-5)+'" cy="'+(p.y-r+5)+'" r="9" fill="#ffd166" stroke="#fff" stroke-width="1"/>';
+        g += '<text x="'+(p.x+r-5)+'" y="'+(p.y-r+5)+'" font-size="9" fill="#333" text-anchor="middle" dominant-baseline="central" style="pointer-events:none">'+n.n+'</text>';
+      }
+      g += '</g>';
+    });
+    svg.innerHTML = '<defs><radialGradient id="bgG" cx="50%" cy="50%"><stop offset="0%" stop-color="#3a1e63"/><stop offset="100%" stop-color="#1c0f3a"/></radialGradient></defs><rect width="640" height="640" fill="url(#bgG)" rx="14"/>' + g;
+  }
+
+  window.openGraphBook = function(bid){
+    if (!bid) return;
+    var books = (window.__LIOLI_CFG && window.__LIOLI_CFG.books) || [];
+    var b = books.filter(function(x){ return x.id === bid; })[0];
+    if (b && window.switchBook) window.switchBook(bid);
+  };
+
+  var gb = document.getElementById("tabGraph");
+  if (gb) {
+    gb.addEventListener("click", function(){
+      this.classList.add("active");
+      ["tabToc","tabBookmarks","tabShelf","tabPractice"].forEach(function(id){ document.getElementById(id).classList.remove("active"); });
+      ["tocBody","bmBody","shelfBody","practiceBody","graphBody"].forEach(function(id){
+        var el = document.getElementById(id); if (el) el.style.display = (id === "graphBody") ? "" : "none";
+      });
+      var sb = document.getElementById("searchBody"); if (sb) sb.classList.remove("open");
+      renderGraph();
+    });
+  }
 })();
 </script>
 </body>
