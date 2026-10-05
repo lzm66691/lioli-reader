@@ -547,7 +547,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v83</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v84</span></div>
 
   <div class="spacer"></div>
 
@@ -662,7 +662,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
         </div>
 
-        <div class="shelf-item" style="cursor:pointer;background:linear-gradient(135deg,rgba(16,185,129,.12),rgba(77,107,254,.10));border:1px solid var(--glass-border);border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:10px;opacity:.9">
+        <div class="shelf-item" id="pbCardLA" title="打开线性代数练习面板" style="cursor:pointer;background:linear-gradient(135deg,rgba(16,185,129,.12),rgba(77,107,254,.10));border:1px solid var(--glass-border);border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:10px">
 
           <span style="font-size:22px">📐</span>
 
@@ -670,9 +670,27 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
             <div style="font-weight:700;font-size:13.5px">线性代数题库</div>
 
-            <div style="font-size:11.5px;color:var(--muted)">筹备中 · 线代 2.1-2.3 速查产出后上线</div>
+            <div style="font-size:11.5px;color:var(--muted)">LA-1 行列式基础 · 可练习</div>
 
           </div>
+
+          <span style="color:var(--teal-dark);font-size:16px">›</span>
+
+        </div>
+
+        <div class="shelf-item" id="pbCardCalc" title="打开高等数学练习面板" style="cursor:pointer;background:linear-gradient(135deg,rgba(245,158,11,.12),rgba(77,107,254,.10));border:1px solid var(--glass-border);border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:10px">
+
+          <span style="font-size:22px">🧮</span>
+
+          <div style="flex:1;min-width:0">
+
+            <div style="font-weight:700;font-size:13.5px">高等数学题库</div>
+
+            <div style="font-size:11.5px;color:var(--muted)">CAL-1 映射与函数 · 可练习</div>
+
+          </div>
+
+          <span style="color:var(--teal-dark);font-size:16px">›</span>
 
         </div>
 
@@ -997,7 +1015,7 @@ if (!BOOKS.length) {
 
     try { collapsed = JSON.parse(localStorage.getItem("reader-app-shelf-collapse") || "{}") || {}; } catch(e){}
 
-    Object.keys(groups).forEach(function(g){ if (!(g in collapsed)) collapsed[g] = true; });  /* v80：书架分组默认折叠（未点过的新组/首次加载全折叠，含未来课件组） */
+    Object.keys(groups).forEach(function(g){ if (!(g in collapsed)) collapsed[g] = true; });  /* v84：书架分组默认折叠（未点过/新增组默认收起） */
 
     function renderGroup(g, books){
 
@@ -2005,6 +2023,11 @@ if (!BOOKS.length) {
   }
   var _pbC = document.getElementById("pbCardC");
   if (_pbC) _pbC.addEventListener("click", function(){ if (window.initCPractice) window.initCPractice(); else window.showCpErr("题库脚本未加载：c-practice 未执行成功，请清缓存重试或反馈莉（v69 诊断）"); });
+
+  var _pbLA = document.getElementById("pbCardLA");
+  if (_pbLA) _pbLA.addEventListener("click", function(){ if (window.openSubjectQuiz) window.openSubjectQuiz("la"); else window.showCpErr("习题脚本未加载（v84）"); });
+  var _pbCalc = document.getElementById("pbCardCalc");
+  if (_pbCalc) _pbCalc.addEventListener("click", function(){ if (window.openSubjectQuiz) window.openSubjectQuiz("calc"); else window.showCpErr("习题脚本未加载（v84）"); });
 
   /* v69 诊断：脚本错误提示浮层（用于平板「点不开」问题定位） */
   window.showCpErr = function (msg) {
@@ -3086,7 +3109,7 @@ if (!BOOKS.length) {
 
 </script>
 
-<script src="c-course/c-practice-v83.js?v=20261005b" data-base="."></script>
+<script src="c-course/c-practice-v84.js?v=20261005c" data-base="."></script>
 
 <script>
 /* v75：划词浮层升级（UI 报告第二阶段①）——高亮三色 + 复制 + 问 AI；支持 PDF 内（iframe）选区；高亮复用 marks 标注体系（萝 C 路线零密钥） */
