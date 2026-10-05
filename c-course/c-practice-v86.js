@@ -2435,9 +2435,20 @@ int main(void)
     html += '<div style="font-size:11.5px;color:#94a3b8;margin-bottom:8px">点击模块节点展开子知识点（虚线=关联 · 橙色=前置 · 绿色=包含）· 点击「跳转课件」直达对应讲义</div>';
     html += '<div id="kgCanvas" style="position:relative;width:100%;height:920px">';
     html += nodeCard(0);
-    LV1.forEach(function(i){ html += linkLine(NODES[i], false, i); html += nodeCard(i); });
+    LV1.forEach(function(i){
+      html += linkLine(NODES[i], false, i);
+      html += nodeCard(i);
+      (CHILDREN[i] || []).forEach(function(k){ html += linkLine(NODES[k], true, k); html += nodeCard(k); });
+    });
     html += '</div></div>';
     m.innerHTML = html;
+    /* 初始隐藏全部二级节点与连线 */
+    var cvs = document.getElementById("kgCanvas");
+    Array.prototype.slice.call(cvs.querySelectorAll('.kgNode')).forEach(function(x){
+      var idn = parseInt(x.getAttribute("data-id"), 10);
+      if (idn >= 11) { x.style.display = "none"; }
+    });
+    Array.prototype.slice.call(cvs.querySelectorAll('.kgLine[data-lv2="1"]')).forEach(function(x){ x.style.display = "none"; });
     m.querySelector("#kgBack").onclick = function(){ m.remove(); };
     m.addEventListener("click", function(e){
       var tar = e.target && e.target.nodeType === 3 ? e.target.parentNode : e.target;
@@ -2460,28 +2471,21 @@ int main(void)
       nd2.setAttribute("data-open", open ? "0" : "1");
       var ar = nd2.querySelector(".kgAr"); if (ar) ar.textContent = open ? "▾ 展开" : "▴ 收起";
       var canvas = document.getElementById("kgCanvas");
-      var h = 920;
-      kids.forEach(function(k){
-        var n = NODES[k];
-        var card = canvas.querySelector('.kgNode[data-id="' + k + '"]');
-        var line = canvas.querySelector('.kgLine[data-to="' + k + '"]');
-        if (!card) {
-          card = document.createElement("div"); card.innerHTML = nodeCard(k); card = card.firstChild;
-          card.style.opacity = "0"; card.style.transform = "translate(-50%,-50%) translateY(-10px)";
-          canvas.appendChild(card);
-          var lw = document.createElement("div"); lw.innerHTML = linkLine(n, true, k); 
-          while (lw.firstChild) canvas.insertBefore(lw.firstChild, card);
-          canvas.querySelector('.kgLine[data-to="' + k + '"]').style.opacity = "0";
-        }
-        if (open) {
-          card.style.opacity = "0"; card.style.transform = "translate(-50%,-50%) translateY(-10px)";
-          var l2 = canvas.querySelector('.kgLine[data-to="' + k + '"]'); if (l2) l2.style.opacity = "0";
-          setTimeout(function(){ card.style.display = "none"; if (l2) l2.style.display = "none"; }, 300);
-        } else {
-          card.style.display = ""; var l3 = canvas.querySelector('.kgLine[data-to="' + k + '"]'); if (l3) l3.style.display = "";
-          setTimeout(function(){ card.style.opacity = "1"; card.style.transform = "translate(-50%,-50%) translateY(0)"; if (l3) l3.style.opacity = "1"; }, 16);
-        }
-      });
+      for (var ki = 0; ki < kids.length; ki++) {
+        (function(k){
+          var card = canvas.querySelector('.kgNode[data-id="' + k + '"]');
+          var line = canvas.querySelector('.kgLine[data-to="' + k + '"]');
+          if (!card) return;
+          if (open) {
+            card.style.opacity = "0"; card.style.transform = "translate(-50%,-50%) translateY(-10px)";
+            if (line) line.style.opacity = "0";
+            setTimeout(function(){ card.style.display = "none"; if (line) line.style.display = "none"; }, 300);
+          } else {
+            card.style.display = ""; if (line) line.style.display = "";
+            setTimeout(function(){ card.style.opacity = "1"; card.style.transform = "translate(-50%,-50%) translateY(0)"; if (line) line.style.opacity = "1"; }, 16);
+          }
+        })(kids[ki]);
+      }
     });
     document.body.appendChild(m);
   };
