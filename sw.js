@@ -1,7 +1,7 @@
-﻿/* PWA Service Worker — 莉萝阅读器 v79：划词高亮修复（doHighlight 不依赖会被 hide 清空的 curRange/curDoc）（c-practice-v79）（2026-10-04）
-   外壳缓存 reader-p2-dg-v82（含 pdf.js 全套 + KaTeX）；PDF 缓存 reader-pdf-v3（按需 cache-first）
+﻿/* PWA Service Worker — 莉萝阅读器 v83：书架分组默认折叠（未点过/新增分组默认收起）+ 版本一致化（v80-82 中间态统一）（c-practice-v83）（2026-10-05）
+   外壳缓存 reader-p2-dg-v83（含 pdf.js 全套 + KaTeX）；PDF 缓存 reader-pdf-v3（按需 cache-first）
    升级纪律：改外壳/pdf.js → 同时改缓存名 */
-var CACHE_SHELL = "reader-p2-dg-v82";
+var CACHE_SHELL = "reader-p2-dg-v83";
 var CACHE_PDF   = "reader-pdf-v3";
 var CACHE_CRUNNER = "reader-crun-v1";
 
@@ -20,7 +20,7 @@ var SHELL_URLS = [
   "./阅读器.html",
   "./阅读器注入.css",
   "./config.json",
-  "./c-course/c-practice-v79.js",
+  "./c-course/c-practice-v83.js",
   "./c-course/c-mindmap.html",
   "./manifest.json",
   "./vendor/pdfjs/LICENSE",
