@@ -2410,15 +2410,16 @@ int main(void)
     return '<svg class="kgLine" style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible" data-from="' + n.parent + '" data-to="' + n.id + '" data-lv2="' + (isLv2 ? 1 : 0) + '"><line x1="' + x1 + '%" y1="' + y1 + '%" x2="' + x2 + '%" y2="' + y2 + '%" stroke="rgba(139,92,246,.45)" stroke-width="1.6" stroke-dasharray="4 3"/></svg>' + tag;
   }
 
-  function nodeCard(n){
-    var isRoot = n.id === 0;
+  function nodeCard(id){
+    var n = NODES[id];
+    var isRoot = id === 0;
     var isLv1 = !isRoot && !n.parent;
     var kids = CHILDREN[n.id];
     var col = isRoot ? "rgba(168,85,247,.35)" : isLv1 ? COLORS[(n.id - 1) % 8] : "rgba(255,255,255,.08)";
     var w = isRoot ? 44 : isLv1 ? 26 : 24;
     var go = n.bk ? '<div class="kgGo" style="margin-top:7px;background:rgba(139,92,246,.3);border:1px solid rgba(168,85,247,.5);color:#d8b4fe;font-size:11px;padding:4px 10px;border-radius:16px;cursor:pointer;display:inline-block">跳转课件 ›</div>' : "";
-    var dot = isRoot ? "" : '<div style="position:absolute;top:6px;right:6px;width:16px;height:16px;border-radius:50%;background:rgba(12,8,28,.85);color:#d8b4fe;font-size:9px;display:flex;align-items:center;justify-content:center;font-weight:700">' + n.id + '</div>';
-    return '<div class="kgNode" data-id="' + n.id + '" data-open="0" style="position:absolute;left:' + n.x + '%;top:' + n.y + '%;transform:translate(-50%,-50%);width:' + w + '%;min-width:92px;border-radius:22px;padding:13px 8px;text-align:center;background:' + col + ';border:1.5px solid ' + (isRoot ? "rgba(216,180,254,.7)" : "rgba(148,163,184,.28)") + ';backdrop-filter:blur(6px);cursor:' + (kids ? "pointer" : "default") + ';box-shadow:0 6px 22px rgba(0,0,0,.35);transition:opacity .3s,transform .3s;z-index:2">' + dot + '<div style="font-size:' + (isRoot ? 15 : isLv1 ? 13 : 12) + 'px;font-weight:' + (isRoot || isLv1 ? 700 : 400) + ';color:' + (isRoot ? "#f0d9ff" : "#e8eaf2") + ';line-height:1.35">' + esc3(n.t) + '</div>' + go + (kids ? '<div class="kgAr" style="margin-top:6px;color:#94a3b8;font-size:11px;transition:transform .3s">▾ 展开</div>' : '') + '</div>';
+    var dot = isRoot ? "" : '<div style="position:absolute;top:6px;right:6px;width:16px;height:16px;border-radius:50%;background:rgba(12,8,28,.85);color:#d8b4fe;font-size:9px;display:flex;align-items:center;justify-content:center;font-weight:700">' + id + '</div>';
+    return '<div class="kgNode" data-id="' + id + '" data-open="0" style="position:absolute;left:' + n.x + '%;top:' + n.y + '%;transform:translate(-50%,-50%);width:' + w + '%;min-width:92px;border-radius:22px;padding:13px 8px;text-align:center;background:' + col + ';border:1.5px solid ' + (isRoot ? "rgba(216,180,254,.7)" : "rgba(148,163,184,.28)") + ';backdrop-filter:blur(6px);cursor:' + (kids ? "pointer" : "default") + ';box-shadow:0 6px 22px rgba(0,0,0,.35);transition:opacity .3s,transform .3s;z-index:2">' + dot + '<div style="font-size:' + (isRoot ? 15 : isLv1 ? 13 : 12) + 'px;font-weight:' + (isRoot || isLv1 ? 700 : 400) + ';color:' + (isRoot ? "#f0d9ff" : "#e8eaf2") + ';line-height:1.35">' + esc3(n.t) + '</div>' + go + (kids ? '<div class="kgAr" style="margin-top:6px;color:#94a3b8;font-size:11px;transition:transform .3s">▾ 展开</div>' : '') + '</div>';
   }
 
   window.openKnowledgeGraph = function(){
@@ -2433,8 +2434,8 @@ int main(void)
       '<div style="flex:1;text-align:center;background:rgba(16,185,129,.14);border:1px solid rgba(16,185,129,.3);border-radius:12px;padding:8px 4px"><div style="font-size:18px;font-weight:800;color:#86efac">' + GRAPH_STATS.rel + '</div><div style="font-size:11px;color:#94a3b8">知识关系</div></div></div>';
     html += '<div style="font-size:11.5px;color:#94a3b8;margin-bottom:8px">点击模块节点展开子知识点（虚线=关联 · 橙色=前置 · 绿色=包含）· 点击「跳转课件」直达对应讲义</div>';
     html += '<div id="kgCanvas" style="position:relative;width:100%;height:920px">';
-    html += nodeCard(NODES[0]);
-    LV1.forEach(function(i){ html += linkLine(NODES[i], false); html += nodeCard(NODES[i]); });
+    html += nodeCard(0);
+    LV1.forEach(function(i){ html += linkLine(NODES[i], false); html += nodeCard(i); });
     html += '</div></div>';
     m.innerHTML = html;
     m.querySelector("#kgBack").onclick = function(){ m.remove(); };
@@ -2465,7 +2466,7 @@ int main(void)
         var card = canvas.querySelector('.kgNode[data-id="' + k + '"]');
         var line = canvas.querySelector('.kgLine[data-to="' + k + '"]');
         if (!card) {
-          card = document.createElement("div"); card.innerHTML = nodeCard(n); card = card.firstChild;
+          card = document.createElement("div"); card.innerHTML = nodeCard(k); card = card.firstChild;
           card.style.opacity = "0"; card.style.transform = "translate(-50%,-50%) translateY(-10px)";
           canvas.appendChild(card);
           var lw = document.createElement("div"); lw.innerHTML = linkLine(n, true); 
