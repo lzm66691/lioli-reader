@@ -2370,7 +2370,7 @@ int main(void)
 
 /* v86：知识图谱 v2 —— MOOC 式放射状网络图（圆形节点 + 连线 + 关系标签 + 点击展开动画 + 课件跳转） */
 (function(){
-  var GRAPH_STATS = { kp: 32, res: 48, rel: 36 };
+  var GRAPH_STATS = { kp: 41, res: 48, rel: 41 };
   /* 节点：id/t(标题)/bk(课件书id，可跳转)/pg(页码)/tag(关系)/parent(父id)/c(子id数组)
      布局为放射状：根顶部居中 → 一级子横排 → 二级子纵向展开 */
   var NODES = {
@@ -2386,24 +2386,95 @@ int main(void)
     11: { t: "数列极限的定义", tag: "包含", parent: 1, x: 5,  y: 48 },
     12: { t: "函数极限的定义", tag: "包含", parent: 1, x: 5,  y: 58 },
     13: { t: "极限的性质", tag: "前置", parent: 1, x: 5,  y: 68 },
+    14: { t: "极限存在准则", tag: "前置", parent: 1, x: 5,  y: 76 },
     21: { t: "两个重要极限", tag: "包含", parent: 2, x: 17.5, y: 48 },
     22: { t: "等价无穷小代换", tag: "前置", parent: 2, x: 17.5, y: 58 },
     23: { t: "洛必达法则", tag: "前置", parent: 2, x: 17.5, y: 68 },
+    24: { t: "极限运算法则", tag: "前置", parent: 2, x: 17.5, y: 76 },
     31: { t: "连续性定义", tag: "包含", parent: 3, x: 30, y: 48 },
     32: { t: "间断点分类", tag: "包含", parent: 3, x: 30, y: 58 },
     33: { t: "闭区间连续函数性质", tag: "前置", parent: 3, x: 30, y: 68 },
+    34: { t: "连续函数的运算", tag: "前置", parent: 3, x: 30, y: 76 },
     41: { t: "无穷小的比较", tag: "包含", parent: 4, x: 42.5, y: 48 },
-    42: { t: "无穷大与渐近线", tag: "前置", parent: 4, x: 42.5, y: 58 }
+    42: { t: "无穷大与渐近线", tag: "前置", parent: 4, x: 42.5, y: 58 },
+    43: { t: "无穷小阶的应用", tag: "前置", parent: 4, x: 42.5, y: 68 },
+    51: { t: "函数概念与性质", tag: "包含", parent: 5, x: 55, y: 48 },
+    52: { t: "基本初等函数", tag: "包含", parent: 5, x: 55, y: 58 },
+    53: { t: "复合函数与反函数", tag: "前置", parent: 5, x: 55, y: 68 },
+    54: { t: "初等函数", tag: "前置", parent: 5, x: 55, y: 76 },
+    61: { t: "不定积分概念与性质", tag: "包含", parent: 6, x: 67.5, y: 48 },
+    62: { t: "换元积分法", tag: "包含", parent: 6, x: 67.5, y: 56 },
+    63: { t: "分部积分法", tag: "包含", parent: 6, x: 67.5, y: 64 },
+    64: { t: "定积分概念与性质", tag: "前置", parent: 6, x: 67.5, y: 72 },
+    65: { t: "微积分基本定理", tag: "前置", parent: 6, x: 67.5, y: 80 },
+    66: { t: "定积分的应用", tag: "前置", parent: 6, x: 67.5, y: 88 },
+    71: { t: "常数项级数概念与性质", tag: "包含", parent: 7, x: 80, y: 48 },
+    72: { t: "正项级数审敛", tag: "包含", parent: 7, x: 80, y: 58 },
+    73: { t: "交错级数与绝对收敛", tag: "前置", parent: 7, x: 80, y: 68 },
+    74: { t: "幂级数", tag: "前置", parent: 7, x: 80, y: 76 },
+    75: { t: "傅里叶级数", tag: "前置", parent: 7, x: 80, y: 84 },
+    81: { t: "数学思想方法", tag: "包含", parent: 8, x: 92.5, y: 48 },
+    82: { t: "数学史与名家", tag: "包含", parent: 8, x: 92.5, y: 58 },
+    83: { t: "数学建模初步", tag: "前置", parent: 8, x: 92.5, y: 68 }
   };
-  var CHILDREN = { 1: [11,12,13], 2: [21,22,23], 3: [31,32,33], 4: [41,42] };
+  var CHILDREN = { 1: [11,12,13,14], 2: [21,22,23,24], 3: [31,32,33,34], 4: [41,42,43], 5: [51,52,53,54], 6: [61,62,63,64,65,66], 7: [71,72,73,74,75], 8: [81,82,83] };
   var LV1 = [1,2,3,4,5,6,7,8];
   var TAG_COLOR = { "前置": "#f5b34c", "包含": "#57d9a0" };
   var COLORS = ["rgba(139,92,246,.5)", "rgba(77,107,254,.5)", "rgba(16,185,129,.5)", "rgba(245,158,11,.5)", "rgba(236,72,153,.5)", "rgba(59,130,246,.5)", "rgba(20,184,166,.5)", "rgba(168,85,247,.5)"];
 
+  /* 大学物理（上）图谱：模块跳转已接入 lzu-大物上-1（第1-4章）/ lzu-大物上-2（第5-7章）课件 PDF */
+  var PH_STATS = { kp: 32, res: 16, rel: 32 };
+  var PH_NODES = {
+    0:   { t: "大学物理（上）", x: 50, y: 6, r: 1 },
+    101: { t: "质点运动学", bk: "lzu-大物上-1", pg: 1, parent: 0, x: 6.5, y: 30, r: 1 },
+    102: { t: "牛顿运动定律", bk: "lzu-大物上-1", pg: 55, parent: 0, x: 19, y: 30, r: 1 },
+    103: { t: "功与能量", bk: "lzu-大物上-1", pg: 117, parent: 0, x: 31.5, y: 30, r: 1 },
+    104: { t: "动量守恒", bk: "lzu-大物上-1", pg: 181, parent: 0, x: 44, y: 30, r: 1 },
+    105: { t: "角动量守恒", bk: "lzu-大物上-1", pg: 238, parent: 0, x: 56.5, y: 30, r: 1 },
+    106: { t: "刚体力学", bk: "lzu-大物上-2", pg: 138, parent: 0, x: 69, y: 30, r: 1 },
+    107: { t: "流体力学", bk: "lzu-大物上-2", pg: 210, parent: 0, x: 81.5, y: 30, r: 1 },
+    108: { t: "振动与波动", bk: "lzu-大物上-2", pg: 240, parent: 0, x: 94, y: 30, r: 1 },
+    1011: { t: "质点与参考系", tag: "包含", parent: 101, x: 6.5, y: 48 },
+    1012: { t: "位移·速度·加速度", tag: "包含", parent: 101, x: 6.5, y: 58 },
+    1013: { t: "曲线运动与圆周运动", tag: "前置", parent: 101, x: 6.5, y: 68 },
+    1014: { t: "相对运动", tag: "前置", parent: 101, x: 6.5, y: 78 },
+    1021: { t: "牛顿三定律", tag: "包含", parent: 102, x: 19, y: 48 },
+    1022: { t: "惯性系与非惯性系", tag: "包含", parent: 102, x: 19, y: 58 },
+    1023: { t: "惯性力", tag: "前置", parent: 102, x: 19, y: 68 },
+    1024: { t: "牛顿定律的应用", tag: "前置", parent: 102, x: 19, y: 78 },
+    1031: { t: "功与功率", tag: "包含", parent: 103, x: 31.5, y: 48 },
+    1032: { t: "动能定理", tag: "包含", parent: 103, x: 31.5, y: 58 },
+    1033: { t: "保守力与势能", tag: "前置", parent: 103, x: 31.5, y: 68 },
+    1034: { t: "机械能守恒定律", tag: "前置", parent: 103, x: 31.5, y: 78 },
+    1041: { t: "动量与冲量", tag: "包含", parent: 104, x: 44, y: 48 },
+    1042: { t: "动量定理", tag: "包含", parent: 104, x: 44, y: 58 },
+    1043: { t: "动量守恒定律", tag: "前置", parent: 104, x: 44, y: 68 },
+    1044: { t: "碰撞", tag: "前置", parent: 104, x: 44, y: 78 },
+    1051: { t: "角动量与力矩", tag: "包含", parent: 105, x: 56.5, y: 48 },
+    1052: { t: "角动量定理", tag: "包含", parent: 105, x: 56.5, y: 58 },
+    1053: { t: "角动量守恒定律", tag: "前置", parent: 105, x: 56.5, y: 68 },
+    1054: { t: "质点在中心力场", tag: "前置", parent: 105, x: 56.5, y: 78 },
+    1061: { t: "刚体运动学", tag: "包含", parent: 106, x: 69, y: 48 },
+    1062: { t: "转动惯量", tag: "包含", parent: 106, x: 69, y: 58 },
+    1063: { t: "转动定律", tag: "前置", parent: 106, x: 69, y: 68 },
+    1064: { t: "刚体角动量守恒", tag: "前置", parent: 106, x: 69, y: 78 },
+    1071: { t: "流体静力学", tag: "包含", parent: 107, x: 81.5, y: 48 },
+    1072: { t: "伯努利方程", tag: "包含", parent: 107, x: 81.5, y: 58 },
+    1073: { t: "黏性流体", tag: "前置", parent: 107, x: 81.5, y: 68 },
+    1074: { t: "层流与湍流", tag: "前置", parent: 107, x: 81.5, y: 78 },
+    1081: { t: "简谐运动", tag: "包含", parent: 108, x: 94, y: 48 },
+    1082: { t: "振动合成", tag: "包含", parent: 108, x: 94, y: 58 },
+    1083: { t: "机械波", tag: "前置", parent: 108, x: 94, y: 68 },
+    1084: { t: "波的干涉与衍射", tag: "前置", parent: 108, x: 94, y: 78 }
+  };
+  var PH_CHILDREN = { 101: [1011,1012,1013,1014], 102: [1021,1022,1023,1024], 103: [1031,1032,1033,1034], 104: [1041,1042,1043,1044], 105: [1051,1052,1053,1054], 106: [1061,1062,1063,1064], 107: [1071,1072,1073,1074], 108: [1081,1082,1083,1084] };
+  var PH_LV1 = [101,102,103,104,105,106,107,108];
+  var CUR = { nodes: NODES, children: CHILDREN, lv1: LV1, stats: GRAPH_STATS, title: "知识图谱 · 高等数学（一）" };
+
   function esc3(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
   function linkLine(n, isLv2, nid){
-    var p = NODES[n.parent];
+    var p = CUR.nodes[n.parent];
     var x1 = p.x, y1 = p.y + (p.r === 1 ? 8 : 7), x2 = n.x, y2 = n.y - 7;
     var midx = (x1 + x2) / 2, midy = (y1 + y2) / 2;
     var tag = n.tag ? '<span class="kgLTag" style="position:absolute;left:' + midx + '%;top:' + midy + '%;transform:translate(-50%,-50%);background:rgba(12,8,28,.9);color:' + TAG_COLOR[n.tag] + ';font-size:10px;padding:1px 7px;border-radius:20px;border:1px solid ' + TAG_COLOR[n.tag] + '44">' + esc3(n.tag) + '</span>' : "";
@@ -2411,34 +2482,38 @@ int main(void)
   }
 
   function nodeCard(id){
-    var n = NODES[id];
+    var n = CUR.nodes[id];
     var isRoot = id === 0;
     var isLv1 = !isRoot && !n.parent;
-    var kids = CHILDREN[n.id];
-    var col = isRoot ? "rgba(168,85,247,.35)" : isLv1 ? COLORS[(n.id - 1) % 8] : "rgba(255,255,255,.08)";
+    var kids = CUR.children[id];
+    var col = isRoot ? "rgba(168,85,247,.35)" : isLv1 ? COLORS[(id - 1) % 8] : "rgba(255,255,255,.08)";
     var w = isRoot ? 44 : isLv1 ? 26 : 24;
     var go = n.bk ? '<div class="kgGo" style="margin-top:7px;background:rgba(139,92,246,.3);border:1px solid rgba(168,85,247,.5);color:#d8b4fe;font-size:11px;padding:4px 10px;border-radius:16px;cursor:pointer;display:inline-block">跳转课件 ›</div>' : "";
     var dot = isRoot ? "" : '<div style="position:absolute;top:6px;right:6px;width:16px;height:16px;border-radius:50%;background:rgba(12,8,28,.85);color:#d8b4fe;font-size:9px;display:flex;align-items:center;justify-content:center;font-weight:700">' + id + '</div>';
     return '<div class="kgNode" data-id="' + id + '" data-open="0" style="position:absolute;left:' + n.x + '%;top:' + n.y + '%;transform:translate(-50%,-50%);width:' + w + '%;min-width:92px;border-radius:22px;padding:13px 8px;text-align:center;background:' + col + ';border:1.5px solid ' + (isRoot ? "rgba(216,180,254,.7)" : "rgba(148,163,184,.28)") + ';backdrop-filter:blur(6px);cursor:' + (kids ? "pointer" : "default") + ';box-shadow:0 6px 22px rgba(0,0,0,.35);transition:opacity .3s,transform .3s;z-index:2">' + dot + '<div style="font-size:' + (isRoot ? 15 : isLv1 ? 13 : 12) + 'px;font-weight:' + (isRoot || isLv1 ? 700 : 400) + ';color:' + (isRoot ? "#f0d9ff" : "#e8eaf2") + ';line-height:1.35">' + esc3(n.t) + '</div>' + go + (kids ? '<div class="kgAr" style="margin-top:6px;color:#94a3b8;font-size:11px;transition:transform .3s">▾ 展开</div>' : '') + '</div>';
   }
 
-  window.openKnowledgeGraph = function(){
+  window.openKnowledgeGraph = function(subject){
+    subject = subject === "phys" ? "phys" : "calc";
+    if (subject === "phys") { CUR.nodes = PH_NODES; CUR.children = PH_CHILDREN; CUR.lv1 = PH_LV1; CUR.stats = PH_STATS; CUR.title = "知识图谱 · 大学物理（上）"; }
+    else { CUR.nodes = NODES; CUR.children = CHILDREN; CUR.lv1 = LV1; CUR.stats = GRAPH_STATS; CUR.title = "知识图谱 · 高等数学（一）"; }
     var old = document.getElementById("kgOverlay"); if (old) old.remove();
     var m = document.createElement("div");
     m.id = "kgOverlay";
     m.style.cssText = "position:fixed;inset:0;z-index:99997;background:rgba(12,8,28,.97);overflow:auto;padding:20px 14px 60px;";
-    var html = '<div style="max-width:900px;margin:0 auto"><div style="display:flex;align-items:center;gap:10px;margin-bottom:4px"><button id="kgBack" style="background:rgba(255,255,255,.1);border:none;color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px">← 返回</button><span style="font-size:17px;font-weight:700;color:#e9d5ff">知识图谱 · 高等数学（一）</span></div>';
-    html += '<div style="display:flex;gap:10px;margin:10px 0 14px">' +
-      '<div style="flex:1;text-align:center;background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.3);border-radius:12px;padding:8px 4px"><div style="font-size:18px;font-weight:800;color:#d8b4fe">' + GRAPH_STATS.kp + '</div><div style="font-size:11px;color:#94a3b8">知识点</div></div>' +
-      '<div style="flex:1;text-align:center;background:rgba(77,107,254,.14);border:1px solid rgba(77,107,254,.3);border-radius:12px;padding:8px 4px"><div style="font-size:18px;font-weight:800;color:#a5b8ff">' + GRAPH_STATS.res + '</div><div style="font-size:11px;color:#94a3b8">教学资源</div></div>' +
-      '<div style="flex:1;text-align:center;background:rgba(16,185,129,.14);border:1px solid rgba(16,185,129,.3);border-radius:12px;padding:8px 4px"><div style="font-size:18px;font-weight:800;color:#86efac">' + GRAPH_STATS.rel + '</div><div style="font-size:11px;color:#94a3b8">知识关系</div></div></div>';
+    var html = '<div style="max-width:900px;margin:0 auto"><div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;flex-wrap:wrap"><button id="kgBack" style="background:rgba(255,255,255,.1);border:none;color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px">← 返回</button><span style="font-size:17px;font-weight:700;color:#e9d5ff">' + CUR.title + '</span></div>';
+    html += '<div style="display:flex;gap:10px;margin:4px 0 8px"><button id="kgSubCalc" style="flex:1;padding:8px 6px;border-radius:10px;cursor:pointer;font-size:13px;border:1px solid ' + (subject === "calc" ? "rgba(168,85,247,.8)" : "rgba(148,163,184,.25)") + ';background:' + (subject === "calc" ? "rgba(139,92,246,.25)" : "rgba(255,255,255,.04)") + ';color:' + (subject === "calc" ? "#e9d5ff" : "#94a3b8") + '">📐 高等数学（一）</button><button id="kgSubPhys" style="flex:1;padding:8px 6px;border-radius:10px;cursor:pointer;font-size:13px;border:1px solid ' + (subject === "phys" ? "rgba(16,185,129,.8)" : "rgba(148,163,184,.25)") + ';background:' + (subject === "phys" ? "rgba(16,185,129,.22)" : "rgba(255,255,255,.04)") + ';color:' + (subject === "phys" ? "#a7f3d0" : "#94a3b8") + '">⚛️ 大学物理（上）</button></div>';
+    html += '<div style="display:flex;gap:10px;margin:6px 0 14px">' +
+      '<div style="flex:1;text-align:center;background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.3);border-radius:12px;padding:8px 4px"><div style="font-size:18px;font-weight:800;color:#d8b4fe">' + CUR.stats.kp + '</div><div style="font-size:11px;color:#94a3b8">知识点</div></div>' +
+      '<div style="flex:1;text-align:center;background:rgba(77,107,254,.14);border:1px solid rgba(77,107,254,.3);border-radius:12px;padding:8px 4px"><div style="font-size:18px;font-weight:800;color:#a5b8ff">' + CUR.stats.res + '</div><div style="font-size:11px;color:#94a3b8">教学资源</div></div>' +
+      '<div style="flex:1;text-align:center;background:rgba(16,185,129,.14);border:1px solid rgba(16,185,129,.3);border-radius:12px;padding:8px 4px"><div style="font-size:18px;font-weight:800;color:#86efac">' + CUR.stats.rel + '</div><div style="font-size:11px;color:#94a3b8">知识关系</div></div></div>';
     html += '<div style="font-size:11.5px;color:#94a3b8;margin-bottom:8px">点击模块节点展开子知识点（虚线=关联 · 橙色=前置 · 绿色=包含）· 点击「跳转课件」直达对应讲义</div>';
     html += '<div id="kgCanvas" style="position:relative;width:100%;height:920px">';
     html += nodeCard(0);
-    LV1.forEach(function(i){
-      html += linkLine(NODES[i], false, i);
+    CUR.lv1.forEach(function(i){
+      html += linkLine(CUR.nodes[i], false, i);
       html += nodeCard(i);
-      (CHILDREN[i] || []).forEach(function(k){ html += linkLine(NODES[k], true, k); html += nodeCard(k); });
+      (CUR.children[i] || []).forEach(function(k, idx){ CUR.nodes[k].y = 46 + idx * 8; html += linkLine(CUR.nodes[k], true, k); html += nodeCard(k); });
     });
     html += '</div></div>';
     m.innerHTML = html;
@@ -2446,16 +2521,18 @@ int main(void)
     var cvs = m.querySelector("#kgCanvas");
     Array.prototype.slice.call(cvs.querySelectorAll('.kgNode')).forEach(function(x){
       var idn = parseInt(x.getAttribute("data-id"), 10);
-      if (idn >= 11) { x.style.display = "none"; }
+      if (idn !== 0 && CUR.lv1.indexOf(idn) < 0) { x.style.display = "none"; }
     });
     Array.prototype.slice.call(cvs.querySelectorAll('.kgLine[data-lv2="1"]')).forEach(function(x){ x.style.display = "none"; });
     m.querySelector("#kgBack").onclick = function(){ m.remove(); };
+    var sc = m.querySelector("#kgSubCalc"); if (sc) sc.onclick = function(){ window.openKnowledgeGraph("calc"); };
+    var sp = m.querySelector("#kgSubPhys"); if (sp) sp.onclick = function(){ window.openKnowledgeGraph("phys"); };
     m.addEventListener("click", function(e){
       var tar = e.target && e.target.nodeType === 3 ? e.target.parentNode : e.target;
       var go = tar && tar.closest ? tar.closest(".kgGo") : null;
       if (go) {
         var nd = go.closest(".kgNode");
-        var n = NODES[nd.getAttribute("data-id")];
+        var n = CUR.nodes[nd.getAttribute("data-id")];
         if (n && n.bk) {
           if (window.switchBook) { try { window.switchBook(n.bk, n.pg || 1); } catch(err){ alert("跳转失败：" + n.t); } }
           else alert("课件跳转暂不可用（需先打开一本书）");
@@ -2465,7 +2542,7 @@ int main(void)
       var nd2 = tar && tar.closest ? tar.closest(".kgNode") : null;
       if (!nd2) return;
       var id = nd2.getAttribute("data-id");
-      var kids = CHILDREN[id];
+      var kids = CUR.children[id];
       if (!kids) return;
       var open = nd2.getAttribute("data-open") === "1";
       nd2.setAttribute("data-open", open ? "0" : "1");
