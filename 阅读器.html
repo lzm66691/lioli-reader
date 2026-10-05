@@ -547,7 +547,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v102</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v103</span></div>
 
   <div class="spacer"></div>
 
@@ -1736,6 +1736,7 @@ if (!BOOKS.length) {
       + '<div class="toolbox-about">莉萝阅读器 v' + (document.getElementById("appVer") ? document.getElementById("appVer").textContent.replace("v","") : "18") + ' · 数据仅存本机</div>';
     document.body.appendChild(_tbPanel);
     var _tbOpen = false;
+    _tbPanel.hidden = true;  /* v103：工具箱平时收起，点按钮才展开 */
     function _tbShow(on){
       _tbOpen = !!on; _tbPanel.hidden = !_tbOpen;
       _tbBtn.classList.toggle("active", _tbOpen);
