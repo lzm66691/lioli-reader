@@ -1709,6 +1709,7 @@ if (!BOOKS.length) {
       + '<button class="toolbox-item" data-act="rotate"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 7a6 6 0 1 0-1.5 4.5M13 2v5H8"/></svg></span>旋转 90°</button>'
       + '<button class="toolbox-item" data-act="search"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="4"/><path d="M10 10l4 4"/></svg></span>PDF 搜索</button>'
       + '<button class="toolbox-item" data-act="cpractice"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2h8v12H4zM4 5.5h8M7 2v3.5M9 2v3.5M5.5 9h5M5.5 11.5h3"/></svg></span>C 练习</button>'
+      + '<button class="toolbox-item" data-act="phquiz"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.5c3.6 0 6.5 2.9 6.5 6.5S11.6 14.5 8 14.5 1.5 11.6 1.5 8 4.4 1.5 8 1.5zM8 5v3.5M8 11h.01"/></svg></span>物理题库</button>'
       + '<div class="toolbox-grp">标注</div>'
       + '<button class="toolbox-item" data-act="note"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M3 2h10v11l-2-1.5L9 13V2"/></svg></span>笔记</button>'
       + '<button class="toolbox-item" data-act="pen"><span class="tb-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 2-8.5 8.5L3 13l.5-2.5z"/></svg></span>画笔</button>'
@@ -1814,6 +1815,7 @@ if (!BOOKS.length) {
       backup: function(){ try { exportBackup(); } catch(e){ alert("备份失败：" + e); } },
       restore: function(){ try { importBackup(); } catch(e){ alert("恢复失败：" + e); } },
       cpractice: function(){ if (window.initCPractice) window.initCPractice(); },
+      phquiz: function(){ if (window.initPhQuiz) window.initPhQuiz(); },
       shelfsearch: function(){
         var s = document.getElementById("shelfSearch");
         if (s) { try { s.focus(); s.scrollIntoView({ block: "center" }); } catch(e){} }
@@ -3121,7 +3123,7 @@ if (!BOOKS.length) {
 
 </script>
 
-<script src="c-course/c-practice-v120.js?v=20261006m" data-base="."></script>
+<script src="c-course/c-practice-v121.js?v=20261006n" data-base="."></script>
 
 <script>
 /* v75：划词浮层升级（UI 报告第二阶段①）——高亮三色 + 复制 + 问 AI；支持 PDF 内（iframe）选区；高亮复用 marks 标注体系（萝 C 路线零密钥） */
