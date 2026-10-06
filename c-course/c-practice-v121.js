@@ -2643,24 +2643,28 @@ int main(void)
     });
     html += '</div></div></div>';
     m.innerHTML = html;
-    var _cv = m.querySelector("#kgCanvas");
-    var _mt = 0, _ml = 0;
-    m.querySelectorAll(".kgNode").forEach(function(x){ var t = parseFloat(x.style.top); if (t > _mt) _mt = t; var l = parseFloat(x.style.left); if (l > _ml) _ml = l; });
-    _cv.style.width = Math.max(100, _ml + 10) + '%';
-    _cv.style.height = Math.max(900, Math.round((_mt / 100) * _cv.offsetWidth + 120)) + 'px';
-    /* dsh 风：光标移动背景光斑 */
-    var _glow1 = document.createElement("div"), _glow2 = document.createElement("div");
-    _glow1.style.cssText = "position:fixed;width:520px;height:520px;border-radius:50%;pointer-events:none;z-index:1;background:radial-gradient(circle,rgba(139,92,246,.16),transparent 70%);transform:translate(-50%,-50%);left:0;top:0;transition:left .6s ease-out,top .6s ease-out";
-    _glow2.style.cssText = "position:fixed;width:340px;height:340px;border-radius:50%;pointer-events:none;z-index:1;background:radial-gradient(circle,rgba(16,185,129,.10),transparent 70%);transform:translate(-50%,-50%);left:0;top:0;transition:left 1s ease-out,top 1s ease-out";
-    m.appendChild(_glow1); m.appendChild(_glow2);
-    m.addEventListener("mousemove", function(e){
-      _glow1.style.left = e.clientX + "px"; _glow1.style.top = e.clientY + "px";
-      _glow2.style.left = (e.clientX - 120) + "px"; _glow2.style.top = (e.clientY - 90) + "px";
-    });
-    /* 图谱美感：节点渐变 + 连线流动 */
-    var _st = document.createElement("style");
-    _st.textContent = ".kgLine line{animation:dashflow 7s linear infinite}@keyframes dashflow{to{stroke-dashoffset:-56}}";
-    m.appendChild(_st);
+    setTimeout(function(){
+      try {
+        var _cv = m.querySelector("#kgCanvas");
+        var _mt = 0, _ml = 0;
+        m.querySelectorAll(".kgNode").forEach(function(x){ var t = parseFloat(x.style.top); if (t > _mt) _mt = t; var l = parseFloat(x.style.left); if (l > _ml) _ml = l; });
+        _cv.style.width = Math.max(100, _ml + 10) + '%';
+        _cv.style.height = Math.max(900, Math.round((_mt / 100) * _cv.offsetWidth + 120)) + 'px';
+        /* dsh 风：光标移动背景光斑 */
+        var _glow1 = document.createElement("div"), _glow2 = document.createElement("div");
+        _glow1.style.cssText = "position:fixed;width:520px;height:520px;border-radius:50%;pointer-events:none;z-index:1;background:radial-gradient(circle,rgba(139,92,246,.16),transparent 70%);transform:translate(-50%,-50%);left:0;top:0;transition:left .6s ease-out,top .6s ease-out";
+        _glow2.style.cssText = "position:fixed;width:340px;height:340px;border-radius:50%;pointer-events:none;z-index:1;background:radial-gradient(circle,rgba(16,185,129,.10),transparent 70%);transform:translate(-50%,-50%);left:0;top:0;transition:left 1s ease-out,top 1s ease-out";
+        m.appendChild(_glow1); m.appendChild(_glow2);
+        m.addEventListener("mousemove", function(e){
+          _glow1.style.left = e.clientX + "px"; _glow1.style.top = e.clientY + "px";
+          _glow2.style.left = (e.clientX - 120) + "px"; _glow2.style.top = (e.clientY - 90) + "px";
+        });
+        /* 图谱美感：节点渐变 + 连线流动 */
+        var _st = document.createElement("style");
+        _st.textContent = ".kgLine line{animation:dashflow 7s linear infinite}@keyframes dashflow{to{stroke-dashoffset:-56}}";
+        m.appendChild(_st);
+      } catch (e) { console.error("kg-inject", e); }
+    }, 30);
     /* 图谱缩放：按钮 + 双指捏合（可收放自如） */
     var zw = m.querySelector("#kgZoomWrap");
     var _zs = 1;
