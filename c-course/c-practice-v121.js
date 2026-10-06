@@ -2672,6 +2672,7 @@ int main(void)
     if (zOut) zOut.onclick = function(){ _zs = Math.max(0.4, Math.round((_zs - 0.25) * 100) / 100); _zoom(); };
     if (zFit) zFit.onclick = function(){ _zs = 1; _zoom(); };
     var _pd = 0;
+    var _rszT = 0;
     m.addEventListener("touchstart", function(e){ if (e.touches.length === 2) { _pd = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); } }, {passive:true});
     m.addEventListener("touchmove", function(e){ if (e.touches.length === 2 && _pd) { var d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); _zs = Math.max(0.4, Math.min(2, Math.round(_zs * (d / _pd) * 100) / 100)); _pd = d; _zoom(); } }, {passive:true});
     m.addEventListener("touchend", function(){ _pd = 0; });
@@ -2756,6 +2757,20 @@ int main(void)
               card.style.transform = "translate(-50%,-50%) scale(1)";
               card.style.opacity = "1";
               if (line) line.style.opacity = "1";
+              /* 展开后按实际节点位置重算画布尺寸（内容适配） */
+              clearTimeout(_rszT);
+              _rszT = setTimeout(function(){
+                var mx = 0, my = 0;
+                canvas.querySelectorAll('.kgNode').forEach(function(c){
+                  if (c.style.display === "none") return;
+                  var r = c.getBoundingClientRect(), cr = canvas.getBoundingClientRect();
+                  var ty = r.top - cr.top + r.height / 2, tx = r.left - cr.left + r.width / 2;
+                  if (tx > mx) mx = tx;
+                  if (ty > my) my = ty;
+                });
+                canvas.style.width = Math.max(100, (mx / (canvas.clientWidth || 900)) * 100 + 10) + '%';
+                canvas.style.height = Math.max(900, my + 120) + 'px';
+              }, 120);
             }, 20 + dly);
           }
         })(kids[ki], ki * 60);
