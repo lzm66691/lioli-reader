@@ -2645,11 +2645,6 @@ int main(void)
     m.innerHTML = html;
     setTimeout(function(){
       try {
-        var _cv = m.querySelector("#kgCanvas");
-        var _mt = 0, _ml = 0;
-        m.querySelectorAll(".kgNode").forEach(function(x){ var t = parseFloat(x.style.top); if (t > _mt) _mt = t; var l = parseFloat(x.style.left); if (l > _ml) _ml = l; });
-        _cv.style.width = Math.max(100, _ml + 10) + '%';
-        _cv.style.height = Math.max(900, Math.round((_mt / 100) * _cv.offsetWidth + 120)) + 'px';
         /* dsh 风：光标移动背景光斑 */
         var _glow1 = document.createElement("div"), _glow2 = document.createElement("div");
         _glow1.style.cssText = "position:fixed;width:520px;height:520px;border-radius:50%;pointer-events:none;z-index:1;background:radial-gradient(circle,rgba(139,92,246,.16),transparent 70%);transform:translate(-50%,-50%);left:0;top:0;transition:left .6s ease-out,top .6s ease-out";
@@ -2682,8 +2677,11 @@ int main(void)
     m.addEventListener("touchend", function(){ _pd = 0; });
     /* 初始隐藏全部二级节点与连线 */
     var cvs = m.querySelector("#kgCanvas");
-    /* 屏幕自适应：画布高度随视口动态计算（窄屏/平板自动变矮，宽屏保持舒展） */
-    cvs.style.height = Math.max(720, Math.round(window.innerHeight * 0.85)) + 'px';
+    /* 屏幕自适应：画布尺寸随内容撑开（宽高按节点实际布局，窄屏/平板自动适应） */
+    var _mt = 0, _ml = 0;
+    cvs.querySelectorAll('.kgNode').forEach(function(x){ var t = parseFloat(x.style.top); if (t > _mt) _mt = t; var l = parseFloat(x.style.left); if (l > _ml) _ml = l; });
+    cvs.style.width = Math.max(100, _ml + 10) + '%';
+    cvs.style.height = Math.max(900, Math.round((_mt / 100) * cvs.offsetWidth + 120)) + 'px';
     Array.prototype.slice.call(cvs.querySelectorAll('.kgNode')).forEach(function(x){
       var idn = parseInt(x.getAttribute("data-id"), 10);
       if (idn !== 0 && CUR.lv1.indexOf(idn) < 0) { x.style.display = "none"; }
