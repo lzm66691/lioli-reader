@@ -49,6 +49,10 @@
 
   --blur:blur(26px) saturate(1.7);
 
+  /* v130：UI 规范 —— 圆角三档（仅可点元素圆润）/ 字阶断崖（标题≠放大正文）/ 单一强调色 */
+  --r-sm:10px; --r-md:14px; --r-lg:20px;
+  --fs-title:18px; --fs-h:14px; --fs-body:13px; --fs-sm:11px;
+
 }
 
 .hl-marker.hl-1{background:rgba(251,218,131,.42)} .hl-marker.hl-2{background:rgba(228,147,142,.38)} .hl-marker.hl-3{background:rgba(141,187,255,.38)}
@@ -488,6 +492,10 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
   .zoom-hint{display:none}
 
+  /* v130：窄屏右栏再收窄，给 PDF 更多空间 */
+  .note-panel{width:218px}
+  .sidebar{width:182px}
+
 }
 
 @media (max-width:720px){
@@ -547,7 +555,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v129</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v130</span></div>
 
   <div class="spacer"></div>
 
@@ -711,6 +719,16 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
           <span style="color:var(--teal-dark);font-size:16px">›</span>
 
         </div>
+
+      </div>
+
+      <!-- v130：题库书架（科目分区，像书架一样找不同习题） -->
+
+      <div style="font-weight:700;font-size:13px;color:var(--ink);margin:14px 2px 8px;display:flex;align-items:center;gap:8px"><span>📚 题库书架</span><span style="font-size:11px;color:var(--muted);font-weight:400">点卡片打开对应题库 · 练习册可自动扫描入库</span></div>
+
+      <div id="quizShelfGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;padding:2px">
+
+        <div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:12px;padding:18px 0">题库加载中…</div>
 
       </div>
 
@@ -2027,6 +2045,8 @@ if (!BOOKS.length) {
 
     renderPracticeBoard();
 
+    if (window.initQuizCenter) { try { window.initQuizCenter(); } catch(e){} }
+
   });
 
   function renderPracticeBoard(){
@@ -3108,7 +3128,7 @@ if (!BOOKS.length) {
 
 </script>
 
-<script src="c-course/c-practice-v129.js?v=20261007b" data-base="."></script>
+<script src="c-course/c-practice-v130.js?v=20261007c" data-base="."></script>
 
 <script>
 /* v75：划词浮层升级（UI 报告第二阶段①）——高亮三色 + 复制 + 问 AI；支持 PDF 内（iframe）选区；高亮复用 marks 标注体系（萝 C 路线零密钥） */
