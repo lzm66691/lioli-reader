@@ -20,7 +20,7 @@ var SHELL_URLS = [
   "./阅读器.html",
   "./阅读器注入.css",
   "./config.json",
-  "./c-course/c-practice-v130.js",
+  "./c-course/c-practice-v131.js",
   "./c-course/c-mindmap.html",
   "./manifest.json",
   "./vendor/pdfjs/LICENSE",
