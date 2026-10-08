@@ -2827,9 +2827,9 @@ int main(void)
       { q: "熵增原理表明孤立系统自发过程熵的变化为？", opts: ["ΔS≥0","ΔS≤0","ΔS=0","不确定"], ans: 0, expl: "孤立系统自发过程熵不减少，ΔS≥0" }
     ]}
   };
+  window.PH_QUIZ_DATA = PH_QUIZ; /* v132：统一题库面板数据导出（定义即导出） */
   window.initPhQuiz = function(){
     var old = document.getElementById("phQuizOverlay"); if (old) old.remove();
-    window.PH_QUIZ_DATA = PH_QUIZ; /* v132：统一题库面板数据导出 */
     var m = document.createElement("div");
     m.id = "phQuizOverlay";
     m.style.cssText = "position:fixed;inset:0;z-index:99996;background:#0a0c18;overflow:auto;padding:20px 16px 60px;color:#e2e8f0";
