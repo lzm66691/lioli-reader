@@ -1604,7 +1604,7 @@ int main(void)
     splitBtn.addEventListener("click", () => { splitMode = !splitMode; applySplit(splitMode); });
     splitHandle.addEventListener("pointerdown", (e) => {
       e.preventDefault();
-      splitHandle.setPointerCapture && splitHandle.setPointerCapture(e.pointerId);
+      try { splitHandle.setPointerCapture && splitHandle.setPointerCapture(e.pointerId); } catch (e2) {}
       const move = (ev) => {
         const x = ev.clientX != null ? ev.clientX : (ev.touches ? ev.touches[0].clientX : 0);
         const w = Math.max(340, Math.min(window.innerWidth - 60, window.innerWidth - x));
