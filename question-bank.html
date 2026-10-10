@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>莉萝题库 · 拼题A风格题集</title>
+<style>
+  :root{
+    --bg:#0f172a; --panel:#1e293b; --card:#16213a; --line:#334155; --ink:#e2e8f0; --muted:#94a3b8;
+    --accent:#4D6BFE; --ok:#10B981; --warn:#F59E0B; --hot:#EF4444; --purple:#A78BFA;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+  header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 18px;background:rgba(15,23,42,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  header h1{font-size:16px;font-weight:700;letter-spacing:.03em}
+  header .cnt{font-size:11px;color:var(--muted);background:var(--panel);border:1px solid var(--line);padding:3px 9px;border-radius:99px}
+  .filters{display:flex;gap:7px;flex-wrap:wrap;margin-left:auto;align-items:center}
+  .fbtn{border:1px solid var(--line);background:var(--card);color:var(--muted);padding:5px 11px;border-radius:8px;font-size:12px;cursor:pointer;transition:all .15s}
+  .fbtn:hover{color:var(--ink);border-color:var(--accent)}
+  .fbtn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  main{max-width:860px;margin:0 auto;padding:16px 18px 40px}
+  .group{margin-bottom:22px}
+  .g-head{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:700;margin-bottom:9px;color:var(--ink)}
+  .g-head .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);display:inline-block}
+  .g-head small{font-weight:400;color:var(--muted);font-size:11.5px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:13px;margin-bottom:11px;overflow:hidden;transition:border-color .15s}
+  .card.open{border-color:var(--accent)}
+  .q-head{display:flex;align-items:center;gap:9px;padding:12px 15px;cursor:pointer;user-select:none}
+  .q-head:hover{background:rgba(77,107,254,.06)}
+  .q-no{font-size:11px;font-weight:700;color:var(--accent);background:rgba(77,107,254,.13);border:1px solid rgba(77,107,254,.35);padding:2px 7px;border-radius:6px;white-space:nowrap}
+  .q-title{font-size:13.5px;font-weight:600;flex:1;line-height:1.45}
+  .q-badges{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+  .bdg{font-size:10.5px;padding:2px 7px;border-radius:99px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+  .bdg.score{color:var(--warn);border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.08)}
+  .bdg.diff-入门{color:var(--ok);border-color:rgba(16,185,129,.4);background:rgba(16,185,129,.07)}
+  .bdg.diff-基础{color:var(--purple);border-color:rgba(167,139,250,.4);background:rgba(167,139,250,.07)}
+  .bdg.diff-进阶{color:var(--hot);border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.07)}
+  .bdg.type{color:#7dd3fc;border-color:rgba(56,189,248,.35);background:rgba(56,189,248,.06)}
+  .arrow{color:var(--muted);font-size:12px;transition:transform .2s}
+  .card.open .arrow{transform:rotate(90deg)}
+  .q-body{display:none;padding:0 15px 15px;border-top:1px dashed var(--line)}
+  .card.open .q-body{display:block}
+  .q-desc{font-size:13px;line-height:1.75;color:#cbd5e1;margin:13px 0 4px}
+  .io-box{background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:12px;line-height:1.7;margin-top:9px;color:#a5b4fc}
+  .io-box b{color:var(--muted);font-weight:600;margin-right:8px}
+  .io-box pre{white-space:pre-wrap;word-break:break-all;font-family:Consolas,monospace}
+  .tag-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .tag-row span{font-size:10.5px;color:var(--muted);background:var(--panel);padding:2px 8px;border-radius:99px;border:1px solid var(--line)}
+  .src{font-size:10.5px;color:#64748b;margin-top:8px;line-height:1.5}
+  .src a{color:#7dd3fc;text-decoration:none}
+  /* 答题区 */
+  .ans-zone{margin-top:13px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
+  .ans-zone h6{font-size:11px;color:var(--muted);letter-spacing:.05em;margin-bottom:8px;font-weight:700}
+  .ans-zone input[type=text]{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:9px 11px;font-size:13px;outline:none}
+  .ans-zone input[type=text]:focus{border-color:var(--accent)}
+  .ans-row{display:flex;gap:8px;margin-top:8px}
+  .ans-row button{border:none;border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;font-weight:600}
+  .btn-sub{background:var(--accent);color:#fff}
+  .btn-ans{background:transparent;border:1px solid var(--line) !important;color:var(--muted)}
+  .result{font-size:12.5px;margin-top:9px;font-weight:600}
+  .result.ok{color:var(--ok)} .result.no{color:var(--hot)}
+  .ref-ans{margin-top:10px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12px;display:none}
+  .ref-ans pre{white-space:pre-wrap;word-break:break-all;font-family:Consolas,monospace;line-height:1.6;color:#cbd5e1}
+  .ref-ans.show{display:block}
+  .ref-ans b{color:var(--muted)}
+  .analysis{font-size:12px;color:#94a3b8;line-height:1.7;margin-top:9px;background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.2);border-radius:8px;padding:9px 11px;display:none}
+  .analysis.show{display:block}
+  .analysis b{color:var(--purple)}
+  .empty{padding:40px;text-align:center;color:var(--muted);font-size:13px}
+  footer{text-align:center;font-size:10.5px;color:#475569;padding:14px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<header>
+  <h1>📚 莉萝题库</h1>
+  <span class="cnt" id="cnt"></span>
+  <div class="filters" id="filters">
+    <button class="fbtn on" data-t="all">全部</button>
+    <button class="fbtn" data-t="circuit">⚡ 电路</button>
+    <button class="fbtn" data-t="programming">💻 编程</button>
+    <span style="width:1px;height:16px;background:var(--line)"></span>
+    <button class="fbtn on" data-q="all">全题型</button>
+    <button class="fbtn" data-q="blank">填空</button>
+    <button class="fbtn" data-q="code">编程</button>
+  </div>
+</header>
+<main id="main"></main>
+<footer>莉萝题库 · schema v2.1 · 数据源 course/question-bank.json（幂等按 id upsert）</footer>
+
+<script>
+(function(){
+"use strict";
+var FILTER = {t:"all", q:"all"};
+var BANK = null;
+
+fetch("course/question-bank.json?v=" + Date.now()).then(function(r){ return r.json(); }).then(function(d){
+  BANK = d;
+  render();
+}).catch(function(e){
+  document.getElementById("main").innerHTML = '<div class="empty">题库加载失败：' + e + '</div>';
+});
+
+document.getElementById("filters").addEventListener("click", function(ev){
+  var b = ev.target.closest(".fbtn");
+  if (!b) return;
+  var k = b.dataset.t !== undefined ? "t" : "q";
+  var v = b.dataset.t !== undefined ? b.dataset.t : b.dataset.q;
+  FILTER[k] = v;
+  document.querySelectorAll(".fbtn").forEach(function(x){
+    var kk = x.dataset.t !== undefined ? "t" : "q";
+    var vv = x.dataset.t !== undefined ? x.dataset.t : x.dataset.q;
+    x.classList.toggle("on", FILTER[kk] === vv);
+  });
+  render();
+});
+
+function passFilter(q){
+  if (FILTER.t !== "all" && q.type !== FILTER.t) return false;
+  if (FILTER.q !== "all" && q.questionType !== FILTER.q) return false;
+  return true;
+}
+
+function render(){
+  if (!BANK) return;
+  var all = BANK.circuit.concat(BANK.programming);
+  var vis = all.filter(passFilter);
+  document.getElementById("cnt").textContent = vis.length + " / " + all.length + " 题";
+  /* 按 course 分组（保持 course 出现顺序） */
+  var groups = {}, order = [];
+  vis.forEach(function(q){
+    var c = q.course || "其他";
+    if (!groups[c]){ groups[c] = []; order.push(c); }
+    groups[c].push(q);
+  });
+  var html = "";
+  order.forEach(function(c){
+    var qs = groups[c];
+    html += '<section class="group"><div class="g-head"><span class="dot"></span>' + esc(c) + ' <small>'+ qs.length +' 题</small></div>';
+    qs.forEach(function(q){ html += card(q); });
+    html += '</section>';
+  });
+  if (!vis.length) html = '<div class="empty">没有符合条件的题目</div>';
+  document.getElementById("main").innerHTML = html;
+}
+
+function card(q){
+  var t = q.type === "circuit" ? "⚡ 电路" : "💻 编程";
+  var qt = {blank:"填空", code:"编程", single:"单选", multiple:"多选"}[q.questionType] || q.questionType;
+  var tc = (q.testCases || []).filter(function(x){ return !x.hidden; });
+  var showIn = tc.length && tc[0].input !== "";
+  return '<div class="card" data-id="' + q.id + '">'
+    + '<div class="q-head" onclick="toggleQ(this)">'
+    +   '<span class="q-no">' + esc(q.id) + '</span>'
+    +   '<span class="q-title">' + esc(q.title) + '</span>'
+    +   '<span class="q-badges">'
+    +     '<span class="bdg score">' + q.score + ' 分</span>'
+    +     '<span class="bdg diff-' + esc(q.difficulty) + '">' + esc(q.difficulty) + '</span>'
+    +     '<span class="bdg type">' + esc(qt) + '</span>'
+    +     (q.tag && q.tag.length ? q.tag.slice(0,2).map(function(tg){ return '<span class="bdg">#' + esc(tg) + '</span>'; }).join('') : '')
+    +   '</span>'
+    +   '<span class="arrow">▶</span>'
+    + '</div>'
+    + '<div class="q-body">'
+    +   '<div class="q-desc">' + esc(q.desc) + '</div>'
+    +   (q.questionType === "code" && q.input ? '<div class="io-box"><b>输入格式</b><pre>' + esc(q.input) + '</pre></div>' : '')
+    +   (q.questionType === "code" && q.output ? '<div class="io-box"><b>输出格式</b><pre>' + esc(q.output) + '</pre></div>' : '')
+    +   (tc.length ? '<div class="io-box"><b>样例</b><pre>' + esc(tc.map(function(x){ return (x.input !== "" ? ("输入: " + x.input + "\n") : "") + "输出: " + x.expected; }).join("\n────────\n")) + '</pre></div>' : '')
+    +   '<div class="tag-row">' + (q.tag || []).map(function(tg){ return '<span>#' + esc(tg) + '</span>'; }).join('') + '</div>'
+    +   (q.source ? '<div class="src">来源：' + esc(q.source.name) + (q.source.url ? ' · <a href="' + esc(q.source.url) + '" target="_blank" rel="noopener">链接</a>' : '') + ' · ' + esc(q.source.license || "") + '</div>' : '')
+    +   '<div class="ans-zone">'
+    +     '<h6>✏ 答题判定</h6>'
+    +   '</div>'
+    + '</div></div>';
+}
+
+/* 全局判定 + 折叠（由 card 渲染后绑定） */
+window.toggleQ = function(head){
+  var cardEl = head.closest(".card");
+  var open = cardEl.classList.toggle("open");
+  var body = cardEl.querySelector(".q-body");
+  if (open && !body.dataset.booted){
+    body.dataset.booted = "1";
+    var id = cardEl.dataset.id;
+    var q = findQ(id);
+    if (q) bootAns(body, q);
+  }
+};
+function findQ(id){
+  var all = BANK.circuit.concat(BANK.programming);
+  return all.find(function(q){ return q.id === id; });
+}
+function bootAns(body, q){
+  var zone = body.querySelector(".ans-zone");
+  if (q.type === "circuit"){
+    zone.innerHTML = '<div class="ans-row">'
+      + '<input type="text" placeholder="输入你的答案（如 0.5 A）">'
+      + '<button class="btn-sub" onclick="submitAns(this)">判定</button>'
+      + '<button class="btn-ans" onclick="showAns(this)">看答案</button>'
+      + '</div>'
+      + '<div class="result"></div>'
+      + '<div class="ref-ans"><b>参考答案：</b><pre>' + esc(q.answer) + '</pre></div>'
+      + '<div class="analysis"><b>解析：</b>' + esc(q.analysis || "") + '</div>';
+  } else {
+    zone.innerHTML = '<div class="ans-row"><button class="btn-ans" onclick="showProgAns(this)">看答案</button><button class="btn-ans" onclick="toggleAnalysis(this)">解析</button></div>'
+      + '<div class="ref-ans"><b>' + esc(q.answerNote || "参考答案") + '：</b><pre>' + esc(q.answer) + '</pre></div>'
+      + '<div class="analysis"><b>解析：</b>' + esc(q.analysis || "") + '</div>';
+  }
+}
+
+window.showProgAns = function(btn){
+  var zone = btn.closest(".ans-zone");
+  var ref = zone.querySelector(".ref-ans"), an = zone.querySelector(".analysis");
+  var show = !ref.classList.contains("show");
+  ref.classList.toggle("show", show);
+  if (show) an.classList.add("show");
+  btn.textContent = show ? "收起答案" : "看答案";
+};
+
+window.showAns = function(btn){
+  var zone = btn.closest(".ans-zone");
+  var ref = zone.querySelector(".ref-ans"), an = zone.querySelector(".analysis");
+  ref.classList.toggle("show");
+  if (ref.classList.contains("show")) an.classList.add("show");
+};
+window.toggleAnalysis = function(btn){
+  var an = btn.closest(".ans-zone").querySelector(".analysis");
+  an.classList.toggle("show");
+  btn.textContent = an.classList.contains("show") ? "收起解析" : "解析";
+};
+
+/* 电路题判定：normalize 比对 */
+window.submitAns = function(btn){
+  var zone = btn.closest(".ans-zone");
+  var inp = zone.querySelector("input").value;
+  var res = zone.querySelector(".result");
+  var cardEl = btn.closest(".card");
+  var q = findQ(cardEl.dataset.id);
+  var norm = q.normalize || {};
+  var ok = judge(inp, q.answer, norm);
+  res.className = "result " + (ok ? "ok" : "no");
+  res.textContent = ok ? "✓ 判定正确！" : "✗ 再想想（提示：" + esc(q.hint || "可先看答案对照") + "）";
+};
+
+function judge(user, ans, norm){
+  var u = String(user).trim(), a = String(ans).trim();
+  if (norm.strip_space){ u = u.replace(/\s+/g, " "); a = a.replace(/\s+/g, " "); }
+  /* 单位别名替换 */
+  var al = norm.unit_aliases || {};
+  Object.keys(al).forEach(function(k){ u = u.split(k).join(al[k]); a = a.split(k).join(al[k]); });
+  /* 全等 */
+  if (u === a) return true;
+  /* 数字容差：提取所有数字对比较 */
+  var nu = u.match(/-?\d+(\.\d+)?/g) || [];
+  var na = a.match(/-?\d+(\.\d+)?/g) || [];
+  if (nu.length && nu.length === na.length){
+    var tol = norm.tolerance != null ? norm.tolerance : 0.01;
+    var allOk = true;
+    for (var i = 0; i < nu.length; i++){
+      if (Math.abs(parseFloat(nu[i]) - parseFloat(na[i])) > tol) allOk = false;
+    }
+    /* 去掉数字后剩余部分应一致 */
+    var restU = u.replace(/-?\d+(\.\d+)?/g, "").trim();
+    var restA = a.replace(/-?\d+(\.\d+)?/g, "").trim();
+    if (allOk && restU === restA) return true;
+  }
+  return false;
+}
+
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+})();
+</script>
+</body>
+</html>
