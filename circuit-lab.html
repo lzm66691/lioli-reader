@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>电路实验室 · 莉萝阅读器</title>
+<style>
+  :root{
+    --bg:#0f172a; --panel:#1e293b; --line:#334155; --ink:#e2e8f0; --muted:#94a3b8;
+    --accent:#4D6BFE; --ok:#10B981; --warn:#F59E0B; --hot:#EF4444;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+  #app{display:flex;flex-direction:column;height:100%}
+  header{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  header h1{font-size:15px;font-weight:700;letter-spacing:.03em}
+  header .sub{font-size:11px;color:var(--muted)}
+  .parts{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-left:auto}
+  .pbtn{border:1px solid var(--line);background:#263247;color:var(--ink);padding:6px 10px;border-radius:8px;font-size:12px;cursor:pointer;transition:all .15s}
+  .pbtn:hover{background:#2e3c57;border-color:var(--accent)}
+  .pbtn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .tbtn{border:1px solid var(--line);background:transparent;color:var(--muted);padding:6px 9px;border-radius:8px;font-size:11.5px;cursor:pointer}
+  .tbtn:hover{color:var(--ink);border-color:var(--muted)}
+  #canvas{flex:1;display:block;touch-action:none;background:radial-gradient(circle at 30% 30%, #16213a 0, #0b1326 70%)}
+  #props{display:none;position:absolute;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:12px;min-width:190px;box-shadow:0 10px 30px rgba(0,0,0,.4);z-index:10}
+  #props h4{font-size:12.5px;margin-bottom:7px;color:var(--accent)}
+  #props label{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:5px 0;color:var(--muted)}
+  #props input[type=range]{width:90px}
+  #props input[type=number]{width:62px;background:#0f172a;color:var(--ink);border:1px solid var(--line);border-radius:5px;padding:3px 5px;font-size:12px}
+  #props button{margin-top:6px;width:100%;border:none;background:var(--accent);color:#fff;border-radius:7px;padding:5px 0;font-size:12px;cursor:pointer}
+  #calc{position:absolute;right:14px;bottom:14px;background:rgba(30,41,59,.92);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:12px;min-width:230px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+  #calc h5{font-size:11px;color:var(--muted);letter-spacing:.06em;margin-bottom:6px;font-weight:700}
+  #calc .row{display:flex;justify-content:space-between;gap:16px;margin:3px 0}
+  #calc .row b{font-variant-numeric:tabular-nums}
+  #calc .ok{color:var(--ok)} #calc .warn{color:var(--warn)} #calc .hot{color:var(--hot)}
+  /* ---- 元件库抽屉（Phase 2a） ---- */
+  #drawer{position:absolute;left:12px;top:56px;bottom:70px;width:196px;background:rgba(30,41,59,.94);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:12px;padding:10px;z-index:8;display:flex;flex-direction:column;gap:8px;overflow:auto}
+  #drawer h5{font-size:11px;color:var(--muted);letter-spacing:.06em;font-weight:700}
+  #drawer .lib-search{width:100%;background:#0f172a;border:1px solid var(--line);color:var(--ink);border-radius:7px;padding:6px 8px;font-size:12px;outline:none}
+  #drawer .lib-search:focus{border-color:var(--accent)}
+  #drawer .lib-group{font-size:10.5px;color:#64748b;margin:6px 0 3px;letter-spacing:.04em}
+  .lib-btn{display:flex;align-items:center;gap:8px;width:100%;border:1px solid var(--line);background:#263247;color:var(--ink);padding:6px 9px;border-radius:8px;font-size:12px;cursor:pointer;transition:all .15s;text-align:left}
+  .lib-btn:hover{background:#2e3c57;border-color:var(--accent)}
+  .lib-btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .lib-btn:disabled{opacity:.45;cursor:not-allowed}
+  .lib-btn:disabled:hover{border-color:var(--line);background:#263247}
+  .lib-btn .soon{font-size:9px;color:#94a3b8;background:rgba(148,163,184,.15);padding:1px 5px;border-radius:99px;margin-left:auto}
+  /* 模板下拉 */
+  .tbtn:disabled{opacity:.45;cursor:not-allowed}
+  select.tpl{background:#0f172a;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:11.5px;cursor:pointer;outline:none}
+  #toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:rgba(15,23,42,.92);border:1px solid var(--line);color:var(--ink);font-size:12px;padding:8px 16px;border-radius:9px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:99}
+  .legend{position:absolute;left:222px;bottom:14px;font-size:10.5px;color:var(--muted);background:rgba(15,23,42,.7);padding:7px 10px;border-radius:8px;line-height:1.7}
+  @media (max-width:760px){ header{font-size:12px} .sub{display:none} #calc{left:10px;right:10px;bottom:10px;min-width:0} #drawer{left:8px;width:150px} .legend{display:none} }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>⚡ 电路实验室</h1>
+    <span class="sub">Phase 2a · 元件库 + 网格 + 模板</span>
+    <select class="tpl" id="tplSel" title="预置示例电路">
+      <option value="">▾ 示例模板</option>
+      <option value="series">串联分压（1灯）</option>
+      <option value="twolamp">双灯串联（亮暗比较）</option>
+      <option value="switch">开关控制灯泡</option>
+    </select>
+    <div class="parts" id="parts">
+      <button class="tbtn" id="delBtn" title="删除选中元件">🗑 删除</button>
+      <button class="tbtn" id="clearBtn" title="清空画布">✖ 清空</button>
+      <button class="tbtn" id="shareBtn" title="复制当前电路链接">🔗 分享</button>
+      <button class="tbtn" id="waveBtn" disabled title="波形图（Phase 2b 开放）">📈 波形</button>
+      <button class="tbtn" id="netBtn" disabled title="网表导出（Phase 2b 开放）">📋 网表</button>
+    </div>
+  </header>
+  <canvas id="canvas"></canvas>
+  <div id="drawer">
+    <h5>🧩 元件库</h5>
+    <input class="lib-search" id="libSearch" placeholder="搜索元件…">
+    <div class="lib-group">电源</div>
+    <button class="lib-btn" data-part="battery">🔋 电池</button>
+    <button class="lib-btn" data-part="vsource" disabled>🔺 电压源 <span class="soon">2b</span></button>
+    <div class="lib-group">负载</div>
+    <button class="lib-btn" data-part="resistor">➰ 电阻</button>
+    <button class="lib-btn" data-part="bulb">💡 灯泡</button>
+    <button class="lib-btn" data-part="led" disabled>🔴 LED <span class="soon">2b</span></button>
+    <div class="lib-group">控制</div>
+    <button class="lib-btn" data-part="switch">🔘 开关</button>
+    <button class="lib-btn" data-part="pot" disabled>🎚 电位器 <span class="soon">2b</span></button>
+    <div class="lib-group">测量 · 进阶</div>
+    <button class="lib-btn" data-part="ammeter" disabled>🅰 电流表 <span class="soon">2b</span></button>
+    <button class="lib-btn" data-part="voltmeter" disabled>🅥 电压表 <span class="soon">2b</span></button>
+    <button class="lib-btn" data-part="capacitor" disabled>⏺ 电容 <span class="soon">2b</span></button>
+    <button class="lib-btn" data-part="inductor" disabled>🌀 电感 <span class="soon">2b</span></button>
+    <button class="lib-btn" data-part="diode" disabled>▶ 二极管 <span class="soon">2b</span></button>
+  </div>
+  <div id="props"></div>
+  <div id="calc">
+    <h5>⚙ 电路仿真</h5>
+    <div id="calcBody"><div class="row"><span style="color:var(--muted)">画一个闭合回路开始仿真</span></div></div>
+  </div>
+  <div class="legend">
+    1. 点上方元件 → 画布单击放置<br>
+    2. 从元件端点拖线到另一端点，形成闭合回路<br>
+    3. 点元件可调参数（电阻/电压），仿真实时刷新
+  </div>
+  <div id="toast"></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var cv = document.getElementById("canvas"), ctx = cv.getContext("2d");
+var propsEl = document.getElementById("props"), calcEl = document.getElementById("calcBody"), toastEl = document.getElementById("toast");
+
+/* ---------- 电路模型 ---------- */
+var NODE_R = 9;            /* 端点半径 */
+var parts = [];            /* {id,type,x,y,val,on, n0:{x,y}, n1:{x,y}} */
+var wires = [];            /* {id,a:{pid,node}, b:{pid,node}} node:0|1 */
+var selected = null, placing = null, mode = "select", dragWire = null, dragEl = null, dragNode = null;
+var uid = 1, toastT = null;
+
+function newNode(x, y){ return {x:x, y:y}; }
+function nodeOf(p, k){ return k === 0 ? p.n0 : p.n1; }
+
+/* ---------- 网格吸附（Phase 2a） ---------- */
+var GRID = 30;
+function snap(v){ return Math.round(v / GRID) * GRID; }
+function snapPt(x, y){ return {x:snap(x), y:snap(y)}; }
+
+function addPart(type, x, y){
+  var sp = snapPt(x, y);
+  var p = {id:uid++, type:type, x:sp.x, y:sp.y, on:true};
+  var dx = 60, dy = 0;
+  if (type === "battery"){ p.val = 9; p.n0 = newNode(x-dx,y); p.n1 = newNode(x+dx,y); }
+  else if (type === "resistor"){ p.val = 1000; p.n0 = newNode(x-dx,y); p.n1 = newNode(x+dx,y); }
+  else if (type === "bulb"){ p.val = 200; p.n0 = newNode(x-dx,y); p.n1 = newNode(x+dx,y); }
+  else if (type === "switch"){ p.val = 0; p.on = true; p.n0 = newNode(x-dx,y); p.n1 = newNode(x+dx,y); }
+  parts.push(p);
+  return p;
+}
+
+/* ---------- 仿真：找闭合回路（深度优先） ---------- */
+function graph(){
+  /* 端点图：端点 key = pid+':'+n ；边 = wire + 元件本体（n0<->n1 导通） */
+  var adj = {};
+  function key(pid, n){ return pid + ":" + n; }
+  function add(a, b, w){
+    (adj[a] = adj[a] || []).push({to:b, w:w, pid:parseInt(a.split(":")[0],10), n:parseInt(a.split(":")[1],10)});
+    (adj[b] = adj[b] || []).push({to:a, w:w, pid:parseInt(b.split(":")[0],10), n:parseInt(b.split(":")[1],10)});
+  }
+  wires.forEach(function(w){
+    add(key(w.a.pid, w.a.node), key(w.b.pid, w.b.node), w);
+  });
+  /* 元件本体导通（串联回路闭合的关键边） */
+  parts.forEach(function(p){
+    add(key(p.id, 0), key(p.id, 1), {id: -(p.id + 1), internal: true});
+  });
+  return adj;
+}
+
+function findLoops(){
+  var adj = graph(), seen = {}, loops = [];
+  var pids = {};
+  Object.keys(adj).forEach(function(k){ var pid = parseInt(k.split(":")[0], 10); (pids[pid] = pids[pid] || []).push(k); });
+  function walk(start, cur, path, pidSet, nodeset){
+    var nodeKey = cur;
+    if (nodeKey === start && path.length > 1){
+      loops.push({pids:Array.from(pidSet), wires:path.slice()});
+      return;
+    }
+    if (seen[nodeKey]) return;
+    seen[nodeKey] = true;
+    (adj[nodeKey] || []).forEach(function(e){
+      /* 不回头走同一条边 */
+      if (path.length && e.w.id === path[path.length-1].w.id) return;
+      var nps = new Set(pidSet); nps.add(e.pid);
+      var np = path.concat(e);
+      walk(start, e.to, np, nps, nodeset);
+    });
+    seen[nodeKey] = false;
+  }
+  Object.keys(adj).forEach(function(k){
+    walk(k, k, [], new Set([parseInt(k.split(":")[0],10)]), {});
+  });
+  /* 去重：按 pid 集合排序后 join */
+  var seenLoop = {};
+  loops.forEach(function(l){
+    var key = l.pids.slice().sort().join(",");
+    if (!seenLoop[key]) seenLoop[key] = l;
+  });
+  return Object.values(seenLoop);
+}
+
+function solve(loop){
+  /* 串联回路：R 总 = 元件阻值和（电池无阻，开关闭合为 0），V 总 = 电池代数和（同向） */
+  var totalR = 0, totalV = 0, batteryCount = 0;
+  var list = [];
+  loop.pids.forEach(function(pid){
+    var p = parts.find(function(x){ return x.id === pid; });
+    if (!p) return;
+    if (p.type === "battery"){ batteryCount++; totalV += p.val; list.push({p:p, role:"电池", v:p.val}); }
+    else if (p.type === "switch"){ totalR += p.on ? 0.001 : 1e9; list.push({p:p, role:"开关", v:0}); }
+    else { var r = p.type === "bulb" ? p.val : p.val; totalR += r; list.push({p:p, role:"负载", r:r}); }
+  });
+  if (!batteryCount) return null;
+  var I = totalR > 0 ? totalV / totalR : 0;
+  var per = list.map(function(it){
+    var r = it.role === "负载" ? it.r : (it.role === "开关" ? (it.p.on ? 0.001 : 1e9) : 0);
+    var v = it.role === "电池" ? it.v : (I * r);
+    var pwr = (it.role === "负载") ? (I * I * r) : (it.role === "电池" ? -I * it.v : 0);
+    return {p:it.p, role:it.role, v:v, I:I, pwr:pwr};
+  });
+  return {I:I, totalV:totalV, totalR:totalR, per:per, count:batteryCount};
+}
+
+/* ---------- 渲染 ---------- */
+function fitSize(){ cv.width = cv.clientWidth * devicePixelRatio; cv.height = cv.clientHeight * devicePixelRatio; ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0); }
+function resize(){ fitSize(); draw(); }
+window.addEventListener("resize", resize);
+
+function draw(){
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  drawGrid();
+  /* wires */
+  wires.forEach(function(w){
+    var a = endpoint(w.a), b = endpoint(w.b);
+    ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+    ctx.strokeStyle = "#64748b"; ctx.lineWidth = 2.2; ctx.stroke();
+    /* 中点高亮 */
+    ctx.beginPath(); ctx.arc((a.x+b.x)/2, (a.y+b.y)/2, 3, 0, 7); ctx.fillStyle = "#64748b"; ctx.fill();
+  });
+  parts.forEach(function(p){
+    var hot = (selected && selected.id === p.id) || (placing && placing.id === p.id);
+    drawPart(p, hot);
+    /* 端点 */
+    [0,1].forEach(function(k){
+      var n = nodeOf(p,k);
+      ctx.beginPath(); ctx.arc(n.x, n.y, NODE_R, 0, 7);
+      ctx.fillStyle = "#cbd5e1"; ctx.fill();
+      ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.fillStyle = "#facc15"; ctx.beginPath(); ctx.arc(n.x, n.y, 3, 0, 7); ctx.fill();
+    });
+  });
+  /* 拖线预览 */
+  if (dragWire){
+    ctx.beginPath(); ctx.moveTo(dragWire.x0, dragWire.y0); ctx.lineTo(dragWire.x1, dragWire.y1);
+    ctx.strokeStyle = "#facc15"; ctx.lineWidth = 2; ctx.setLineDash([5,4]); ctx.stroke(); ctx.setLineDash([]);
+  }
+  /* 放置预览 */
+  if (placing){
+    ctx.globalAlpha = .45; drawPart(placing, true); ctx.globalAlpha = 1;
+  }
+}
+
+function drawGrid(){
+  ctx.strokeStyle = "rgba(51,65,85,.35)"; ctx.lineWidth = 1;
+  var step = 30;
+  for (var x = step; x < cv.clientWidth; x += step){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,cv.clientHeight); ctx.stroke(); }
+  for (var y = step; y < cv.clientHeight; y += step){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(cv.clientWidth,y); ctx.stroke(); }
+}
+
+function drawPart(p, hot){
+  ctx.save();
+  var x = p.x, y = p.y;
+  /* 引导线 */
+  [0,1].forEach(function(k){ var n = nodeOf(p,k); ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(n.x,n.y); ctx.strokeStyle = "#475569"; ctx.lineWidth = 1.6; ctx.stroke(); });
+  if (p.type === "battery"){
+    ctx.beginPath(); ctx.rect(x-34, y-14, 10, 28); ctx.fillStyle = "#475569"; ctx.fill();
+    ctx.beginPath(); ctx.rect(x+24, y-14, 10, 28); ctx.fillStyle = "#475569"; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x-14,y); ctx.lineTo(x+14,y); ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 3; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x-14,y-12); ctx.lineTo(x+14,y-12); ctx.strokeStyle = "#38bdf8"; ctx.lineWidth = 3; ctx.stroke();
+    label(p, "🔋 " + fmtV(p.val), hot);
+  } else if (p.type === "resistor"){
+    ctx.strokeStyle = hot ? "#facc15" : "#e2e8f0"; ctx.lineWidth = 2.4;
+    ctx.beginPath(); ctx.moveTo(x-24, y);
+    ctx.lineTo(x-16, y); ctx.lineTo(x-8, y-12); ctx.lineTo(x+8, y+12); ctx.lineTo(x+16, y); ctx.lineTo(x+24, y); ctx.stroke();
+    label(p, "R " + fmtR(p.val), hot);
+  } else if (p.type === "bulb"){
+    ctx.beginPath(); ctx.arc(x, y, 13, 0, 7); ctx.strokeStyle = hot ? "#facc15" : "#e2e8f0"; ctx.lineWidth = 2.2; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x-13,y); ctx.lineTo(x+13,y); ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 1.4; ctx.stroke();
+    label(p, "💡", hot);
+  } else if (p.type === "switch"){
+    ctx.beginPath(); ctx.moveTo(x-24, y); ctx.lineTo(x+24, y); ctx.strokeStyle = "#e2e8f0"; ctx.lineWidth = 2; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x-4, y); ctx.lineTo(p.on ? (x+18, y) : (x+4, y-16)); ctx.strokeStyle = p.on ? "#10B981" : "#ef4444"; ctx.lineWidth = 2.6; ctx.stroke();
+    label(p, p.on ? "开关 ON" : "开关 OFF", hot);
+  }
+  ctx.restore();
+}
+
+function label(p, t, hot){
+  ctx.font = "11px system-ui";
+  ctx.textAlign = "center";
+  var y = p.y - 26;
+  if (hot){ ctx.fillStyle = "#0f172a"; var w = ctx.measureText(t).width + 12; ctx.fillRect(p.x - w/2, y - 12, w, 17); }
+  ctx.fillStyle = hot ? "#facc15" : "#94a3b8";
+  ctx.fillText(t, p.x, y);
+}
+
+function fmtV(v){ return (v >= 1000 ? (v/1000).toFixed(1)+"kV" : v.toFixed(1)+"V"); }
+function fmtR(r){ return r >= 1e6 ? (r/1e6).toFixed(1)+"MΩ" : r >= 1000 ? (r/1000).toFixed(1)+"kΩ" : r.toFixed(0)+"Ω"; }
+function fmtA(i){ return i >= 1 ? i.toFixed(2)+"A" : i >= 0.001 ? (i*1000).toFixed(1)+"mA" : (i*1e6).toFixed(0)+"µA"; }
+function fmtW(w){ return w >= 1 ? w.toFixed(2)+"W" : w >= 0.001 ? (w*1000).toFixed(1)+"mW" : (w*1e6).toFixed(0)+"µW"; }
+
+function endpoint(ref){
+  var p = parts.find(function(x){ return x.id === ref.pid; });
+  return p ? nodeOf(p, ref.node) : {x:0,y:0};
+}
+
+/* ---------- 命中测试 ---------- */
+function hitNode(px, py){
+  for (var i = parts.length-1; i >= 0; i--){
+    var p = parts[i];
+    for (var k = 0; k < 2; k++){
+      var n = nodeOf(p, k);
+      if (Math.hypot(px-n.x, py-n.y) <= NODE_R + 6) return {pid:p.id, node:k};
+    }
+  }
+  return null;
+}
+function hitPart(px, py){
+  for (var i = parts.length-1; i >= 0; i--){
+    var p = parts[i];
+    var d = Math.hypot(px-p.x, py-p.y);
+    var r = p.type === "bulb" ? 16 : 34;
+    if (d <= r) return p;
+  }
+  return null;
+}
+
+/* ---------- 交互 ---------- */
+var isTouch = false;
+cv.addEventListener("pointerdown", function(e){
+  var pt = toLocal(e); isTouch = true;
+  if (placing){
+    var p = addPart(placing.type, pt.x, pt.y); placing = null; mode = "select";
+    document.querySelectorAll(".lib-btn").forEach(function(b){ b.classList.remove("on"); });
+    draw(); return;
+  }
+  var hn = hitNode(pt.x, pt.y);
+  if (hn){ dragWire = {x0: pt.x, y0: pt.y, x1: pt.x, y1: pt.y, from: hn}; return; }
+  var hp = hitPart(pt.x, pt.y);
+  if (hp){ selected = hp; dragEl = hp; dragNode = null; showProps(hp); draw(); return; }
+  selected = null; hideProps(); draw();
+});
+cv.addEventListener("pointermove", function(e){
+  var pt = toLocal(e);
+  if (dragWire){ dragWire.x1 = pt.x; dragWire.y1 = pt.y; draw(); return; }
+  if (dragEl){ var sp = snapPt(pt.x, pt.y); dragEl.x = sp.x; dragEl.y = sp.y; var dx = 60; dragEl.n0 = {x:sp.x-dx, y:sp.y}; dragEl.n1 = {x:sp.x+dx, y:sp.y}; draw(); return; }
+});
+window.addEventListener("pointerup", function(e){
+  if (dragWire){
+    var pt = toLocal(e);
+    var hn = hitNode(pt.x, pt.y);
+    if (hn && !(hn.pid === dragWire.from.pid && hn.node === dragWire.from.node)){
+      /* 避免重复连线 */
+      var dup = wires.some(function(w){ return (w.a.pid===dragWire.from.pid&&w.a.node===dragWire.from.node&&w.b.pid===hn.pid&&w.b.node===hn.node) || (w.b.pid===dragWire.from.pid&&w.b.node===dragWire.from.node&&w.a.pid===hn.pid&&w.a.node===hn.node); });
+      if (!dup) wires.push({id:uid++, a:dragWire.from, b:hn});
+      else toast("已存在这条连线");
+    }
+    dragWire = null; draw(); return;
+  }
+  dragEl = null; dragNode = null;
+});
+
+function toLocal(e){
+  var r = cv.getBoundingClientRect();
+  return {x: e.clientX - r.left, y: e.clientY - r.top};
+}
+
+document.querySelectorAll(".lib-btn:not(:disabled)").forEach(function(b){
+  b.addEventListener("click", function(){
+    var t = b.dataset.part;
+    if (placing && placing.type === t){ placing = null; b.classList.remove("on"); mode="select"; return; }
+    placing = {type:t, x:cv.clientWidth/2, y:cv.clientHeight/2, n0:{x:0,y:0}, n1:{x:0,y:0}};
+    mode = "place";
+    document.querySelectorAll(".lib-btn").forEach(function(x){ x.classList.remove("on"); });
+    b.classList.add("on");
+    hideProps(); draw();
+  });
+});
+/* 搜索过滤 */
+document.getElementById("libSearch").addEventListener("input", function(e){
+  var kw = e.target.value.trim();
+  document.querySelectorAll(".lib-btn").forEach(function(b){
+    b.style.display = (!kw || b.textContent.toLowerCase().indexOf(kw.toLowerCase()) >= 0) ? "" : "none";
+  });
+});
+document.getElementById("delBtn").addEventListener("click", function(){
+  if (!selected) return toast("先点选一个元件");
+  parts = parts.filter(function(p){ return p.id !== selected.id; });
+  wires = wires.filter(function(w){ return w.a.pid !== selected.id && w.b.pid !== selected.id; });
+  selected = null; hideProps(); draw();
+});
+document.getElementById("clearBtn").addEventListener("click", function(){
+  parts = []; wires = []; selected = null; placing = null; hideProps(); draw();
+  document.querySelectorAll(".lib-btn").forEach(function(x){ x.classList.remove("on"); });
+  toast("画布已清空");
+});
+document.getElementById("shareBtn").addEventListener("click", share);
+
+/* ---------- 示例模板（Phase 2a） ---------- */
+var TEMPLATES = {
+  series: {  /* 9V + 200Ω 灯泡 串联（闭合回路） */
+    p: [[0,"battery",240,300,9,1], [1,"bulb",480,300,200,1]],
+    w: [[0,1,1,0], [1,1,0,0]]
+  },
+  twolamp: {  /* 12V + 100Ω 灯 + 300Ω 灯 串联（亮暗比较） */
+    p: [[0,"battery",200,300,12,1], [1,"bulb",430,300,100,1], [2,"bulb",660,300,300,1]],
+    w: [[0,1,1,0], [1,1,2,0], [2,1,0,0]]
+  },
+  switch: {  /* 9V - 开关 - 灯泡 串联（开关控制） */
+    p: [[0,"battery",200,300,9,1], [1,"switch",430,300,0,1], [2,"bulb",660,300,200,1]],
+    w: [[0,1,1,0], [1,1,2,0], [2,1,0,0]]
+  }
+};
+document.getElementById("tplSel").addEventListener("change", function(e){
+  var key = e.target.value;
+  e.target.value = "";
+  if (!key || !TEMPLATES[key]) return;
+  restore(JSON.parse(JSON.stringify(TEMPLATES[key])));
+  toast("已加载示例模板：" + ({series:"串联分压", twolamp:"双灯串联", switch:"开关控制"}[key]));
+});
+/* 波形/网表：Phase 2b 占位 */
+["waveBtn","netBtn"].forEach(function(id){
+  var b = document.getElementById(id);
+  if (b && b.disabled){ b.title = "Phase 2b 开放（波形图 / 网表导出）"; }
+});
+
+/* ---------- 属性面板 ---------- */
+function showProps(p){
+  var canVal = p.type === "battery" || p.type === "resistor" || p.type === "bulb";
+  propsEl.style.display = "block";
+  var r = cv.getBoundingClientRect();
+  propsEl.style.left = Math.min(p.x + 26, r.width - 210) + "px";
+  propsEl.style.top = Math.max(8, p.y - 30) + "px";
+  var h = "<h4>" + nameOf(p) + "</h4>";
+  if (canVal){
+    var max = p.type === "battery" ? 24 : 100000, min = p.type === "battery" ? 1 : 10, step = p.type === "battery" ? 0.5 : 10;
+    h += '<label>' + (p.type==="battery"?"电压":"阻值") + ' <input type="range" min="'+min+'" max="'+max+'" step="'+step+'" value="'+p.val+'" data-f="val"></label>';
+    h += '<label>数值 <input type="number" min="'+min+'" max="'+max+'" step="'+step+'" value="'+p.val+'" data-f="val" style="width:70px"></label>';
+  }
+  if (p.type === "switch"){
+    h += '<label>状态 <input type="checkbox" data-f="on" ' + (p.on?"checked":"") + '></label>';
+  }
+  h += '<button id="propClose">关闭</button>';
+  propsEl.innerHTML = h;
+  propsEl.querySelectorAll("[data-f]").forEach(function(inp){
+    inp.addEventListener("input", function(){
+      if (inp.dataset.f === "val") p.val = parseFloat(inp.value) || p.val;
+      if (inp.dataset.f === "on") p.on = inp.checked;
+      /* 同步另一个输入框 */
+      if (inp.dataset.f === "val"){
+        propsEl.querySelectorAll("[data-f=val]").forEach(function(o){ if (o !== inp) o.value = inp.value; });
+      }
+      updateCalc(); draw();
+    });
+  });
+  propsEl.querySelector("#propClose").addEventListener("click", hideProps);
+}
+function nameOf(p){ return {battery:"🔋 电池", resistor:"➰ 电阻", bulb:"💡 灯泡", switch:"🔘 开关"}[p.type] || p.type; }
+function hideProps(){ propsEl.style.display = "none"; }
+
+/* ---------- 仿真面板 ---------- */
+function updateCalc(){
+  var loops = findLoops();
+  if (!loops.length){ calcEl.innerHTML = '<div class="row"><span style="color:var(--muted)">画一个闭合回路开始仿真</span></div>'; return; }
+  var loop = loops[0];
+  var s = solve(loop);
+  if (!s){ calcEl.innerHTML = '<div class="row"><span style="color:var(--warn)">回路缺少电池</span></div>'; return; }
+  var html = '<div class="row"><span>电源电压</span><b class="hot">' + fmtV(s.totalV) + '</b></div>';
+  html += '<div class="row"><span>回路电流</span><b class="ok">' + fmtA(s.I) + '</b></div>';
+  html += '<div class="row"><span>总电阻</span><b>' + fmtR(s.totalR) + '</b></div>';
+  s.per.forEach(function(it){
+    if (it.role === "电池") return;
+    html += '<div class="row"><span>' + nameOf(it.p) + '</span><b>' + fmtV(it.v) + ' / ' + fmtA(it.I) + '</b></div>';
+    if (it.role === "负载") html += '<div class="row" style="padding-left:6px"><span style="color:var(--muted)">· 功率</span><b class="' + (it.pwr > 1 ? "hot" : "ok") + '">' + fmtW(it.pwr) + '</b></div>';
+  });
+  calcEl.innerHTML = html;
+}
+
+/* ---------- 序列化 / 分享 ---------- */
+function serialize(){
+  return {p: parts.map(function(p){ return [p.id, p.type, Math.round(p.x), Math.round(p.y), p.val, p.on ? 1:0]; }),
+          w: wires.map(function(w){ return [w.a.pid, w.a.node, w.b.pid, w.b.node]; }) };
+}
+function restore(data){
+  parts = []; wires = []; selected = null; placing = null;
+  var idMap = {};
+  var legacy = Array.isArray(data.p) && data.p.length && typeof data.p[0][0] === "string";
+  data.p.forEach(function(a){
+    /* 兼容旧分享链接格式 [type,x,y,val,on]（v146 及之前） */
+    var p = legacy ? addPart(a[0], a[1], a[2]) : addPart(a[1], a[2], a[3]);
+    var v = legacy ? a[3] : a[4], on = legacy ? a[4] : a[5];
+    p.val = v; p.on = on === 1;
+    if (legacy){ /* 旧格式用 p 数组下标定位 wire */ idMap[data.p.indexOf(a)] = p.id; }
+    else { idMap[a[0]] = p.id; }
+  });
+  data.w.forEach(function(w){ wires.push({id:uid++, a:{pid:idMap[w[0]], node:w[1]}, b:{pid:idMap[w[2]], node:w[3]}}); });
+  updateCalc(); draw();
+}
+function share(){
+  var s = JSON.stringify(serialize());
+  var url = location.origin + location.pathname + "#" + encodeURIComponent(s);
+  try{ navigator.clipboard.writeText(url).then(function(){ toast("电路链接已复制，粘贴到浏览器即可打开"); }); }
+  catch(e){ toast(url.slice(0,60) + "…"); }
+}
+(function(){
+  var h = location.hash.slice(1);
+  if (h){
+    try{ restore(JSON.parse(decodeURIComponent(h))); toast("已载入分享的电路"); }
+    catch(e){ toast("电路链接无法解析"); }
+  }
+})();
+
+function toast(msg){
+  toastEl.textContent = msg; toastEl.style.opacity = "1";
+  clearTimeout(toastT); toastT = setTimeout(function(){ toastEl.style.opacity = "0"; }, 2200);
+}
+
+resize();
+updateCalc();
+})();
+</script>
+</body>
+</html>
