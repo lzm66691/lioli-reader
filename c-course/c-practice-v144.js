@@ -1524,6 +1524,7 @@ int main(void)
   }
 
   let cpRoot = null;
+  let splitMode = false;   /* v144.1：提升到外层，hide() 需访问（此前局部变量导致关闭抛 ReferenceError） */
   function buildPanel() {
     ensureStyle();
     cpRoot = document.createElement("div");
@@ -1589,7 +1590,6 @@ int main(void)
     splitHandle.style.cssText = "position:absolute;top:0;left:0;bottom:0;width:8px;cursor:col-resize;z-index:7000;display:none;touch-action:none;background:rgba(77,107,254,0)";
     splitHandle.title = "拖拽调整宽度";
     cpRoot.appendChild(splitHandle);
-    let splitMode = false;
     const splitBtn = cpRoot.querySelector("[data-act=split]");
     /* v142.1：分屏时同步收窄左侧 PDF 区（pdf.js viewer 检测 iframe 尺寸变化自动重排） */
     function getPdfWrap(){ try { return document.querySelector(".pdf-wrap") || document.getElementById("pdfFrame"); } catch(e){ return null; } }
