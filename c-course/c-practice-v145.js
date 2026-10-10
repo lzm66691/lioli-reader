@@ -1671,8 +1671,10 @@ int main(void)
     ta.addEventListener("click", updateCurline);
     ta.addEventListener("focus", updateCurline);
     /* v145：中文输入法兼容——composition 期间显示真实文字（否则候选字看不到） */
-    ta.addEventListener("compositionstart", () => { ta.style.color = ""; });
-    ta.addEventListener("compositionupdate", () => { ta.style.color = ""; });
+    let compColor = "#334155";
+    try { compColor = getComputedStyle(cpRoot).getPropertyValue("--body").trim() || "#334155"; } catch (e) {}
+    ta.addEventListener("compositionstart", () => { ta.style.color = compColor; });
+    ta.addEventListener("compositionupdate", () => { ta.style.color = compColor; });
     ta.addEventListener("compositionend", () => {
       ta.style.color = "transparent";
       const q = curQ();
