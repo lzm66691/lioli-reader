@@ -1,0 +1,417 @@
+{
+ "meta": {
+  "name": "莉萝题库 · 拼题A风格题集",
+  "schema_version": "2.0",
+  "schema_note": "type=大类(circuit/programming) + questionType=题型(blank/code/single/multiple)；answer语义：电路题=标准答案(归一化比对)，编程题=参考代码；samples[]展示用，testCases[]判分用",
+  "source_note": "题目取材自清华《电工电子技术基础》、大学电路教材例题及 PTA 经典编程题，来源字段见每题 source"
+ },
+ "circuit": [
+  {
+   "id": "EL-001",
+   "course": "电路基础",
+   "type": "circuit",
+   "questionType": "blank",
+   "title": "基尔霍夫电压定律·单回路求电流",
+   "score": 10,
+   "difficulty": "基础",
+   "tag": [
+    "KVL",
+    "欧姆定律"
+   ],
+   "desc": "电路如右图：9V 理想电压源与 1Ω、2Ω、4V 电压源（反向）、7Ω 电阻串联成闭合回路。求回路电流 I。",
+   "hint": "沿回路列 KVL：9 - 1I - 2I - 4 - 7I = 0",
+   "testCases": [
+    {
+     "input": "",
+     "expected": "0.5",
+     "hidden": false
+    }
+   ],
+   "answer": "0.5 A",
+   "normalize": {
+    "strip_space": true,
+    "tolerance": 0.01,
+    "unit_aliases": {
+     "安": "A",
+     "安培": "A",
+     "伏": "V",
+     "伏特": "V",
+     "欧": "Ω",
+     "欧姆": "Ω",
+     "瓦": "W",
+     "瓦特": "W"
+    },
+    "note": "第一期：单位表为别名表（非换算），0.5A 与 500mA 判不同答案"
+   },
+   "source": {
+    "name": "清华《电工电子技术基础(第2版)》例1-5",
+    "url": "https://www.tup.tsinghua.edu.cn/upload/books/yz/062316-01.pdf",
+    "license": "教材例题引用"
+   },
+   "analysis": "KVL：Σ电压代数和为 0。9 - (1+2+7)I - 4 = 0 → 10I = 5 → I = 0.5A。"
+  },
+  {
+   "id": "EL-002",
+   "course": "电路基础",
+   "type": "circuit",
+   "questionType": "blank",
+   "title": "KCL与分压·求电阻参数",
+   "score": 15,
+   "difficulty": "进阶",
+   "tag": [
+    "KCL",
+    "KVL",
+    "欧姆定律"
+   ],
+   "desc": "电路中总电流 I = 2A 流入节点后分为两支：I1 经 R1，I2 经 R2。已知 U1 = 5V（R1 两端电压），U3 = 3V（R2 与下方 2Ω 电阻串联段电压）。求：U2、I2、R2、I1、R1。",
+   "hint": "先由 KVL 求 U2 = U1 - U3；再由欧姆定律求 I2 = U3 / 2Ω；KCL 求 I1 = I - I2。",
+   "testCases": [
+    {
+     "input": "",
+     "expected": "2 1.5 1.33 0.5 10",
+     "hidden": false
+    }
+   ],
+   "answer": "U2=2V；I2=1.5A；R2≈1.33Ω；I1=0.5A；R1=10Ω",
+   "normalize": {
+    "strip_space": true,
+    "unit_aliases": {
+     "安": "A",
+     "安培": "A",
+     "伏": "V",
+     "伏特": "V",
+     "欧": "Ω",
+     "欧姆": "Ω",
+     "瓦": "W",
+     "瓦特": "W"
+    },
+    "tolerance": 0.01,
+    "note": "第一期：单位表为别名表（非换算），0.5A 与 500mA 判不同答案"
+   },
+   "source": {
+    "name": "清华教材 KVL/KCL 例题",
+    "url": "http://www.tup.tsinghua.edu.cn/upload/books/yz/065784-02.txt",
+    "license": "教材例题引用"
+   },
+   "analysis": "KVL：U2 = U1 - U3 = 5 - 3 = 2V；I2 = U3 / 2 = 1.5A；R2 = U2/I2 = 2/1.5 ≈ 1.33Ω；KCL：I1 = I - I2 = 0.5A；R1 = U1/I1 = 10Ω。"
+  },
+  {
+   "id": "EL-003",
+   "course": "电路基础",
+   "type": "circuit",
+   "questionType": "blank",
+   "title": "戴维南定理·最大功率传输",
+   "score": 20,
+   "difficulty": "进阶",
+   "tag": [
+    "戴维南定理",
+    "最大功率传输"
+   ],
+   "desc": "含源一端口网络经戴维南等效后，开路电压 Uoc = 10V，等效内阻 R0 = 5Ω。负载电阻 RL 接在两端。问：RL 取何值时获得最大功率？最大功率 Pmax 为多少？",
+   "hint": "最大功率传输条件：RL = R0。Pmax = Uoc² / (4·R0)。",
+   "testCases": [
+    {
+     "input": "",
+     "expected": "5 5",
+     "hidden": false
+    }
+   ],
+   "answer": "RL=5Ω；Pmax=5W",
+   "normalize": {
+    "strip_space": true,
+    "unit_aliases": {
+     "安": "A",
+     "安培": "A",
+     "伏": "V",
+     "伏特": "V",
+     "欧": "Ω",
+     "欧姆": "Ω",
+     "瓦": "W",
+     "瓦特": "W"
+    },
+    "tolerance": 0.01,
+    "note": "第一期：单位表为别名表（非换算），0.5A 与 500mA 判不同答案"
+   },
+   "source": {
+    "name": "清华教材戴维南例题 / 山东理工《电路定理》讲义",
+    "url": "https://etcnew.sdut.edu.cn/meol/data/convert/2023/10/27/8880de9c-5043-40db-8b41-9d27bed8b45f_2070268.html",
+    "license": "教学资料引用"
+   },
+   "analysis": "最大功率传输定理：RL = R0 = 5Ω 时负载获最大功率；Pmax = Uoc²/(4R0) = 100/20 = 5W。"
+  },
+  {
+   "id": "EL-004",
+   "course": "电路基础",
+   "type": "circuit",
+   "questionType": "blank",
+   "title": "叠加定理·双电源电路",
+   "score": 20,
+   "difficulty": "进阶",
+   "tag": [
+    "叠加定理"
+   ],
+   "desc": "电路含两个独立电源。电压源单独作用时负载电流 IL1 = 1A；电流源单独作用时 IL2 = 0.4A，方向相同。负载电阻 RL = 6Ω。求：总负载电流 IL 与负载端电压 U。",
+   "hint": "叠加定理：IL = IL1 + IL2；U = IL × RL。",
+   "testCases": [
+    {
+     "input": "",
+     "expected": "1.4 8.4",
+     "hidden": false
+    }
+   ],
+   "answer": "IL=1.4A；U=8.4V",
+   "normalize": {
+    "strip_space": true,
+    "unit_aliases": {
+     "安": "A",
+     "安培": "A",
+     "伏": "V",
+     "伏特": "V",
+     "欧": "Ω",
+     "欧姆": "Ω",
+     "瓦": "W",
+     "瓦特": "W"
+    },
+    "tolerance": 0.01,
+    "note": "第一期：单位表为别名表（非换算），0.5A 与 500mA 判不同答案"
+   },
+   "source": {
+    "name": "山东春季高考《电工技术基础与技能》复杂直流电路题",
+    "url": "https://m.zxxk.com/soft/59745865.html",
+    "license": "试题引用"
+   },
+   "analysis": "叠加：IL = 1 + 0.4 = 1.4A（两电源单独作用方向一致）；U = IL·RL = 1.4 × 6 = 8.4V。"
+  },
+  {
+   "id": "EL-005",
+   "course": "电路基础",
+   "type": "circuit",
+   "questionType": "blank",
+   "title": "功率计算·判断发出/吸收",
+   "score": 10,
+   "difficulty": "基础",
+   "tag": [
+    "功率",
+    "参考方向"
+   ],
+   "desc": "三个元件串联电路：P1 = U1·I1 = 1V×2A；P2 = U2·I1 = (-3V)×2A；P3 = U3·I1 = 8V×2A。判断各元件功率是发出还是吸收。",
+   "hint": "功率为正为吸收，为负为发出。",
+   "testCases": [
+    {
+     "input": "",
+     "expected": "2 -6 16",
+     "hidden": false
+    }
+   ],
+   "answer": "P1=2W（吸收）；P2=-6W（发出）；P3=16W（吸收）",
+   "normalize": {
+    "strip_space": true,
+    "unit_aliases": {
+     "安": "A",
+     "安培": "A",
+     "伏": "V",
+     "伏特": "V",
+     "欧": "Ω",
+     "欧姆": "Ω",
+     "瓦": "W",
+     "瓦特": "W"
+    },
+    "tolerance": 0.01,
+    "note": "第一期：单位表为别名表（非换算），0.5A 与 500mA 判不同答案"
+   },
+   "source": {
+    "name": "安徽大学《电路模型和电路定律》习题",
+    "url": "http://www.ahu.edu.cn/_upload/article/files/fb/a9/a745d7e64bcba0155b5f97c76f65/5c2d06d0-330e-4ae3-8a3e-f4c0997ab089.pdf",
+    "license": "教学资料引用"
+   },
+   "analysis": "P>0 吸收功率，P<0 发出功率。P1=2W>0 吸收；P2=-6W<0 发出；P3=16W>0 吸收。"
+  }
+ ],
+ "programming": [
+  {
+   "id": "PTA-001",
+   "course": "C语言",
+   "type": "programming",
+   "questionType": "code",
+   "title": "Hello World",
+   "score": 5,
+   "difficulty": "入门",
+   "tag": [
+    "基础IO"
+   ],
+   "desc": "本题要求编写程序，输出一个短句“Hello World!”。",
+   "input": "本题目没有输入。",
+   "output": "在一行中输出短句“Hello World!”。",
+   "testCases": [
+    {
+     "input": "",
+     "expected": "Hello World!",
+     "hidden": false
+    }
+   ],
+   "answer": "#include <stdio.h>\nint main(){\n  printf(\"Hello World!\\n\");\n  return 0;\n}",
+   "answerNote": "参考代码，非唯一解",
+   "source": {
+    "name": "PTA 经典入门题",
+    "url": "https://pintia.cn/",
+    "license": "题目改写"
+   },
+   "analysis": "入门第一题，掌握 printf 基本输出。"
+  },
+  {
+   "id": "PTA-002",
+   "course": "C语言",
+   "type": "programming",
+   "questionType": "code",
+   "title": "统计字符个数",
+   "score": 10,
+   "difficulty": "基础",
+   "tag": [
+    "字符处理",
+    "循环"
+   ],
+   "desc": "输入一行字符，分别统计出其中英文字母、空格、数字和其他字符的个数。",
+   "input": "一行字符（长度不超过 100，含空格）。",
+   "output": "依次输出：字母数、空格数、数字数、其他字符数。",
+   "testCases": [
+    {
+     "input": "I am 18 years old.",
+     "expected": "letters=13 space=4 digit=2 other=1",
+     "hidden": false
+    }
+   ],
+   "answer": "#include <stdio.h>\nint main(){\n  char c; int letters=0,space=0,digit=0,other=0;\n  while((c=getchar())!='\\n'){\n    if((c>='a'&&c<='z')||(c>='A'&&c<='Z')) letters++;\n    else if(c==' ') space++;\n    else if(c>='0'&&c<='9') digit++;\n    else other++;\n  }\n  printf(\"letters=%d space=%d digit=%d other=%d\\n\",letters,space,digit,other);\n  return 0;\n}",
+   "answerNote": "参考代码，非唯一解",
+   "source": {
+    "name": "清华《C程序设计》例5.4 变体 / PTA 题源",
+    "url": "http://www.tup.tsinghua.edu.cn/upload/books/yz/076451-03.txt",
+    "license": "教材例题改写"
+   },
+   "analysis": "getchar 逐字符读入，if-else 分类统计。"
+  },
+  {
+   "id": "PTA-003",
+   "course": "C语言",
+   "type": "programming",
+   "questionType": "code",
+   "title": "计算阶乘 n!",
+   "score": 10,
+   "difficulty": "基础",
+   "tag": [
+    "循环",
+    "累乘"
+   ],
+   "desc": "输入一个正整数 n，编程输出 n!（n 的阶乘）。n ≤ 20。",
+   "input": "一个正整数 n。",
+   "output": "输出 n! 的值。",
+   "testCases": [
+    {
+     "input": "5",
+     "expected": "120",
+     "hidden": false
+    }
+   ],
+   "answer": "#include <stdio.h>\nint main(){\n  long long i,n,fact=1;\n  scanf(\"%lld\",&n);\n  for(i=2;i<=n;i++) fact*=i;\n  printf(\"%lld\\n\",fact);\n  return 0;\n}",
+   "answerNote": "参考代码，非唯一解",
+   "source": {
+    "name": "PTA 案例 05-01-04",
+    "url": "http://www.tup.tsinghua.edu.cn/upload/books/yz/092591-01.txt",
+    "license": "教材案例改写"
+   },
+   "analysis": "for 循环累乘；n=20 时 20! 超出 int，用 long long。"
+  },
+  {
+   "id": "PTA-004",
+   "course": "C语言",
+   "type": "programming",
+   "questionType": "code",
+   "title": "查找星期",
+   "score": 15,
+   "difficulty": "基础",
+   "tag": [
+    "数组查表",
+    "字符串"
+   ],
+   "desc": "根据下表查找到星期，返回对应的序号（0=Sunday, 1=Monday, ..., 6=Saturday）。输入星期英文名，输出对应序号；找不到输出 -1。",
+   "input": "一个字符串（星期英文名，首字母大写）。",
+   "output": "对应的序号，或 -1。",
+   "testCases": [
+    {
+     "input": "Wednesday",
+     "expected": "3",
+     "hidden": false
+    }
+   ],
+   "answer": "#include <stdio.h>\n#include <string.h>\nint main(){\n  char *week[7]={\"Sunday\",\"Monday\",\"Tuesday\",\"Wednesday\",\"Thursday\",\"Friday\",\"Saturday\"};\n  char s[16]; int i;\n  scanf(\"%s\",s);\n  for(i=0;i<7;i++) if(strcmp(week[i],s)==0){ printf(\"%d\\n\",i); return 0; }\n  printf(\"-1\\n\"); return 0;\n}",
+   "answerNote": "参考代码，非唯一解",
+   "source": {
+    "name": "PTA 浙大版习题 11-2",
+    "url": "https://blog.csdn.net/qq_40856560/article/details/135584151",
+    "license": "题目改写"
+   },
+   "analysis": "字符串数组查表 + strcmp 比较。"
+  },
+  {
+   "id": "PTA-005",
+   "course": "C语言",
+   "type": "programming",
+   "questionType": "code",
+   "title": "求区间平方倒数之和",
+   "score": 15,
+   "difficulty": "进阶",
+   "tag": [
+    "循环",
+    "浮点精度"
+   ],
+   "desc": "输入两个正整数 m、n（m ≤ n），计算并输出 Σ(i² + 1/i)，i 从 m 到 n。结果保留 6 位小数。",
+   "input": "两个整数 m 和 n，空格分隔。",
+   "output": "一个实数，保留 6 位小数。",
+   "testCases": [
+    {
+     "input": "1 3",
+     "expected": "14.833333",
+     "hidden": false
+    }
+   ],
+   "answer": "#include <stdio.h>\nint main(){\n  int m,n,i; double sum=0;\n  scanf(\"%d %d\",&m,&n);\n  for(i=m;i<=n;i++) sum += i*i + 1.0/i;\n  printf(\"%.6f\\n\",sum);\n  return 0;\n}",
+   "answerNote": "参考代码，非唯一解",
+   "source": {
+    "name": "PTA 攀登者题",
+    "url": "https://blog.csdn.net/2302_79967187/article/details/142881371",
+    "license": "题目改写"
+   },
+   "analysis": "1.0/i 用浮点除法避免整数截断。"
+  },
+  {
+   "id": "PTA-006",
+   "course": "C语言",
+   "type": "programming",
+   "questionType": "code",
+   "title": "最大值及其最小下标",
+   "score": 15,
+   "difficulty": "进阶",
+   "tag": [
+    "数组",
+    "遍历"
+   ],
+   "desc": "输入一个正整数 n（1 < n ≤ 10），再输入 n 个整数，输出最大值及其对应的最小下标（下标从 0 开始）。",
+   "input": "第一行 n，第二行 n 个整数。",
+   "output": "最大值和它的最小下标，空格分隔。",
+   "testCases": [
+    {
+     "input": "4\n10 8 1 9",
+     "expected": "10 0",
+     "hidden": false
+    }
+   ],
+   "answer": "#include <stdio.h>\nint main(){\n  int n,i,max,idx=0,a[10];\n  scanf(\"%d\",&n);\n  for(i=0;i<n;i++) scanf(\"%d\",&a[i]);\n  max=a[0];\n  for(i=1;i<n;i++) if(a[i]>max){ max=a[i]; idx=i; }\n  printf(\"%d %d\\n\",max,idx);\n  return 0;\n}",
+   "answerNote": "参考代码，非唯一解",
+   "source": {
+    "name": "石河子大学典型例题",
+    "url": "https://eol.shzu.edu.cn/meol/common/script/preview/download_preview.jsp?fileid=830151&resid=151649871&lid=39052&preview=preview",
+    "license": "教学资料引用"
+   },
+   "analysis": "只更新严格大于的索引，保证相同最大值取最小下标。"
+  }
+ ]
+}
