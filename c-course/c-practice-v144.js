@@ -2430,8 +2430,15 @@ int main(void)
     try { localStorage.setItem("reader-app-cpractice-open", "1"); } catch (e) {}
   }
   function hide() {
-    /* v143.1：任何方式关闭面板都必须先清理分屏状态，否则遮罩残留盖住主页 */
-    if (splitMode) { splitMode = false; applySplit(false); }
+    /* v144.1：任何方式关闭面板必须先清理分屏状态（内联实现，不依赖 buildPanel 闭包函数） */
+    if (splitMode) {
+      splitMode = false;
+      try { document.body.classList.remove("cp-split"); } catch (e) {}
+      try { const w = document.querySelector(".pdf-wrap"); if (w) w.style.cssText = ""; } catch (e) {}
+      try { const sh = document.getElementById("cpSplitHandle"); if (sh) sh.style.display = "none"; } catch (e) {}
+      try { if (cpRoot) { const sb = cpRoot.querySelector("[data-act=split]"); if (sb) sb.style.background = ""; } } catch (e) {}
+      try { if (cpRoot) cpRoot.style.cssText = ""; } catch (e) {}
+    }
     if (cpRoot) cpRoot.hidden = true;
     try { localStorage.setItem("reader-app-cpractice-open", "0"); } catch (e) {}
   }
