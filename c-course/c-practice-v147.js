@@ -1456,7 +1456,8 @@ int main(void)
       .cp-editor .cp-gutter{flex:0 0 44px;padding:10px 8px 10px 8px;text-align:right;color:var(--muted,#64748b);background:var(--gutter-bg,rgba(0,0,0,.035));border-right:1px solid var(--line,#e2e8f0);font-family:Consolas,"Courier New",monospace;font-size:13px;line-height:1.55;white-space:pre;overflow:hidden;user-select:none;box-sizing:border-box}
       .cp-editor .cp-code{position:relative;flex:1;min-width:0;min-height:0}
       .cp-editor pre,.cp-editor textarea{margin:0;padding:10px 12px;font-family:Consolas,"Courier New",monospace;font-size:13px;line-height:1.55;white-space:pre;tab-size:4;box-sizing:border-box}
-      .cp-editor pre{position:absolute;inset:0;overflow:hidden;color:transparent;pointer-events:none;border:none;background:transparent;z-index:4}
+      .cp-editor pre{position:absolute;inset:0;overflow:hidden;color:var(--body,#334155);pointer-events:none;border:none;background:transparent;z-index:4}
+      body.dark .cp-editor pre{color:#e2e8f0}
       /* v141：语法高亮颜色（pre 在 textarea 之上显示彩色文字，textarea 文字透明保持可编辑） */
       .cp-editor pre .cpt-kw{color:#7c3aed}.cp-editor pre .cpt-cm{color:#059669}.cp-editor pre .cpt-str{color:#b91c1c}.cp-editor pre .cpt-num{color:#0d9488}.cp-editor pre .cpt-pre{color:#b45309}
       body.dark .cp-editor pre .cpt-kw{color:#c4b5fd}body.dark .cp-editor pre .cpt-cm{color:#6ee7b7}body.dark .cp-editor pre .cpt-str{color:#fca5a5}body.dark .cp-editor pre .cpt-num{color:#5eead4}body.dark .cp-editor pre .cpt-pre{color:#fcd34d}
