@@ -2,7 +2,7 @@
  "meta": {
   "name": "莉萝题库 · 拼题A风格题集",
   "schema_version": "2.0",
-  "schema_note": "type=大类(circuit/programming) + questionType=题型(blank/code/single/multiple)；answer语义：电路题=标准答案(归一化比对)，编程题=参考代码；samples[]展示用，testCases[]判分用",
+  "schema_note": "type=大类(circuit/programming) + questionType=题型(blank/code/single/multiple)；answer语义：电路题=标准答案(归一化比对)，编程题=参考代码；samples[]展示用，testCases[]判分用；2026-10-12 补录 PTA-007~014（8道）",
   "source_note": "题目取材自清华《电工电子技术基础》、大学电路教材例题及 PTA 经典编程题，来源字段见每题 source"
  },
  "circuit": [
@@ -412,6 +412,268 @@
     "license": "教学资料引用"
    },
    "analysis": "只更新严格大于的索引，保证相同最大值取最小下标。"
+  },
+  {
+   "id": "PTA-007",
+   "course": "C语言",
+   "type": "programming",
+   "questionType": "code",
+   "title": "Programming in C is fun!",
+   "score": 5,
+   "difficulty": "入门",
+   "tag": [
+    "基础IO"
+   ],
+   "desc": "本题要求编写程序，输出一个短句“Programming in C is fun!”。",
+   "input": "本题目没有输入。",
+   "output": "在一行中输出短句“Programming in C is fun!”。",
+   "testCases": [
+    {
+     "input": "",
+     "expected": "Programming in C is fun!",
+     "hidden": false
+    }
+   ],
+   "answer": "#include <stdio.h>\nint main(){\n  printf(\"Programming in C is fun!\\n\");\n  return 0;\n}",
+   "answerNote": "参考代码，非唯一解",
+   "source": {
+    "name": "PTA 基础编程题目集 练习2-1",
+    "url": "https://pintia.cn/problem-sets/14",
+    "license": "题目改写"
+   },
+   "analysis": "printf 直接输出字符串，注意结尾换行。"
+  },
+  {
+   "id": "PTA-008",
+   "course": "C语言",
+   "type": "programming",
+   "questionType": "code",
+   "title": "温度转换（华氏→摄氏）",
+   "score": 5,
+   "difficulty": "入门",
+   "tag": [
+    "算术运算",
+    "整数除法"
+   ],
+   "desc": "本题要求编写程序，计算华氏温度 100°F 对应的摄氏温度。计算公式：C = 5 × (F − 32) / 9，式中 C 表示摄氏温度，F 表示华氏温度，输出取整数（C 语言整数除法）。",
+   "input": "本题目没有输入。",
+   "output": "输出格式：\"Celsius = 摄氏温度\"，摄氏温度为整数。",
+   "testCases": [
+    {
+     "input": "",
+     "expected": "Celsius = 37",
+     "hidden": false
+    }
+   ],
+   "answer": "#include <stdio.h>\nint main(){\n  int fahr = 100;\n  int celsius = 5 * (fahr - 32) / 9;\n  printf(\"Celsius = %d\\n\", celsius);\n  return 0;\n}",
+   "answerNote": "参考代码，非唯一解",
+   "source": {
+    "name": "PTA 基础编程题目集 练习2-4",
+    "url": "https://pintia.cn/problem-sets/14",
+    "license": "题目改写"
+   },
+   "analysis": "5×68/9 = 340/9 = 37（整数除法截断）。"
+  },
+  {
+   "id": "PTA-009",
+   "course": "C语言",
+   "type": "programming",
+   "questionType": "code",
+   "title": "统计学生平均成绩与及格人数",
+   "score": 10,
+   "difficulty": "基础",
+   "tag": [
+    "循环",
+    "分支",
+    "浮点"
+   ],
+   "desc": "本题要求编写程序，计算学生们的平均成绩，并统计及格（成绩不低于 60 分）的人数。题目保证输入与输出均在整型范围内。",
+   "input": "输入在第一行中给出非负整数 N（学生人数），第二行给出 N 个非负整数成绩，其间以空格分隔。",
+   "output": "按照以下格式输出：\naverage = 平均成绩（保留 1 位小数）\ncount = 及格人数",
+   "testCases": [
+    {
+     "input": "5\n77 54 92 73 60",
+     "expected": "average = 71.2\ncount = 4",
+     "hidden": false
+    }
+   ],
+   "answer": "#include <stdio.h>\nint main(){\n  int n, x, i, cnt = 0; double sum = 0;\n  scanf(\"%d\", &n);\n  for (i = 0; i < n; i++){\n    scanf(\"%d\", &x);\n    sum += x;\n    if (x >= 60) cnt++;\n  }\n  if (n == 0) printf(\"average = 0.0\\ncount = 0\\n\");\n  else printf(\"average = %.1f\\ncount = %d\\n\", sum / n, cnt);\n  return 0;\n}",
+   "answerNote": "参考代码，非唯一解；平均成绩需用浮点除法",
+   "source": {
+    "name": "PTA 基础编程题目集 练习3-3（改编）",
+    "url": "https://pintia.cn/problem-sets/14",
+    "license": "题目改写"
+   },
+   "analysis": "sum 用 double 避免整数除法丢精度：356/5 = 71.2；及格 77/92/73/60 = 4 人。"
+  },
+  {
+   "id": "PTA-010",
+   "course": "C语言",
+   "type": "programming",
+   "questionType": "code",
+   "title": "求幂级数展开的部分和",
+   "score": 15,
+   "difficulty": "进阶",
+   "tag": [
+    "循环",
+    "浮点精度",
+    "级数"
+   ],
+   "desc": "已知函数 e^x 的幂级数展开式为：e^x = 1 + x + x²/2! + x³/3! + … + x^k/k! + …。现给定一个实数 x，求该幂级数展开的部分和，直到最后一项的绝对值小于 0.00001。",
+   "input": "输入在一行中给出一个实数 x ∈ [0, 5]。",
+   "output": "在一行中输出部分和的值，保留小数点后 6 位。输出格式：\"sum = S\"。",
+   "testCases": [
+    {
+     "input": "0.3",
+     "expected": "sum = 1.349859",
+     "hidden": false
+    }
+   ],
+   "answer": "#include <stdio.h>\nint main(){\n  double x, term = 1, sum = 0;\n  int i = 0;\n  scanf(\"%lf\", &x);\n  while (term >= 1e-5 || term <= -1e-5){\n    sum += term;\n    i++;\n    term = term * x / i;   // 递推：term_k = term_{k-1} * x / k\n  }\n  sum += term;  // 补上最后一项（绝对值 < 1e-5 但仍计入？按题意取整项和）\n  printf(\"sum = %.6f\\n\", sum);\n  return 0;\n}",
+   "answerNote": "参考代码，非唯一解；实现要点：第 k 项 = 前一项 × x ÷ k，避免重复算阶乘",
+   "source": {
+    "name": "PTA 基础编程题目集 习题4-2（改编）",
+    "url": "https://pintia.cn/problem-sets/14",
+    "license": "题目改写"
+   },
+   "analysis": "递推 term = term × x / i；x=0.3 时收敛于 e^0.3 ≈ 1.349859（保留6位）。"
+  },
+  {
+   "id": "PTA-011",
+   "course": "C语言",
+   "type": "programming",
+   "questionType": "code",
+   "title": "水仙花数",
+   "score": 20,
+   "difficulty": "进阶",
+   "tag": [
+    "数位分离",
+    "循环",
+    "枚举"
+   ],
+   "desc": "水仙花数是指一个 N 位正整数，其各位数字的 N 次方之和等于该数本身。例如：153 = 1³ + 5³ + 3³。本题要求编写程序，输出所有 N 位水仙花数。",
+   "input": "输入在一行中给出一个正整数 N（3 ≤ N ≤ 7）。",
+   "output": "按递增顺序输出所有 N 位水仙花数，每个数字占一行。",
+   "testCases": [
+    {
+     "input": "3",
+     "expected": "153\n370\n371\n407",
+     "hidden": false
+    },
+    {
+     "input": "4",
+     "expected": "1634\n8208\n9474",
+     "hidden": false
+    }
+   ],
+   "answer": "#include <stdio.h>\nint main(){\n  int n, i, t, d, sum;\n  int pw[10];\n  long long start = 1, end = 10, k;\n  scanf(\"%d\", &n);\n  for (i = 0; i < n - 1; i++) start *= 10;\n  for (i = 0; i < n; i++) end *= 10;\n  for (i = 0; i < 10; i++){\n    pw[i] = 1;\n    for (d = 0; d < n; d++) pw[i] *= i;   // 预计算 0..9 的 n 次方\n  }\n  for (k = start; k < end; k++){\n    t = (int)k; sum = 0;\n    while (t){ sum += pw[t % 10]; t /= 10; }\n    if (sum == k) printf(\"%d\\n\", (int)k);\n  }\n  return 0;\n}",
+   "answerNote": "参考代码，非唯一解；预计算次方表避免 pow 重复调用（N=7 时枚举 900 万次）",
+   "source": {
+    "name": "PTA 基础编程题目集 习题4-6",
+    "url": "https://pintia.cn/problem-sets/14",
+    "license": "题目改写"
+   },
+   "analysis": "3 位水仙花：153/370/371/407；4 位：1634/8208/9474。"
+  },
+  {
+   "id": "PTA-012",
+   "course": "C语言",
+   "type": "programming",
+   "questionType": "code",
+   "title": "求 m 到 n 之和（函数）",
+   "score": 10,
+   "difficulty": "基础",
+   "tag": [
+    "函数",
+    "循环"
+   ],
+   "desc": "本题要求实现一个函数 sum(m, n)，计算并返回整数 m 到 n 的所有整数之和（含端点）。主程序读入两个整数并输出结果。",
+   "input": "一行两个整数 m 和 n（m ≤ n），空格分隔。",
+   "output": "输出格式：\"sum = 结果\"。",
+   "testCases": [
+    {
+     "input": "1 100",
+     "expected": "sum = 5050",
+     "hidden": false
+    }
+   ],
+   "answer": "#include <stdio.h>\nint sum(int m, int n){\n  int s = 0, i;\n  for (i = m; i <= n; i++) s += i;\n  return s;\n}\nint main(){\n  int m, n;\n  scanf(\"%d %d\", &m, &n);\n  printf(\"sum = %d\\n\", sum(m, n));\n  return 0;\n}",
+   "answerNote": "参考代码，非唯一解",
+   "source": {
+    "name": "PTA 基础编程题目集 练习5-1",
+    "url": "https://pintia.cn/problem-sets/14",
+    "license": "题目改写"
+   },
+   "analysis": "1+2+…+100 = 5050。"
+  },
+  {
+   "id": "PTA-013",
+   "course": "C语言",
+   "type": "programming",
+   "questionType": "code",
+   "title": "输出指定范围内的 Fibonacci 数",
+   "score": 20,
+   "difficulty": "进阶",
+   "tag": [
+    "函数",
+    "数组",
+    "递推"
+   ],
+   "desc": "本题要求实现一个函数 fib(n) 返回第 n 项 Fibonacci 数（f(1)=1, f(2)=1, f(n)=f(n-1)+f(n-2)），并利用它输出给定区间 [m, n] 内的所有 Fibonacci 数。",
+   "input": "一行两个正整数 m 和 n（1 ≤ m ≤ n ≤ 10000），空格分隔。",
+   "output": "逐个输出区间 [m, n] 内的 Fibonacci 数，每个数占一行。若无，则输出 \"None\"。",
+   "testCases": [
+    {
+     "input": "20 100",
+     "expected": "21\n34\n55\n89",
+     "hidden": false
+    }
+   ],
+   "answer": "#include <stdio.h>\nlong long fib(int n){\n  long long a = 1, b = 1, c, i;\n  if (n == 1 || n == 2) return 1;\n  for (i = 3; i <= n; i++){ c = a + b; a = b; b = c; }\n  return b;\n}\nint main(){\n  int m, n, k, found = 0;\n  scanf(\"%d %d\", &m, &n);\n  for (k = 1; fib(k) <= n; k++){\n    if (fib(k) >= m){ printf(\"%lld\\n\", fib(k)); found = 1; }\n  }\n  if (!found) printf(\"None\\n\");\n  return 0;\n}",
+   "answerNote": "参考代码，非唯一解；注意 long long 防溢出（n≤10000 时 fib 增长快）",
+   "source": {
+    "name": "PTA 基础编程题目集 习题6-4（改编）",
+    "url": "https://pintia.cn/problem-sets/14",
+    "license": "题目改写"
+   },
+   "analysis": "Fibonacci：21/34/55/89 落在 [20,100]。"
+  },
+  {
+   "id": "PTA-014",
+   "course": "C语言",
+   "type": "programming",
+   "questionType": "code",
+   "title": "求一批整数中出现最多的个位数字",
+   "score": 15,
+   "difficulty": "基础",
+   "tag": [
+    "数组",
+    "统计",
+    "取模"
+   ],
+   "desc": "给定一批整数，分析每个整数的个位数字（0~9）。求出现次数最多的个位数字；若并列最多，按升序全部输出。",
+   "input": "第一行给出正整数 N（≤ 1000），第二行给出 N 个不超过 10000 的整数，空格分隔。",
+   "output": "输出格式为 \"数字: 次数\"，若并列则每行一个、按数字升序。",
+   "testCases": [
+    {
+     "input": "3\n1234 2345 3456",
+     "expected": "4: 1\n5: 1\n6: 1",
+     "hidden": false
+    },
+    {
+     "input": "4\n10 20 30 40",
+     "expected": "0: 4",
+     "hidden": false
+    }
+   ],
+   "answer": "#include <stdio.h>\nint main(){\n  int n, x, i, cnt[10] = {0}, max = 0;\n  scanf(\"%d\", &n);\n  for (i = 0; i < n; i++){\n    scanf(\"%d\", &x);\n    cnt[x % 10]++;\n  }\n  for (i = 0; i < 10; i++) if (cnt[i] > max) max = cnt[i];\n  for (i = 0; i < 10; i++) if (cnt[i] == max) printf(\"%d: %d\\n\", i, max);\n  return 0;\n}",
+   "answerNote": "参考代码，非唯一解",
+   "source": {
+    "name": "PTA 基础编程题目集 习题7-2（改编）",
+    "url": "https://pintia.cn/problem-sets/14",
+    "license": "题目改写"
+   },
+   "analysis": "x%10 取个位；样例1个位4/5/6各1次并列；样例2个位全0共4次。"
   }
  ]
 }
