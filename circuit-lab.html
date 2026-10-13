@@ -54,7 +54,15 @@
   <header>
     <button class="back" id="backBtn" title="返回阅读器主页">← 返回</button>
     <h1>⚡ 电路画板</h1>
-    <span class="sub">KiCad 符号库 · 可导出 .kicad_sch（KiCad 8+ 兼容）</span>
+    <span class="sub" id="subTitle">原理图 · KiCad 符号库 · 导出 .kicad_sch（KiCad 8+）</span>
+    <button class="tbtn" id="modeBtn" title="切换 原理图 / PCB 板布局">🖥 PCB</button>
+    <span class="pcbTools" id="pcbTools" style="display:none">
+      <select class="tpl" id="layerSel" title="PCB 布线层">
+        <option value="TOP">TOP 顶层</option>
+        <option value="BOTTOM">BOTTOM 底层</option>
+      </select>
+      <button class="tbtn" id="viaBtn" title="放置过孔（PCB 模式）">◎ 过孔</button>
+    </span>
     <select class="tpl" id="tplSel" title="预置示例电路图">
       <option value="">▾ 示例电路</option>
       <option value="series">串联电路（1灯）</option>
@@ -73,6 +81,7 @@
       <button class="tbtn" id="rotBtn" title="旋转选中元件 90°（或按 R）">⟳ 旋转</button>
       <button class="tbtn" id="pngBtn" title="导出画板为 PNG 图片">📥 PNG</button>
       <button class="tbtn" id="schBtn" title="导出 KiCad 8+ 原理图 .kicad_sch">📤 SCH</button>
+      <button class="tbtn" id="pcbBtn" title="导出 KiCad 8+ PCB .kicad_pcb">📤 PCB</button>
       <button class="tbtn" id="impBtn" title="导入 KiCad 原理图 .kicad_sch">📂 导入</button>
       <button class="tbtn" id="delBtn" title="删除选中元件">🗑 删除</button>
       <button class="tbtn" id="clearBtn" title="清空画布">✖ 清空</button>
@@ -80,7 +89,7 @@
     </div>
   </header>
   <canvas id="canvas"></canvas>
-  <input type="file" id="fileIn" accept=".kicad_sch,.sch">
+  <input type="file" id="fileIn" accept=".kicad_sch,.sch,.kicad_pcb">
   <div id="drawer">
     <h5>🧩 元件库 <span class="src">KiCad 标准符号</span></h5>
     <input class="lib-search" id="libSearch" placeholder="搜索元件…">
@@ -114,7 +123,8 @@
     ① 元件：点元件库 → 画布单击放置<br>
     ② 走线：点「🔗 走线」，起点单击、折点单击、终点双击（吸附元件引脚）<br>
     ③ 旋转：选中元件后点「⟳」或按 R 键<br>
-    ④ 画完 →「📥 PNG」存图 /「📤 SCH」导出 KiCad 原理图（.kicad_sch 可用真实 KiCad 打开）
+    ④ 画完 →「📥 PNG」存图 /「📤 SCH」导出原理图<br>
+    ⑤ PCB 模式：「🖥 PCB」切换 → 摆封装 → 选层布线 →「📤 PCB」导出 .kicad_pcb
   </div>
   <div id="toast"></div>
 </div>
@@ -126,17 +136,40 @@
 var cv = document.getElementById("canvas"), ctx = cv.getContext("2d");
 var propsEl = document.getElementById("props"), statusEl = document.getElementById("statusBody"), toastEl = document.getElementById("toast");
 
-/* ---------- 数据模型（v3：KiCad 符号 + 引脚） ---------- */
+/* ---------- 数据模型（v4：原理图 + PCB 布局） ---------- */
 var SCALE = 24;   /* px / mm（KiCad 坐标） */
 var NODE_R = 8;
 var parts = [];       /* {id,type,x,y,rot,val,on, pins:[{num,x,y,dir}], sym} */
-var wires = [];       /* {id, a:{pid,pin,abs,x,y}, b:{...}, pts} */
-var texts = [], nodes = [], boards = [];
+var wires = [];       /* {id, a:{pid,pin,abs,x,y}, b:{...}, pts, layer} */
+var texts = [], nodes = [], boards = [], vias = [];
 var selected = null, placing = null, mode = "select";
 var dragWire = null, dragEl = null;
 var wirePts = [];
 var boardDrag = null;
 var uid = 1, toastT = null;
+var viewMode = "sch";      /* "sch" 原理图 / "pcb" 布局 */
+var curLayer = "TOP";      /* PCB 布线层 */
+var pcbToolsEl = document.getElementById("pcbTools");
+
+/* PCB 封装库（体形状 mm；焊盘直接映射符号引脚位置，原理图→PCB 天然对齐） */
+var FOOTPRINTS = {
+  R:{shape:"rect",w:6.4,h:2.6}, POT:{shape:"rect",w:5,h:3.5}, THERM:{shape:"rect",w:4,h:2.5},
+  C:{shape:"rect",w:4,h:3}, L:{shape:"rect",w:4,h:3}, T:{shape:"rect",w:7,h:5},
+  X:{shape:"rect",w:6,h:3}, F:{shape:"rect",w:5,h:2.5}, BULB:{shape:"circle",r:3.2},
+  SP:{shape:"circle",r:3.8}, D:{shape:"rect",w:4,h:2.5}, LED:{shape:"circle",r:2.8},
+  Q:{shape:"rect",w:5,h:4.5}, OP:{shape:"rect",w:7,h:6}, VR:{shape:"rect",w:6,h:5},
+  SW:{shape:"rect",w:5.5,h:3.5}, J:{shape:"rect",w:6,h:3}, BAT:{shape:"rect",w:8,h:4}, GND:{shape:"rect",w:3,h:3}
+};
+function setViewMode(m){
+  viewMode = m;
+  document.getElementById("subTitle").textContent = m === "pcb"
+    ? "PCB 布局 · 双层布线 · 导出 .kicad_pcb（KiCad 8+）"
+    : "原理图 · KiCad 符号库 · 导出 .kicad_sch（KiCad 8+）";
+  document.getElementById("modeBtn").textContent = m === "pcb" ? "📄 原理图" : "🖥 PCB";
+  pcbToolsEl.style.display = m === "pcb" ? "inline-flex" : "none";
+  setMode("select");
+  refreshStatus(); draw();
+}
 
 function ROT_XY(p, rot){ /* 绕原点旋转 rot*90°（KiCad 角度：正=逆时针） */
   if (!rot) return p;
@@ -183,17 +216,33 @@ function endpoint(ref){
 function draw(){
   ctx.clearRect(0, 0, cv.width, cv.height);
   drawGrid();
+  if (viewMode === "pcb"){ drawPcbBg(); }
   boards.forEach(function(b){
     ctx.beginPath(); ctx.rect(b.x0, b.y0, b.x1 - b.x0, b.y1 - b.y0);
-    ctx.strokeStyle = "#38bdf8"; ctx.lineWidth = 2.5; ctx.stroke();
-    ctx.fillStyle = "rgba(56,189,248,.06)"; ctx.fill();
+    ctx.strokeStyle = viewMode === "pcb" ? "#4ade80" : "#38bdf8"; ctx.lineWidth = 2.5; ctx.stroke();
+    ctx.fillStyle = viewMode === "pcb" ? "rgba(34,197,94,.10)" : "rgba(56,189,248,.06)"; ctx.fill();
   });
   wires.forEach(function(w){
     var a = endpoint(w.a), b = endpoint(w.b);
     var pts = [a].concat(w.pts || []).concat([b]);
     ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
     for (var i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-    ctx.strokeStyle = "#64748b"; ctx.lineWidth = 2.4; ctx.stroke();
+    if (viewMode === "pcb"){
+      ctx.strokeStyle = w.layer === "BOTTOM" ? "#f59e0b" : "#22c55e";
+      ctx.lineWidth = 9;
+      ctx.lineCap = "round"; ctx.lineJoin = "round";
+      ctx.shadowColor = "rgba(0,0,0,.4)"; ctx.shadowBlur = 2;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.setLineDash([4,3]); ctx.strokeStyle = "rgba(255,255,255,.25)"; ctx.lineWidth = 1.2; ctx.stroke(); ctx.setLineDash([]);
+    } else {
+      ctx.strokeStyle = "#64748b"; ctx.lineWidth = 2.4; ctx.stroke();
+    }
+  });
+  vias.forEach(function(v){
+    ctx.beginPath(); ctx.arc(v.x, v.y, 8, 0, 7); ctx.fillStyle = "#fbbf24"; ctx.fill();
+    ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 1.6; ctx.stroke();
+    ctx.beginPath(); ctx.arc(v.x, v.y, 3, 0, 7); ctx.fillStyle = "#78350f"; ctx.fill();
   });
   nodes.forEach(function(n){
     ctx.beginPath(); ctx.arc(n.x, n.y, 4.5, 0, 7); ctx.fillStyle = "#facc15"; ctx.fill();
@@ -201,13 +250,15 @@ function draw(){
   });
   texts.forEach(function(t){
     ctx.font = "13px system-ui"; ctx.textAlign = "left";
-    ctx.fillStyle = "#e2e8f0"; ctx.fillText(t.txt, t.x, t.y);
+    ctx.fillStyle = viewMode === "pcb" ? "#fef9c3" : "#e2e8f0"; ctx.fillText(t.txt, t.x, t.y);
   });
   parts.forEach(function(p){
     var hot = (selected && selected.id === p.id) || (placing && placing.id === p.id);
-    drawPart(p, hot);
+    if (viewMode === "pcb"){ drawFootprint(p, hot); }
+    else drawPart(p, hot);
     p.pins.forEach(function(pn){
       var e = pinEnd(p, pn.num);
+      if (viewMode === "pcb"){ drawPad(p, pn, e, hot); return; }
       ctx.beginPath(); ctx.arc(e.x, e.y, NODE_R, 0, 7);
       ctx.fillStyle = "#cbd5e1"; ctx.fill();
       ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 1.5; ctx.stroke();
@@ -245,6 +296,34 @@ function drawGrid(){
   var step = 24;
   for (var x = step; x < cv.clientWidth; x += step){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,cv.clientHeight); ctx.stroke(); }
   for (var y = step; y < cv.clientHeight; y += step){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(cv.clientWidth,y); ctx.stroke(); }
+}
+
+/* ---------- PCB 布局渲染 ---------- */
+function drawPcbBg(){
+  ctx.fillStyle = "rgba(2,44,34,.55)";
+  ctx.fillRect(0, 0, cv.clientWidth, cv.clientHeight);
+}
+function drawFootprint(p, hot){
+  ctx.save();
+  ctx.translate(p.x, p.y);
+  if (p.rot) ctx.rotate(p.rot * Math.PI / 180);
+  var fp = FOOTPRINTS[p.type] || {shape:"rect", w:5, h:3};
+  var ink = hot ? "#facc15" : "#d9f99d";
+  ctx.fillStyle = hot ? "rgba(250,204,21,.30)" : "rgba(34,197,94,.22)";
+  ctx.strokeStyle = ink; ctx.lineWidth = 1.6;
+  if (fp.shape === "circle"){
+    ctx.beginPath(); ctx.arc(0, 0, fp.r * SCALE, 0, 7); ctx.fill(); ctx.stroke();
+  } else {
+    var w = fp.w * SCALE, h = fp.h * SCALE;
+    ctx.beginPath(); ctx.rect(-w/2, -h/2, w, h); ctx.fill(); ctx.stroke();
+  }
+  ctx.restore();
+}
+function drawPad(p, pn, e, hot){
+  ctx.beginPath(); ctx.arc(e.x, e.y, 7.2, 0, 7);
+  ctx.fillStyle = hot ? "#fef08a" : "#fbbf24"; ctx.fill();
+  ctx.strokeStyle = "#451a03"; ctx.lineWidth = 1.6; ctx.stroke();
+  ctx.beginPath(); ctx.arc(e.x, e.y, 2.6, 0, 7); ctx.fillStyle = "#451a03"; ctx.fill();
 }
 
 function drawPart(p, hot){
@@ -322,6 +401,10 @@ function hitNodePt(px, py){
   for (var i = nodes.length-1; i >= 0; i--){ var n = nodes[i]; if (Math.hypot(px-n.x, py-n.y) <= 8) return n; }
   return null;
 }
+function hitVia(px, py){
+  for (var i = vias.length-1; i >= 0; i--){ var v = vias[i]; if (Math.hypot(px-v.x, py-v.y) <= 10) return v; }
+  return null;
+}
 function hitBoard(px, py){
   for (var i = boards.length-1; i >= 0; i--){ var b = boards[i]; if (px >= b.x0-4 && px <= b.x1+4 && py >= b.y0-4 && py <= b.y1+4) return b; }
   return null;
@@ -360,6 +443,8 @@ cv.addEventListener("pointerdown", function(e){
     if (ht){ texts = texts.filter(function(t){ return t.id !== ht.id; }); refreshStatus(); draw(); return; }
     var hn = hitNodePt(pt.x, pt.y);
     if (hn){ nodes = nodes.filter(function(n){ return n.id !== hn.id; }); refreshStatus(); draw(); return; }
+    var hv = hitVia(pt.x, pt.y);
+    if (hv){ vias = vias.filter(function(v){ return v.id !== hv.id; }); refreshStatus(); draw(); return; }
     var hb = hitBoard(pt.x, pt.y);
     if (hb){ boards = boards.filter(function(b){ return b.id !== hb.id; }); refreshStatus(); draw(); return; }
     return;
@@ -370,6 +455,7 @@ cv.addEventListener("pointerdown", function(e){
     return;
   }
   if (mode === "node"){ nodes.push({id:uid++, x:snap(pt.x), y:snap(pt.y)}); refreshStatus(); draw(); return; }
+  if (mode === "via"){ vias.push({id:uid++, x:snap(pt.x), y:snap(pt.y)}); refreshStatus(); draw(); return; }
   if (mode === "wire"){
     var hn = hitPin(pt.x, pt.y);
     if (hn){
@@ -423,7 +509,9 @@ cv.addEventListener("dblclick", function(e){
 function finishWire(endRef){
   var start = wirePts.shift();
   var pts = wirePts.slice(); wirePts = [];
-  wires.push({id:uid++, a:start, b:endRef, pts:pts});
+  var w = {id:uid++, a:start, b:endRef, pts:pts};
+  if (viewMode === "pcb") w.layer = curLayer;
+  wires.push(w);
   refreshStatus(); toast("走线完成（ESC 退出走线模式）");
 }
 
@@ -451,6 +539,7 @@ function setMode(m){
   if (m === "wire") document.getElementById("wireBtn").classList.add("on");
   if (m === "text") document.getElementById("textBtn").classList.add("on");
   if (m === "node") document.getElementById("nodeBtn").classList.add("on");
+  if (m === "via") document.getElementById("viaBtn").classList.add("on");
   if (m === "board") document.getElementById("boardBtn").classList.add("on");
   if (m === "erase") document.getElementById("eraseBtn").classList.add("on");
   if (m !== "place"){ placing = null; document.querySelectorAll(".lib-btn").forEach(function(b){ b.classList.remove("on"); }); }
@@ -460,8 +549,12 @@ function setMode(m){
 document.getElementById("wireBtn").addEventListener("click", function(){ setMode(mode === "wire" ? "select" : "wire"); toast(mode === "wire" ? "走线模式：起点单击 → 折点单击 → 终点双击" : "已退出走线"); });
 document.getElementById("textBtn").addEventListener("click", function(){ setMode(mode === "text" ? "select" : "text"); toast(mode === "text" ? "标注模式：在画布点击输入文字" : "已退出标注"); });
 document.getElementById("nodeBtn").addEventListener("click", function(){ setMode(mode === "node" ? "select" : "node"); toast(mode === "node" ? "节点模式：点击画布放置连接点" : "已退出节点"); });
+document.getElementById("viaBtn").addEventListener("click", function(){ setMode(mode === "via" ? "select" : "via"); toast(mode === "via" ? "过孔模式：点击画布放置过孔" : "已退出过孔"); });
 document.getElementById("boardBtn").addEventListener("click", function(){ setMode(mode === "board" ? "select" : "board"); toast(mode === "board" ? "板框模式：拖出矩形板框" : "已退出板框"); });
 document.getElementById("eraseBtn").addEventListener("click", function(){ setMode(mode === "erase" ? "select" : "erase"); toast(mode === "erase" ? "橡皮模式：点击删除元素" : "已退出橡皮"); });
+document.getElementById("modeBtn").addEventListener("click", function(){ setViewMode(viewMode === "pcb" ? "sch" : "pcb"); toast(viewMode === "pcb" ? "已切换到 PCB 布局模式（走线分 TOP/BOTTOM 双层）" : "已切换到原理图模式"); });
+document.getElementById("layerSel").addEventListener("change", function(e){ curLayer = e.target.value; toast("布线层：" + (curLayer === "BOTTOM" ? "BOTTOM 底层（铜黄）" : "TOP 顶层（绿）")); });
+document.getElementById("pcbBtn").addEventListener("click", exportPcb);
 document.getElementById("backBtn").addEventListener("click", function(){ location.href = "阅读器.html"; });
 document.getElementById("pngBtn").addEventListener("click", function(){
   var a = document.createElement("a");
@@ -508,7 +601,7 @@ function exportSch(){
       }
     });
     sym.pins.forEach(function(pn){
-      L.push('        (pin "' + pn.num + '" (at ' + pn.x + ' ' + pn.y + ' ' + pn.dir + ') (length 2.54) (name "' + pn.num + '") (number "' + pn.num + '") (effects (font (size 1.016 1.016))))');
+      L.push('        (pin "' + pn.num + '" (at ' + mm(pn.x) + ' ' + mm(pn.y) + ' ' + pn.dir + ') (length 2.54) (name "' + pn.num + '") (number "' + pn.num + '") (effects (font (size 1.016 1.016))))');
     });
     L.push('      )');
     L.push('    )');
@@ -548,6 +641,73 @@ function exportSch(){
   document.body.appendChild(a); a.click(); a.remove();
   URL.revokeObjectURL(a.href);
   toast("已导出 .kicad_sch（KiCad 8+ 可打开继续编辑）");
+}
+
+/* ---------- KiCad .kicad_pcb 导出（PCB 布局） ---------- */
+function exportPcb(){
+  if (!parts.length){ toast("画布是空的，先放元件"); return; }
+  var L = [];
+  L.push('(kicad_pcb (version 20231120) (generator "lioli-reader")');
+  L.push('  (general (thickness 1.6))');
+  L.push('  (paper "A4")');
+  L.push('  (layers');
+  L.push('    (0 "F.Cu" signal)');
+  L.push('    (31 "B.Cu" signal)');
+  L.push('    (37 "F.SilkS" user)');
+  L.push('    (38 "B.SilkS" user)');
+  L.push('    (39 "F.Mask" user)');
+  L.push('    (40 "B.Mask" user)');
+  L.push('  )');
+  L.push('  (setup (pad_to_mask_clearance 0) (allow_soldermask_bridges 0) (net_class "Default" ""))');
+  L.push('  (net 0 "")');
+  L.push('  (net 1 "NET1")');
+  var refCount = {};
+  parts.forEach(function(p){
+    refCount[p.type] = (refCount[p.type] || 0) + 1;
+    var ref = (p.sym.ref || "X") + refCount[p.type];
+    var fp = FOOTPRINTS[p.type] || {shape:"rect", w:5, h:3};
+    var px = mm(p.x), py = -mm(p.y), rot = (360 - (p.rot||0)) % 360;
+    var u = uuid();
+    L.push('  (footprint "lioli:' + p.type + '" (layer "F.Cu") (uuid "' + u + '") (at ' + px + ' ' + py + ' ' + rot + ') (net 1)');
+    L.push('    (attr through_hole)');
+    L.push('    (fp_text reference "' + ref + '" (at 0 0) (layer "F.SilkS") (effects (font (size 1 1) (thickness 0.15))))');
+    var val = p.val != null ? fmtVal(p) : p.sym.ref;
+    L.push('    (fp_text value "' + val + '" (at 0 0) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))');
+    if (fp.shape === "circle"){
+      L.push('    (fp_circle (center 0 0) (end ' + fp.r + ' 0) (stroke (width 0.15)) (fill (type none)) (layer "F.SilkS"))');
+    } else {
+      var w = fp.w, h = fp.h;
+      L.push('    (fp_line (start ' + (-w/2) + ' ' + (-h/2) + ') (end ' + (w/2) + ' ' + (-h/2) + ') (stroke (width 0.15)) (layer "F.SilkS"))');
+      L.push('    (fp_line (start ' + (w/2) + ' ' + (-h/2) + ') (end ' + (w/2) + ' ' + (h/2) + ') (stroke (width 0.15)) (layer "F.SilkS"))');
+      L.push('    (fp_line (start ' + (w/2) + ' ' + (h/2) + ') (end ' + (-w/2) + ' ' + (h/2) + ') (stroke (width 0.15)) (layer "F.SilkS"))');
+      L.push('    (fp_line (start ' + (-w/2) + ' ' + (h/2) + ') (end ' + (-w/2) + ' ' + (-h/2) + ') (stroke (width 0.15)) (layer "F.SilkS"))');
+    }
+    p.pins.forEach(function(pn){
+      L.push('    (pad "' + pn.num + '" thru_hole circle (at ' + mm(pn.x) + ' ' + mm(pn.y) + ') (size 1.6 1.6) (drill 0.8) (layers "F.Cu" "B.Cu") (net 1) (uuid "' + uuid() + '"))');
+    });
+    L.push('  )');
+  });
+  /* 走线（PCB 层） */
+  wires.forEach(function(w){
+    var a = endpoint(w.a), b = endpoint(w.b);
+    var pts = [a].concat(w.pts || []).concat([b]);
+    var lay = (w.layer === "BOTTOM") ? "B.Cu" : "F.Cu";
+    for (var i = 0; i < pts.length-1; i++){
+      L.push('  (segment (start ' + mm(pts[i].x) + ' ' + (-mm(pts[i].y)) + ') (end ' + mm(pts[i+1].x) + ' ' + (-mm(pts[i+1].y)) + ') (width 0.4) (layer "' + lay + '") (net 1) (uuid "' + uuid() + '"))');
+    }
+  });
+  vias.forEach(function(v){
+    L.push('  (via (at ' + mm(v.x) + ' ' + (-mm(v.y)) + ') (size 0.8) (drill 0.4) (layers "F.Cu" "B.Cu") (net 1) (uuid "' + uuid() + '"))');
+  });
+  L.push(')');
+  var text = L.join("\n");
+  var blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+  var a = document.createElement("a");
+  a.download = "电路画板.kicad_pcb";
+  a.href = URL.createObjectURL(blob);
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(a.href);
+  toast("已导出 .kicad_pcb（KiCad 8+ 可打开继续编辑）");
 }
 document.getElementById("schBtn").addEventListener("click", exportSch);
 
@@ -728,21 +888,24 @@ function hideProps(){ propsEl.style.display = "none"; }
 
 /* ---------- 状态栏 ---------- */
 function refreshStatus(){
-  statusEl.innerHTML = "元件 <b>" + parts.length + "</b> · 走线 <b>" + wires.length + "</b> · 标注 <b>" + texts.length + "</b> · 节点 <b>" + nodes.length + "</b> · 板框 <b>" + boards.length + "</b>";
+  statusEl.innerHTML = (viewMode === "pcb" ? "PCB · " : "原理图 · ") + "元件 <b>" + parts.length + "</b> · 走线 <b>" + wires.length + "</b> · 标注 <b>" + texts.length + "</b> · 节点 <b>" + nodes.length + "</b> · 板框 <b>" + boards.length + "</b>" + (viewMode === "pcb" ? " · 过孔 <b>" + vias.length + "</b>" : "");
 }
 
-/* ---------- 序列化 / 分享（v3） ---------- */
+/* ---------- 序列化 / 分享（v4：原理图 + PCB） ---------- */
 function serialize(){
-  return { v:3,
+  return { v:4, mode:viewMode,
     p: parts.map(function(p){ return [p.id, p.type, Math.round(p.x), Math.round(p.y), p.rot||0, p.val, p.on ? 1:0]; }),
-    w: wires.map(function(w){ return [w.a, w.b, w.pts || []]; }),
+    w: wires.map(function(w){ var o = [w.a, w.b, w.pts || []]; if (w.layer) o.push(w.layer); return o; }),
     t: texts.map(function(t){ return [t.x, t.y, t.txt]; }),
     n: nodes.map(function(n){ return [n.x, n.y]; }),
-    b: boards.map(function(b){ return [b.x0, b.y0, b.x1, b.y1]; }) };
+    b: boards.map(function(b){ return [b.x0, b.y0, b.x1, b.y1]; }),
+    v: vias.map(function(v){ return [v.x, v.y]; }) };
 }
 function restore(data){
-  parts = []; wires = []; texts = []; nodes = []; boards = [];
+  parts = []; wires = []; texts = []; nodes = []; boards = []; vias = [];
   selected = null; placing = null; wirePts = [];
+  if (data && data.mode === "pcb") setViewMode("pcb");
+  else setViewMode("sch");
   var idMap = {};
   var legacyP = data && Array.isArray(data.p) && data.p.length && typeof data.p[0][0] === "string";
   if (legacyP || !data.v){
@@ -781,11 +944,14 @@ function restore(data){
       var A = w[0], B = w[1];
       var AA = A.abs ? {abs:true,x:A.x,y:A.y} : {pid:idMap[A.pid], pin:A.pin};
       var BB = B.abs ? {abs:true,x:B.x,y:B.y} : {pid:idMap[B.pid], pin:B.pin};
-      wires.push({id:uid++, a:AA, b:BB, pts:(w[2]||[]).map(function(q){ return q.abs?{abs:true,x:q.x,y:q.y}:{pid:idMap[q.pid],pin:q.pin}; })});
+      var wobj = {id:uid++, a:AA, b:BB, pts:(w[2]||[]).map(function(q){ return q.abs?{abs:true,x:q.x,y:q.y}:{pid:idMap[q.pid],pin:q.pin}; })};
+      if (w[3]) wobj.layer = w[3];
+      wires.push(wobj);
     });
     (data.t || []).forEach(function(t){ texts.push({id:uid++, x:t[0], y:t[1], txt:t[2]}); });
     (data.n || []).forEach(function(n){ nodes.push({id:uid++, x:n[0], y:n[1]}); });
     (data.b || []).forEach(function(b){ boards.push({id:uid++, x0:b[0], y0:b[1], x1:b[2], y1:b[3]}); });
+    (data.v || []).forEach(function(v){ vias.push({id:uid++, x:v[0], y:v[1]}); });
   }
   refreshStatus(); draw();
 }
