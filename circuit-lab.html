@@ -61,6 +61,12 @@
         <option value="TOP">TOP 顶层</option>
         <option value="BOTTOM">BOTTOM 底层</option>
       </select>
+      <select class="tpl" id="boardColorSel" title="PCB 板基色">
+        <option value="red">🔴 红板</option>
+        <option value="green">🟢 绿板</option>
+        <option value="blue">🔵 蓝板</option>
+        <option value="black">⚫ 黑板</option>
+      </select>
       <button class="tbtn" id="viaBtn" title="放置过孔（PCB 模式）">◎ 过孔</button>
     </span>
     <select class="tpl" id="tplSel" title="预置示例电路图">
@@ -113,9 +119,11 @@
     <button class="lib-btn" data-part="Q">🔻 三极管NPN</button>
     <button class="lib-btn" data-part="OP">△ 运放</button>
     <button class="lib-btn" data-part="VR">▣ 稳压器</button>
+    <button class="lib-btn" data-part="IC8">🧩 芯片DIP-8</button>
     <div class="lib-group">控制 · 连接</div>
     <button class="lib-btn" data-part="SW">🔘 开关</button>
     <button class="lib-btn" data-part="J">⏹ 连接器</button>
+    <button class="lib-btn" data-part="PIN">🔌 引脚排×13</button>
   </div>
   <div id="props"></div>
   <div id="status"><div id="statusBody">元件 0 · 走线 0 · 标注 0 · 节点 0 · 板框 0</div></div>
@@ -158,8 +166,12 @@ var FOOTPRINTS = {
   X:{shape:"rect",w:6,h:3}, F:{shape:"rect",w:5,h:2.5}, BULB:{shape:"circle",r:3.2},
   SP:{shape:"circle",r:3.8}, D:{shape:"rect",w:4,h:2.5}, LED:{shape:"circle",r:2.8},
   Q:{shape:"rect",w:5,h:4.5}, OP:{shape:"rect",w:7,h:6}, VR:{shape:"rect",w:6,h:5},
-  SW:{shape:"rect",w:5.5,h:3.5}, J:{shape:"rect",w:6,h:3}, BAT:{shape:"rect",w:8,h:4}, GND:{shape:"rect",w:3,h:3}
+  SW:{shape:"rect",w:5.5,h:3.5}, J:{shape:"rect",w:6,h:3}, BAT:{shape:"rect",w:8,h:4}, GND:{shape:"rect",w:3,h:3},
+  IC8:{shape:"rect",w:10.16,h:6.6}, PIN:{shape:"rect",w:3.4,h:33}
 };
+/* PCB 板色（电机驱动板风格：红底+黑走线+黄丝印） */
+var BOARD_COLORS = { red:"#7f1d1d", green:"#14532d", blue:"#1e3a8a", black:"#111318" };
+var boardColor = "red";
 function setViewMode(m){
   viewMode = m;
   document.getElementById("subTitle").textContent = m === "pcb"
@@ -219,8 +231,8 @@ function draw(){
   if (viewMode === "pcb"){ drawPcbBg(); }
   boards.forEach(function(b){
     ctx.beginPath(); ctx.rect(b.x0, b.y0, b.x1 - b.x0, b.y1 - b.y0);
-    ctx.strokeStyle = viewMode === "pcb" ? "#4ade80" : "#38bdf8"; ctx.lineWidth = 2.5; ctx.stroke();
-    ctx.fillStyle = viewMode === "pcb" ? "rgba(34,197,94,.10)" : "rgba(56,189,248,.06)"; ctx.fill();
+    ctx.strokeStyle = viewMode === "pcb" ? "#facc15" : "#38bdf8"; ctx.lineWidth = 2.5; ctx.stroke();
+    ctx.fillStyle = viewMode === "pcb" ? "rgba(250,204,21,.05)" : "rgba(56,189,248,.06)"; ctx.fill();
   });
   wires.forEach(function(w){
     var a = endpoint(w.a), b = endpoint(w.b);
@@ -228,7 +240,7 @@ function draw(){
     ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
     for (var i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
     if (viewMode === "pcb"){
-      ctx.strokeStyle = w.layer === "BOTTOM" ? "#f59e0b" : "#22c55e";
+      ctx.strokeStyle = w.layer === "BOTTOM" ? "#3f3f46" : "#18181b";
       ctx.lineWidth = 9;
       ctx.lineCap = "round"; ctx.lineJoin = "round";
       ctx.shadowColor = "rgba(0,0,0,.4)"; ctx.shadowBlur = 2;
@@ -300,8 +312,14 @@ function drawGrid(){
 
 /* ---------- PCB 布局渲染 ---------- */
 function drawPcbBg(){
-  ctx.fillStyle = "rgba(2,44,34,.55)";
+  var c = BOARD_COLORS[boardColor] || BOARD_COLORS.red;
+  ctx.fillStyle = hexToRgba(c, .72);
   ctx.fillRect(0, 0, cv.clientWidth, cv.clientHeight);
+  ctx.strokeStyle = "rgba(255,255,255,.06)"; ctx.lineWidth = 1; ctx.strokeRect(0, 0, cv.clientWidth, cv.clientHeight);
+}
+function hexToRgba(hex, a){
+  var n = parseInt(hex.slice(1), 16);
+  return "rgba(" + (n>>16&255) + "," + (n>>8&255) + "," + (n&255) + "," + a + ")";
 }
 function drawFootprint(p, hot){
   ctx.save();
@@ -553,7 +571,8 @@ document.getElementById("viaBtn").addEventListener("click", function(){ setMode(
 document.getElementById("boardBtn").addEventListener("click", function(){ setMode(mode === "board" ? "select" : "board"); toast(mode === "board" ? "板框模式：拖出矩形板框" : "已退出板框"); });
 document.getElementById("eraseBtn").addEventListener("click", function(){ setMode(mode === "erase" ? "select" : "erase"); toast(mode === "erase" ? "橡皮模式：点击删除元素" : "已退出橡皮"); });
 document.getElementById("modeBtn").addEventListener("click", function(){ setViewMode(viewMode === "pcb" ? "sch" : "pcb"); toast(viewMode === "pcb" ? "已切换到 PCB 布局模式（走线分 TOP/BOTTOM 双层）" : "已切换到原理图模式"); });
-document.getElementById("layerSel").addEventListener("change", function(e){ curLayer = e.target.value; toast("布线层：" + (curLayer === "BOTTOM" ? "BOTTOM 底层（铜黄）" : "TOP 顶层（绿）")); });
+document.getElementById("layerSel").addEventListener("change", function(e){ curLayer = e.target.value; toast("布线层：" + (curLayer === "BOTTOM" ? "BOTTOM 底层（深灰）" : "TOP 顶层（黑）")); });
+document.getElementById("boardColorSel").addEventListener("change", function(e){ boardColor = e.target.value; draw(); toast("板基色：" + (e.target.options[e.target.selectedIndex].text)); });
 document.getElementById("pcbBtn").addEventListener("click", exportPcb);
 document.getElementById("backBtn").addEventListener("click", function(){ location.href = "阅读器.html"; });
 document.getElementById("pngBtn").addEventListener("click", function(){
@@ -891,9 +910,9 @@ function refreshStatus(){
   statusEl.innerHTML = (viewMode === "pcb" ? "PCB · " : "原理图 · ") + "元件 <b>" + parts.length + "</b> · 走线 <b>" + wires.length + "</b> · 标注 <b>" + texts.length + "</b> · 节点 <b>" + nodes.length + "</b> · 板框 <b>" + boards.length + "</b>" + (viewMode === "pcb" ? " · 过孔 <b>" + vias.length + "</b>" : "");
 }
 
-/* ---------- 序列化 / 分享（v4：原理图 + PCB） ---------- */
+/* ---------- 序列化 / 分享（v5：板基色） ---------- */
 function serialize(){
-  return { v:4, mode:viewMode,
+  return { v:5, mode:viewMode, bc:boardColor,
     p: parts.map(function(p){ return [p.id, p.type, Math.round(p.x), Math.round(p.y), p.rot||0, p.val, p.on ? 1:0]; }),
     w: wires.map(function(w){ var o = [w.a, w.b, w.pts || []]; if (w.layer) o.push(w.layer); return o; }),
     t: texts.map(function(t){ return [t.x, t.y, t.txt]; }),
@@ -906,6 +925,8 @@ function restore(data){
   selected = null; placing = null; wirePts = [];
   if (data && data.mode === "pcb") setViewMode("pcb");
   else setViewMode("sch");
+  if (data && data.bc && BOARD_COLORS[data.bc]) boardColor = data.bc;
+  document.getElementById("boardColorSel").value = boardColor;
   var idMap = {};
   var legacyP = data && Array.isArray(data.p) && data.p.length && typeof data.p[0][0] === "string";
   if (legacyP || !data.v){
