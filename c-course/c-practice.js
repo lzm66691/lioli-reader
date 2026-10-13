@@ -926,7 +926,7 @@ int main(void){
     {
       id: "ch4-q4", ch: "4", type: "debug", level: "★",
       title: "改错：scanf 的 3 个雷",
-      desc: "下面程序读入年龄和身高有 3 处错：<br><b>① scanf 漏 &；② 格式符与变量类型不匹配；③ 输出格式缺小数点位数。</b>",
+      desc: "下面程序读入年龄和身高有 2 处错：<br><b>① scanf 漏 &；② 输出缺 %.2f 位数控制（%f 会打出 6 位小数）。</b>",
       starter:
 `#include <stdio.h>
 
@@ -951,7 +951,7 @@ int main(void)
     printf("我 %d 岁 %.2f 米\n", age, h);
     return 0;
 }`,
-      refOut: "年龄身高：19 1.87<br>我 19 岁 1.87 米",
+      refOut: "年龄身高：19 1.87\n我 19 岁 1.87 米",
       hint: "scanf 必须传地址（&变量）；float 用 %f 读；%.2f 控制两位小数。"
     },
     {
@@ -1015,7 +1015,7 @@ int main(void)
       title: "专业：格式化成绩表",
       desc: "读入学号和三门成绩，按固定宽度打印成绩表（学号 10 宽右对齐、成绩 6 宽保留 1 位小数）。",
       sampleIn: "2026001 85 90 78",
-      sampleOut: "学号      成绩1  成绩2  成绩3\n  2026001   85.0   90.0   78.0",
+      sampleOut: "学号      成绩1  成绩2  成绩3\n   2026001   85.0   90.0   78.0",
       starter:
 `#include <stdio.h>
 
@@ -1037,7 +1037,7 @@ int main(void)
     printf("%10ld %6.1f %6.1f %6.1f\n", id, a, b, c);
     return 0;
 }`,
-      refOut: "学号      成绩1  成绩2  成绩3\n  2026001   85.0   90.0   78.0",
+      refOut: "学号      成绩1  成绩2  成绩3\n   2026001   85.0   90.0   78.0",
       hint: "%10ld 右对齐占 10 宽，%6.1f 占 6 宽保留 1 位小数。"
     },
     /* ===== Ch9 函数（v67c 补全） ===== */
@@ -1246,7 +1246,7 @@ int main(void)
     else printf("错误\n");
     return 0;
 }`,
-      refOut: "密码：abc<br>正确",
+      refOut: "密码：abc\n正确",
       hint: "strcmp 返回 0 表示相等；字符串必须用 strcmp 比较（== 比的是地址）；数组要留 \\0 空间（pwd[3] 装不下 \"abc\\0\"）。"
     },
     {
@@ -1437,6 +1437,11 @@ int main(void)
       .cp-body{flex:1;display:grid;grid-template-columns:minmax(280px,360px) 1fr;gap:0;min-height:0}
       .cp-left{border-right:1px solid var(--line,#e2e8f0);display:flex;flex-direction:column;min-height:0;overflow:hidden}
       .cp-qlist{flex:1;overflow:auto;padding:8px}
+      /* v141：本题语法侧边栏 */
+      .cp-syn{border-top:1px solid var(--line,#e2e8f0);padding:8px 10px;max-height:34%;overflow:auto;flex-shrink:0}
+      .cp-syn-head{font-size:11px;font-weight:700;color:var(--muted,#64748b);letter-spacing:.04em;margin-bottom:6px}
+      .cp-syn-chip{display:inline-block;font-size:11px;background:var(--teal-light,#e2e8ff);color:var(--teal-dark,#3b56f0);border-radius:12px;padding:2px 9px;margin:0 4px 5px 0;line-height:1.6}
+      body.dark .cp-syn-chip{background:rgba(77,107,254,.2);color:#c4b5fd}
       .cp-qitem{display:block;width:100%;text-align:left;padding:8px 10px;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--body,#334155);font-size:13px;cursor:pointer;margin-bottom:4px;line-height:1.5}
       .cp-qitem:hover{background:var(--glass-hover, rgba(255,255,255,.4))}
       .cp-qitem.active{background:var(--teal-light,#e2e8ff);color:var(--teal-dark,#3b56f0);font-weight:700}
@@ -1451,13 +1456,16 @@ int main(void)
       .cp-editor .cp-gutter{flex:0 0 44px;padding:10px 8px 10px 8px;text-align:right;color:var(--muted,#64748b);background:var(--gutter-bg,rgba(0,0,0,.035));border-right:1px solid var(--line,#e2e8f0);font-family:Consolas,"Courier New",monospace;font-size:13px;line-height:1.55;white-space:pre;overflow:hidden;user-select:none;box-sizing:border-box}
       .cp-editor .cp-code{position:relative;flex:1;min-width:0;min-height:0}
       .cp-editor pre,.cp-editor textarea{margin:0;padding:10px 12px;font-family:Consolas,"Courier New",monospace;font-size:13px;line-height:1.55;white-space:pre;tab-size:4;box-sizing:border-box}
-      .cp-editor pre{position:absolute;inset:0;overflow:hidden;color:transparent;pointer-events:none;border:none;background:transparent;z-index:2}
-      .cp-editor pre span{color:inherit}
+      .cp-editor pre{position:absolute;inset:0;overflow:hidden;color:transparent;pointer-events:none;border:none;background:transparent;z-index:4}
+      /* v141：语法高亮颜色（pre 在 textarea 之上显示彩色文字，textarea 文字透明保持可编辑） */
+      .cp-editor pre .cpt-kw{color:#7c3aed}.cp-editor pre .cpt-cm{color:#059669}.cp-editor pre .cpt-str{color:#b91c1c}.cp-editor pre .cpt-num{color:#0d9488}.cp-editor pre .cpt-pre{color:#b45309}
+      body.dark .cp-editor pre .cpt-kw{color:#c4b5fd}body.dark .cp-editor pre .cpt-cm{color:#6ee7b7}body.dark .cp-editor pre .cpt-str{color:#fca5a5}body.dark .cp-editor pre .cpt-num{color:#5eead4}body.dark .cp-editor pre .cpt-pre{color:#fcd34d}
       .cp-editor .cp-curline{position:absolute;left:0;right:0;height:20.15px;background:rgba(77,107,254,.09);pointer-events:none;z-index:0;transition:top .08s}
-      .cp-editor textarea{position:absolute;inset:0;width:100%;height:100%;background:transparent;color:var(--ink,#0f172a);border:none;outline:none;resize:none;overflow:auto;caret-color:var(--teal,#4D6BFE);z-index:3}
+      .cp-editor textarea{position:absolute;inset:0;width:100%;height:100%;background:transparent;color:transparent;border:none;outline:none;resize:none;overflow:auto;caret-color:var(--teal,#4D6BFE);z-index:3}
+      .cp-editor textarea::selection{background:rgba(77,107,254,.22)}
       body.dark .cp-editor{background:#0f1220}
       body.dark .cp-editor .cp-gutter{background:rgba(255,255,255,.03)}
-      body.dark .cp-editor textarea{color:#e2e8f0}
+      body.dark .cp-editor textarea{color:transparent}
       body.dark .cp-editor .cp-curline{background:rgba(77,107,254,.16)}
       .cp-out .errline{cursor:pointer;text-decoration:underline dotted}
       .cp-out .errline:hover{background:rgba(239,68,68,.1)}
@@ -1516,6 +1524,7 @@ int main(void)
   }
 
   let cpRoot = null;
+  let splitMode = false;   /* v144.1：提升到外层，hide() 需访问（此前局部变量导致关闭抛 ReferenceError） */
   function buildPanel() {
     ensureStyle();
     cpRoot = document.createElement("div");
@@ -1525,11 +1534,18 @@ int main(void)
       <div class="cp-head">
         <h2>C 语言练习</h2>
         <span style="font-size:11px;color:var(--muted,#64748b)">浏览器内编译运行 · 数据仅存本机</span>
+        <button class="cp-btn cp-ghost" data-act="home" title="关闭练习面板，返回阅读器主页">🏠 主页</button>
+        <button class="cp-btn cp-ghost" data-act="ime" title="切换输入法：中文打字可见候选字 / 英文直接高亮">🀄 中文</button>
+        <button class="cp-btn cp-ghost" data-act="split" title="分屏：左侧看讲义，右侧写代码（宽度可拖拽）">⇔ 分屏</button>
         <button class="cp-close" title="关闭">✕</button>
       </div>
       <div class="cp-body">
         <div class="cp-left">
           <div class="cp-qlist"></div>
+          <div class="cp-syn">
+            <div class="cp-syn-head">📘 本题语法</div>
+            <div class="cp-syn-body"></div>
+          </div>
         </div>
         <div class="cp-right">
           <div class="cp-desc"></div>
@@ -1569,14 +1585,77 @@ int main(void)
       </div>
     `;
     document.body.appendChild(cpRoot);
+    /* v142：分屏拖拽手柄（右侧代码区宽度可调，左侧露出讲义） */
+    const splitHandle = document.createElement("div");
+    splitHandle.id = "cpSplitHandle";
+    splitHandle.style.cssText = "position:absolute;top:0;left:0;bottom:0;width:8px;cursor:col-resize;z-index:7000;display:none;touch-action:none;background:rgba(77,107,254,0)";
+    splitHandle.title = "拖拽调整宽度";
+    cpRoot.appendChild(splitHandle);
+    const splitBtn = cpRoot.querySelector("[data-act=split]");
+    /* v142.1：分屏时同步收窄左侧 PDF 区（pdf.js viewer 检测 iframe 尺寸变化自动重排） */
+    function getPdfWrap(){ try { return document.querySelector(".pdf-wrap") || document.getElementById("pdfFrame"); } catch(e){ return null; } }
+    function syncPdfWrap(){
+      const wrap = getPdfWrap();
+      if (!wrap) return;
+      if (splitMode) {
+        const w = Math.max(200, window.innerWidth - cpRoot.offsetWidth - 10);
+        wrap.style.cssText = "flex:none;width:" + w + "px;min-width:" + w + "px";
+      } else {
+        wrap.style.cssText = "";
+      }
+    }
+    function applySplit(on){
+      if (on) {
+        cpRoot.style.cssText = "position:fixed;top:0;right:0;bottom:0;left:auto;width:55vw;z-index:6000;display:flex;flex-direction:column;box-shadow:-10px 0 36px rgba(2,6,23,.32)";
+        splitHandle.style.display = "block";
+        if (splitBtn) splitBtn.style.background = "rgba(77,107,254,.35)";
+        document.body.classList.add("cp-split");
+        setTimeout(syncPdfWrap, 30); setTimeout(syncPdfWrap, 200);
+      } else {
+        cpRoot.style.cssText = "";
+        splitHandle.style.display = "none";
+        if (splitBtn) splitBtn.style.background = "";
+        document.body.classList.remove("cp-split");
+        syncPdfWrap();
+      }
+    }
+    splitBtn.addEventListener("click", () => { splitMode = !splitMode; applySplit(splitMode); });
+    splitHandle.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      try { splitHandle.setPointerCapture && splitHandle.setPointerCapture(e.pointerId); } catch (e2) {}
+      const move = (ev) => {
+        const x = ev.clientX != null ? ev.clientX : (ev.touches ? ev.touches[0].clientX : 0);
+        const w = Math.max(340, Math.min(window.innerWidth - 60, window.innerWidth - x));
+        cpRoot.style.width = w + "px";
+        syncPdfWrap();
+      };
+      const up = () => { window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); };
+      window.addEventListener("pointermove", move);
+      window.addEventListener("pointerup", up);
+    });
+    /* 分屏时点 PDF 区域自动退出分屏（方便切换回全屏做题） */
+    try {
+      const pd = document.getElementById("pdfFrame");
+      if (pd) pd.addEventListener("click", () => { if (splitMode) { splitMode = false; applySplit(false); } });
+    } catch (e) {}
 
     // 事件绑定
     cpRoot.querySelector(".cp-close").addEventListener("click", hide);
+    /* v142.1：返回主页按钮——关闭练习面板并切回阅读器书架主页 */
+    const homeBtn = cpRoot.querySelector("[data-act=home]");
+    if (homeBtn) homeBtn.addEventListener("click", () => {
+      hide();
+      try {
+        const ts = document.getElementById("tabShelf");
+        if (ts && ts.click) ts.click();
+      } catch (e) {}
+    });
     const ta = cpRoot.querySelector("textarea");
     const pre = cpRoot.querySelector(".cp-editor pre");
     function syncScroll() {
       pre.scrollTop = ta.scrollTop; pre.scrollLeft = ta.scrollLeft;
       const g = cpRoot.querySelector(".cp-gutter"); if (g) g.scrollTop = ta.scrollTop;
+      updateCurline();
     }
     function onEdit() {
       const q = curQ();
@@ -1591,6 +1670,40 @@ int main(void)
     ta.addEventListener("keyup", updateCurline);
     ta.addEventListener("click", updateCurline);
     ta.addEventListener("focus", updateCurline);
+    /* v145：中文输入法兼容——composition 期间显示真实文字（否则候选字看不到） */
+    let compColor = "#334155";
+    try { compColor = getComputedStyle(cpRoot).getPropertyValue("--body").trim() || "#334155"; } catch (e) {}
+    ta.addEventListener("compositionstart", () => { ta.style.color = compColor; });
+    ta.addEventListener("compositionupdate", () => { ta.style.color = compColor; });
+    ta.addEventListener("compositionend", () => {
+      ta.style.color = "transparent";
+      const q = curQ();
+      if (q) renderHighlight(q, ta.value);
+      updateCurline();
+    });
+    /* v145：输入法切换按钮（中/英） */
+    const imeBtn = cpRoot.querySelector("[data-act=ime]");
+    let imeMode = "zh";
+    function cpToast(msg) {
+      let t = cpRoot.querySelector(".cp-toast");
+      if (!t) {
+        t = document.createElement("div"); t.className = "cp-toast";
+        t.style.cssText = "position:absolute;left:50%;bottom:14px;transform:translateX(-50%);background:rgba(15,23,42,.88);color:#fff;font-size:12px;padding:7px 14px;border-radius:9px;z-index:8000;pointer-events:none;opacity:0;transition:opacity .25s;white-space:nowrap";
+        cpRoot.appendChild(t);
+      }
+      t.textContent = msg; t.style.opacity = "1";
+      clearTimeout(t._t); t._t = setTimeout(() => { t.style.opacity = "0"; }, 2600);
+    }
+    if (imeBtn) imeBtn.addEventListener("click", () => {
+      imeMode = imeMode === "zh" ? "en" : "zh";
+      imeBtn.textContent = imeMode === "zh" ? "🀄 中文" : "EN 英文";
+      try {
+        ta.setAttribute("inputmode", imeMode === "en" ? "verbatim" : "text");
+        ta.spellcheck = (imeMode === "en");
+      } catch (e) {}
+      cpToast(imeMode === "zh" ? "中文模式：打字可见候选字 · 系统输入法请按 Shift 切换" : "英文模式：直接高亮显示 · 切中文按 Shift");
+      ta.focus();
+    });
     ta.addEventListener("keydown", (e) => {
       if (e.key === "Tab") {
         e.preventDefault();
@@ -1601,10 +1714,10 @@ int main(void)
       }
     });
     cpRoot.querySelector("[data-act=ref]").addEventListener("click", () => {
-      const r = cpRoot.querySelector(".cp-ref"); if (r) r.style.display = r.style.display === "none" ? "" : "none";
+      const r = cpRoot.querySelector(".cp-ref"); if (r) r.style.display = r.style.display === "none" ? "block" : "none";
     });
     cpRoot.querySelector("[data-act=hint]").addEventListener("click", () => {
-      const h = cpRoot.querySelector(".cp-hint"); if (h) h.style.display = h.style.display === "none" ? "" : "none";
+      const h = cpRoot.querySelector(".cp-hint"); if (h) h.style.display = h.style.display === "none" ? "block" : "none";
     });
     cpRoot.querySelector("[data-act=reset]").addEventListener("click", () => {
       const q = curQ(); if (!q) return;
@@ -1669,8 +1782,10 @@ int main(void)
     let saved = "";
     try { saved = localStorage.getItem("cp-free-code") || ""; } catch(e){}
     ta.value = saved || '#include <stdio.h>\n\nint main(void)\n{\n    printf("Hello, Lioli!\\n");\n    return 0;\n}\n';
+    ta.scrollTop = 0; try { ta.setSelectionRange(0, 0); } catch (e) {}
     renderHighlight(null, ta.value);
     updateGutter(); updateCurline();
+    renderSyn(null);
   }
 
   /* v60：自由写代码——命名保存多份（cp-free-lib）+ 我的代码列表 */
@@ -1830,6 +1945,33 @@ int main(void)
 
   function curQ() { return cpCur ? QUESTIONS.find(q => q.id === cpCur) : null; }
 
+  /* v141：本题语法侧边栏——从题干/提示/初始代码自动提取语法点 */
+  const SYN_KEYWORDS = [
+    ["printf", "printf 格式化输出"], ["scanf", "scanf 格式化输入"], ["%d", "格式占位符 %d"],
+    ["%f", "格式占位符 %f"], ["%g", "格式占位符 %g"], ["%.2f", "精度控制 %.2f"], ["%lf", "double 用 %lf"],
+    ["for", "for 循环"], ["while", "while 循环"], ["if", "if 分支"], ["else", "if-else 分支"],
+    ["switch", "switch 分支"], ["case", "switch case"], ["break", "break 跳出"], ["continue", "continue 跳过"],
+    ["return", "return 返回"], ["const", "const 常量"], ["数组", "数组"], ["下标", "数组下标"],
+    ["指针", "指针"], ["函数", "函数"], ["形参", "函数形参"], ["double", "double 双精度"],
+    ["int", "int 整型"], ["char", "char 字符"], ["结构体", "结构体 struct"], ["include", "#include 头文件"],
+    ["main", "main 函数入口"], ["整数除法", "整数除法陷阱"], ["类型转换", "类型转换"], ["越界", "数组越界"]
+  ];
+  function detectSyntax(q) {
+    const text = (q.title || "") + " " + (q.desc || "") + " " + (q.hint || "") + " " + (q.starter || "") + " " + (q.ref || "");
+    const found = [];
+    for (const pair of SYN_KEYWORDS) { if (text.indexOf(pair[0]) >= 0 && found.indexOf(pair[1]) < 0) found.push(pair[1]); }
+    return found;
+  }
+  function renderSyn(q) {
+    const body = cpRoot.querySelector(".cp-syn-body");
+    if (!body) return;
+    if (!q) { body.innerHTML = '<span style="font-size:11.5px;color:var(--muted,#64748b)">自由模式 · 语法点不固定</span>'; return; }
+    const list = detectSyntax(q);
+    body.innerHTML = list.length
+      ? list.map(s => '<span class="cp-syn-chip">' + escHtml(s) + '</span>').join("")
+      : '<span style="font-size:11.5px;color:var(--muted,#64748b)">暂无标注语法（参考提示与示例）</span>';
+  }
+
   function select(id) {
     const q = QUESTIONS.find(q => q.id === id);
     if (!q) return;
@@ -1853,9 +1995,12 @@ int main(void)
     if (!hintEl) { hintEl = document.createElement("div"); hintEl.className = "cp-hint"; desc.appendChild(hintEl); }
     hintEl.textContent = "提示：" + q.hint;
     hintEl.style.display = "none";
+    // v141：语法侧边栏
+    renderSyn(q);
     // 代码
     const ta = cpRoot.querySelector("textarea");
     ta.value = load(id) != null ? load(id) : q.starter;
+    ta.scrollTop = 0; try { ta.setSelectionRange(0, 0); } catch (e) {}
     renderHighlight(q, ta.value); updateGutter(); updateCurline();
     // 清空输出（保留 meta 提示）
     const out = cpRoot.querySelector(".cp-out");
@@ -1888,7 +2033,8 @@ int main(void)
     const ta = cpRoot.querySelector("textarea");
     const cur = cpRoot.querySelector(".cp-curline");
     const line = ta.value.slice(0, ta.selectionStart).split("\n").length;
-    cur.style.top = ((line - 1) * CP_LINE_H + 10) + "px";
+    /* v141：蓝色当前行条跟随视口——减 scrollTop 补偿滚动偏移（修：标行不与对应行绑定） */
+    cur.style.top = ((line - 1) * CP_LINE_H + 10 - (ta.scrollTop || 0)) + "px";
   }
   function parseErrLine(s) {
     const m = String(s).match(/:(\d+):/);
@@ -2147,6 +2293,10 @@ int main(void)
                   onProgress: (p) => { if (fill) fill.style.width = Math.round(p * 100) + "%"; }
                 }), timeoutMs, src.label + "下载");
                 loadEl.hidden = true;
+                /* v141：提示内核已本地缓存（SW cache-first，下次秒开不再下载） */
+                try {
+                  if (loadEl) loadEl.querySelector(".meta") && (loadEl.querySelector(".meta").textContent = "内核已就绪并缓存到本机（下次运行秒开）");
+                } catch (e2) {}
                 done = true;
                 resolve(cpComp);
                 return;
@@ -2315,6 +2465,15 @@ int main(void)
     try { localStorage.setItem("reader-app-cpractice-open", "1"); } catch (e) {}
   }
   function hide() {
+    /* v144.1：任何方式关闭面板必须先清理分屏状态（内联实现，不依赖 buildPanel 闭包函数） */
+    if (splitMode) {
+      splitMode = false;
+      try { document.body.classList.remove("cp-split"); } catch (e) {}
+      try { const w = document.querySelector(".pdf-wrap"); if (w) w.style.cssText = ""; } catch (e) {}
+      try { const sh = document.getElementById("cpSplitHandle"); if (sh) sh.style.display = "none"; } catch (e) {}
+      try { if (cpRoot) { const sb = cpRoot.querySelector("[data-act=split]"); if (sb) sb.style.background = ""; } } catch (e) {}
+      try { if (cpRoot) cpRoot.style.cssText = ""; } catch (e) {}
+    }
     if (cpRoot) cpRoot.hidden = true;
     try { localStorage.setItem("reader-app-cpractice-open", "0"); } catch (e) {}
   }
@@ -2325,4 +2484,900 @@ int main(void)
   // 暴露给阅读器
   window.initCPractice = function () { show(); };
   window.toggleCPractice = toggle;
+})();
+
+/* v84：习题区（高数/线代）——自评模式题库（题目 + 答案对照），题源：CAL-1 / LA-1 练习册 */
+(function(){
+  var SUBJECT_QUIZZES = {
+    calc: [
+      { q: "1. 映射 f:X→Y 的三要素是 ____、____、____。", a: "集合 X（定义域集）、集合 Y（陪域/到达域）、对应法则 f。" },
+      { q: "2. 函数 y=f(x) 的定义域是指 ____ 的取值集合；值域是指 ____ 的集合。", a: "自变量 x（使表达式有意义的全体 x）；所有函数值 f(x) 组成。" },
+      { q: "3. 反函数存在的条件是原函数为 ____；反函数的定义域等于原函数的 ____。", a: "双射（一一对应）；值域。" },
+      { q: "4. 函数 f(x) 为奇函数的前提是定义域关于 ____ 对称，且对定义域内任意 x 满足 ____。", a: "原点；f(−x)=−f(x)。" },
+      { q: "5. 反三角函数 arcsin x 的定义域是 ____，值域是 ____。", a: "[−1, 1]；[−π/2, π/2]。" }
+    ],
+    la: [
+      { q: "1. 二阶行列式 |a b; c d| 的值等于 ____，其中 ad 所在的线叫 ____ 对角线，bc 所在的线叫 ____ 对角线。", a: "ad−bc；主；副。" },
+      { q: "2. 行列式外面用的是 ____（符号），矩阵外面用的是小括号或 ____。行列式最终是一个 ____，矩阵是一张 ____。", a: "两条竖线；中括号；数；数表。" },
+      { q: "3. 三阶行列式展开共有 ____ 项，其中 ____ 个正项、____ 个负项；每一项是 ____ 个数相乘。", a: "6；3；3；3。" },
+      { q: "4. 元素 a₂₃ 表示位于第 ____ 行、第 ____ 列。", a: "2；3。" },
+      { q: "5. 判断：|1 2; 3 4| 和 (1 2; 3 4) 是同一个东西，值都是 −2。", a: "错——竖线是行列式（值 −2），括号是矩阵（数表，没有值）。" }
+    ]
+  };
+  var TITLES = { calc: "高数题库 · 映射与函数（CAL-1）", la: "线代题库 · 二阶三阶行列式（LA-1）" };
+  window.SUBJ_QUIZ_DATA = SUBJECT_QUIZZES; /* v132：统一题库面板数据导出 */
+  window.openSubjectQuiz = function(subj){
+    var data = SUBJECT_QUIZZES[subj]; if (!data) return;
+    var m = document.createElement("div");
+    m.style.cssText = "position:fixed;inset:0;z-index:99998;background:rgba(10,15,30,.96);backdrop-filter:blur(8px);overflow:auto;padding:24px 16px 60px;";
+    var html = '<div style="max-width:760px;margin:0 auto"><div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><button id="sqBack" style="background:rgba(255,255,255,.1);border:none;color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px">← 返回</button><span style="font-size:16px;font-weight:700;color:#fff">' + (TITLES[subj] || "习题") + '</span><span style="font-size:12px;color:#94a3b8;margin-left:auto">自评模式：先做再看答案</span></div>';
+    html += data.map(function(it){
+      return '<div style="background:rgba(255,255,255,.05);border:1px solid rgba(148,163,184,.18);border-radius:12px;padding:14px 16px;margin-bottom:12px"><div style="color:#e8eaf2;font-size:13.5px;line-height:1.7;white-space:pre-wrap">' + it.q + '</div><button class="sqAns" style="margin-top:10px;background:rgba(77,107,254,.25);border:1px solid rgba(77,107,254,.5);color:#cfe0ff;padding:5px 12px;border-radius:8px;cursor:pointer;font-size:12px">显示答案</button><div class="sqA" style="display:none;margin-top:8px;color:#8ddc97;font-size:13px;line-height:1.7;white-space:pre-wrap;background:rgba(16,185,129,.08);border-radius:8px;padding:10px 12px">' + it.a + '</div></div>';
+    }).join("");
+    m.innerHTML = html + '</div>';
+    m.querySelector("#sqBack").onclick = function(){ m.remove(); };
+    m.addEventListener("click", function(e){
+      if (e.target.classList && e.target.classList.contains("sqAns")) {
+        var b = e.target.nextElementSibling;
+        var show = b.style.display === "block";
+        b.style.display = show ? "none" : "block";
+        e.target.textContent = show ? "显示答案" : "收起答案";
+      }
+    });
+    document.body.appendChild(m);
+  };
+})();
+
+/* v86：知识图谱 v2 —— MOOC 式放射状网络图（圆形节点 + 连线 + 关系标签 + 点击展开动画 + 课件跳转） */
+(function(){
+  var GRAPH_STATS = { kp: 41, res: 48, rel: 41 };
+  /* 节点：id/t(标题)/bk(课件书id，可跳转)/pg(页码)/tag(关系)/parent(父id)/c(子id数组)
+     布局为放射状：根顶部居中 → 一级子横排 → 二级子纵向展开 */
+  var NODES = {
+    0:  { t: "高等数学（一）", x: 50, y: 6,  r: 1 },
+    1:  { t: "函数极限与数列极限", bk: "cal2-讲义", pg: 1, parent: 0, x: 5,  y: 30, r: 1 },
+    2:  { t: "极限计算方法", bk: "cal3-讲义", pg: 1, parent: 0, x: 17.5, y: 30, r: 1 },
+    3:  { t: "连续性与间断点", bk: "cal4-讲义", pg: 1, parent: 0, x: 30, y: 30, r: 1 },
+    4:  { t: "无穷小与无穷大", bk: "cal3-讲义", pg: 1, parent: 0, x: 42.5, y: 30, r: 1 },
+    5:  { t: "映射与函数", bk: "cal1-讲义", pg: 1, parent: 0, x: 55, y: 30, r: 1 },
+    6:  { t: "积分学基础", parent: 0, x: 67.5, y: 30, r: 1 },
+    7:  { t: "数列与级数", parent: 0, x: 80, y: 30, r: 1 },
+    8:  { t: "数学素质与历史", parent: 0, x: 92.5, y: 30, r: 1 },
+    11: { t: "数列极限的定义", tag: "包含", parent: 1, x: 5,  y: 48 },
+    12: { t: "函数极限的定义", tag: "包含", parent: 1, x: 5,  y: 58 },
+    13: { t: "极限的性质", tag: "前置", parent: 1, x: 5,  y: 68 },
+    14: { t: "极限存在准则", tag: "前置", parent: 1, x: 5,  y: 76 },
+    21: { t: "两个重要极限", tag: "包含", parent: 2, x: 17.5, y: 48 },
+    22: { t: "等价无穷小代换", tag: "前置", parent: 2, x: 17.5, y: 58 },
+    23: { t: "洛必达法则", tag: "前置", parent: 2, x: 17.5, y: 68 },
+    24: { t: "极限运算法则", tag: "前置", parent: 2, x: 17.5, y: 76 },
+    31: { t: "连续性定义", tag: "包含", parent: 3, x: 30, y: 48 },
+    32: { t: "间断点分类", tag: "包含", parent: 3, x: 30, y: 58 },
+    33: { t: "闭区间连续函数性质", tag: "前置", parent: 3, x: 30, y: 68 },
+    34: { t: "连续函数的运算", tag: "前置", parent: 3, x: 30, y: 76 },
+    41: { t: "无穷小的比较", tag: "包含", parent: 4, x: 42.5, y: 48 },
+    42: { t: "无穷大与渐近线", tag: "前置", parent: 4, x: 42.5, y: 58 },
+    43: { t: "无穷小阶的应用", tag: "前置", parent: 4, x: 42.5, y: 68 },
+    51: { t: "函数概念与性质", tag: "包含", parent: 5, x: 55, y: 48 },
+    52: { t: "基本初等函数", tag: "包含", parent: 5, x: 55, y: 58 },
+    53: { t: "复合函数与反函数", tag: "前置", parent: 5, x: 55, y: 68 },
+    54: { t: "初等函数", tag: "前置", parent: 5, x: 55, y: 76 },
+    61: { t: "不定积分概念与性质", tag: "包含", parent: 6, x: 67.5, y: 48 },
+    62: { t: "换元积分法", tag: "包含", parent: 6, x: 67.5, y: 56 },
+    63: { t: "分部积分法", tag: "包含", parent: 6, x: 67.5, y: 64 },
+    64: { t: "定积分概念与性质", tag: "前置", parent: 6, x: 67.5, y: 72 },
+    65: { t: "微积分基本定理", tag: "前置", parent: 6, x: 67.5, y: 80 },
+    66: { t: "定积分的应用", tag: "前置", parent: 6, x: 67.5, y: 88 },
+    71: { t: "常数项级数概念与性质", tag: "包含", parent: 7, x: 80, y: 48 },
+    72: { t: "正项级数审敛", tag: "包含", parent: 7, x: 80, y: 58 },
+    73: { t: "交错级数与绝对收敛", tag: "前置", parent: 7, x: 80, y: 68 },
+    74: { t: "幂级数", tag: "前置", parent: 7, x: 80, y: 76 },
+    75: { t: "傅里叶级数", tag: "前置", parent: 7, x: 80, y: 84 },
+    81: { t: "数学思想方法", tag: "包含", parent: 8, x: 92.5, y: 48 },
+    82: { t: "数学史与名家", tag: "包含", parent: 8, x: 92.5, y: 58 },
+    83: { t: "数学建模初步", tag: "前置", parent: 8, x: 92.5, y: 68 }
+  };
+  var CHILDREN = { 1: [11,12,13,14], 2: [21,22,23,24], 3: [31,32,33,34], 4: [41,42,43], 5: [51,52,53,54], 6: [61,62,63,64,65,66], 7: [71,72,73,74,75], 8: [81,82,83] };
+  var LV1 = [1,2,3,4,5,6,7,8];
+  var TAG_COLOR = { "前置": "#f5b34c", "包含": "#57d9a0" };
+  var COLORS = [[139,92,246],[77,107,254],[16,185,129],[245,158,11],[236,72,153],[59,130,246],[20,184,166],[168,85,247]];
+
+  /* 大学物理（上）图谱：模块跳转已接入 lzu-大物上-1（第1-4章）/ lzu-大物上-2（第5-7章）课件 PDF */
+  var PH_STATS = { kp: 32, res: 16, rel: 32 };
+  var PH_NODES = {
+    0:   { t: "大学物理（上）", x: 50, y: 6, r: 1 },
+    101: { t: "质点运动学", bk: "lzu-大物上-1", pg: 1, parent: 0, x: 6.5, y: 30, r: 1 },
+    102: { t: "牛顿运动定律", bk: "lzu-大物上-1", pg: 55, parent: 0, x: 19, y: 30, r: 1 },
+    103: { t: "功与能量", bk: "lzu-大物上-1", pg: 117, parent: 0, x: 31.5, y: 30, r: 1 },
+    104: { t: "动量守恒", bk: "lzu-大物上-1", pg: 181, parent: 0, x: 44, y: 30, r: 1 },
+    105: { t: "角动量守恒", bk: "lzu-大物上-1", pg: 238, parent: 0, x: 56.5, y: 30, r: 1 },
+    106: { t: "刚体力学", bk: "lzu-大物上-2", pg: 138, parent: 0, x: 69, y: 30, r: 1 },
+    107: { t: "流体力学", bk: "lzu-大物上-2", pg: 210, parent: 0, x: 81.5, y: 30, r: 1 },
+    108: { t: "振动与波动", bk: "lzu-大物上-2", pg: 240, parent: 0, x: 94, y: 30, r: 1 },
+    1011: { t: "质点与参考系", tag: "包含", parent: 101, x: 6.5, y: 48 },
+    1012: { t: "位移·速度·加速度", tag: "包含", parent: 101, x: 6.5, y: 58 },
+    1013: { t: "曲线运动与圆周运动", tag: "前置", parent: 101, x: 6.5, y: 68 },
+    1014: { t: "相对运动", tag: "前置", parent: 101, x: 6.5, y: 78 },
+    1021: { t: "牛顿三定律", tag: "包含", parent: 102, x: 19, y: 48 },
+    1022: { t: "惯性系与非惯性系", tag: "包含", parent: 102, x: 19, y: 58 },
+    1023: { t: "惯性力", tag: "前置", parent: 102, x: 19, y: 68 },
+    1024: { t: "牛顿定律的应用", tag: "前置", parent: 102, x: 19, y: 78 },
+    1031: { t: "功与功率", tag: "包含", parent: 103, x: 31.5, y: 48 },
+    1032: { t: "动能定理", tag: "包含", parent: 103, x: 31.5, y: 58 },
+    1033: { t: "保守力与势能", tag: "前置", parent: 103, x: 31.5, y: 68 },
+    1034: { t: "机械能守恒定律", tag: "前置", parent: 103, x: 31.5, y: 78 },
+    1041: { t: "动量与冲量", tag: "包含", parent: 104, x: 44, y: 48 },
+    1042: { t: "动量定理", tag: "包含", parent: 104, x: 44, y: 58 },
+    1043: { t: "动量守恒定律", tag: "前置", parent: 104, x: 44, y: 68 },
+    1044: { t: "碰撞", tag: "前置", parent: 104, x: 44, y: 78 },
+    1051: { t: "角动量与力矩", tag: "包含", parent: 105, x: 56.5, y: 48 },
+    1052: { t: "角动量定理", tag: "包含", parent: 105, x: 56.5, y: 58 },
+    1053: { t: "角动量守恒定律", tag: "前置", parent: 105, x: 56.5, y: 68 },
+    1054: { t: "质点在中心力场", tag: "前置", parent: 105, x: 56.5, y: 78 },
+    1061: { t: "刚体运动学", tag: "包含", parent: 106, x: 69, y: 48 },
+    1062: { t: "转动惯量", tag: "包含", parent: 106, x: 69, y: 58 },
+    1063: { t: "转动定律", tag: "前置", parent: 106, x: 69, y: 68 },
+    1064: { t: "刚体角动量守恒", tag: "前置", parent: 106, x: 69, y: 78 },
+    1071: { t: "流体静力学", tag: "包含", parent: 107, x: 81.5, y: 48 },
+    1072: { t: "伯努利方程", tag: "包含", parent: 107, x: 81.5, y: 58 },
+    1073: { t: "黏性流体", tag: "前置", parent: 107, x: 81.5, y: 68 },
+    1074: { t: "层流与湍流", tag: "前置", parent: 107, x: 81.5, y: 78 },
+    1081: { t: "简谐运动", tag: "包含", parent: 108, x: 94, y: 48 },
+    1082: { t: "振动合成", tag: "包含", parent: 108, x: 94, y: 58 },
+    1083: { t: "机械波", tag: "前置", parent: 108, x: 94, y: 68 },
+    1084: { t: "波的干涉与衍射", tag: "前置", parent: 108, x: 94, y: 78 }
+  };
+  var PH_CHILDREN = { 101: [1011,1012,1013,1014], 102: [1021,1022,1023,1024], 103: [1031,1032,1033,1034], 104: [1041,1042,1043,1044], 105: [1051,1052,1053,1054], 106: [1061,1062,1063,1064], 107: [1071,1072,1073,1074], 108: [1081,1082,1083,1084] };
+  var PH_LV1 = [101,102,103,104,105,106,107,108];
+
+  /* 线性代数图谱：跳转已接入 la1-la3 / lam1-lam12 讲义 */
+  var LA_STATS = { kp: 21, res: 17, rel: 21 };
+  var LA_NODES = {
+    0:   { t: "线性代数", x: 50, y: 6, r: 1 },
+    201: { t: "行列式", bk: "la1-讲义", pg: 1, parent: 0, x: 15, y: 30, r: 1 },
+    202: { t: "矩阵及其运算", bk: "lam1-讲义", pg: 1, parent: 0, x: 38.5, y: 30, r: 1 },
+    203: { t: "向量组的线性相关性", bk: "lam9", pg: 1, parent: 0, x: 62, y: 30, r: 1 },
+    204: { t: "线性方程组", bk: "lam12", pg: 1, parent: 0, x: 85, y: 30, r: 1 },
+    2011: { t: "二阶与三阶行列式", tag: "包含", bk: "la1-讲义", parent: 201, x: 15, y: 48 },
+    2012: { t: "全排列与逆序数", tag: "包含", bk: "la2-讲义", parent: 201, x: 15, y: 58 },
+    2013: { t: "n阶行列式的定义", tag: "前置", bk: "la2b-讲义", parent: 201, x: 15, y: 68 },
+    2014: { t: "行列式的性质", tag: "前置", bk: "la3-讲义", parent: 201, x: 15, y: 78 },
+    2021: { t: "矩阵定义与加减数乘", tag: "包含", bk: "lam1-讲义", parent: 202, x: 38.5, y: 48 },
+    2022: { t: "矩阵乘法", tag: "包含", bk: "lam2-讲义", parent: 202, x: 38.5, y: 56 },
+    2023: { t: "方阵的幂", tag: "包含", bk: "lam3-讲义", parent: 202, x: 38.5, y: 64 },
+    2024: { t: "转置与方阵行列式", tag: "前置", bk: "lam4-讲义", parent: 202, x: 38.5, y: 72 },
+    2025: { t: "伴随矩阵", tag: "前置", bk: "lam5-讲义", parent: 202, x: 38.5, y: 80 },
+    2026: { t: "逆矩阵", tag: "前置", bk: "lam6-讲义", parent: 202, x: 38.5, y: 88 },
+    2027: { t: "初等变换与求逆", tag: "前置", bk: "lam7", parent: 202, x: 38.5, y: 96 },
+    2028: { t: "分块矩阵与矩阵的秩", tag: "前置", bk: "lam8", parent: 202, x: 38.5, y: 104 },
+    2031: { t: "向量概念与线性表示", tag: "包含", bk: "lam9", parent: 203, x: 62, y: 48 },
+    2032: { t: "线性相关与极大无关组", tag: "包含", bk: "lam10", parent: 203, x: 62, y: 58 },
+    2033: { t: "向量组的秩", tag: "前置", bk: "lam11", parent: 203, x: 62, y: 68 },
+    2041: { t: "线性方程组", tag: "包含", bk: "lam12", parent: 204, x: 85, y: 48 },
+    2042: { t: "齐次与非齐次方程组", tag: "前置", bk: "lam12", parent: 204, x: 85, y: 58 }
+  };
+  var LA_CHILDREN = { 201: [2011,2012,2013,2014], 202: [2021,2022,2023,2024,2025,2026,2027,2028], 203: [2031,2032,2033], 204: [2041,2042] };
+  var LA_LV1 = [201,202,203,204];
+
+  /* C 语言图谱：跳转已接入 c-ch1/3/4/5/6/7/9/10/11/12 讲义（C Primer Plus 第6版 蓝本） */
+  var C_STATS = { kp: 41, res: 10, rel: 41 };
+  var C_NODES = {
+    0:   { t: "C 语言", x: 50, y: 6, r: 1 },
+    301: { t: "初识C与程序框架", bk: "c-ch1", pg: 1, parent: 0, x: 5, y: 30, r: 1 },
+    302: { t: "数据和C", bk: "c-ch3", pg: 1, parent: 0, x: 15, y: 30, r: 1 },
+    303: { t: "格式化输入输出", bk: "c-ch4", pg: 1, parent: 0, x: 25, y: 30, r: 1 },
+    304: { t: "运算符与表达式", bk: "c-ch5", pg: 1, parent: 0, x: 35, y: 30, r: 1 },
+    305: { t: "循环", bk: "c-ch6", pg: 1, parent: 0, x: 45, y: 30, r: 1 },
+    306: { t: "分支与跳转", bk: "c-ch7", pg: 1, parent: 0, x: 55, y: 30, r: 1 },
+    307: { t: "函数", bk: "c-ch9", pg: 1, parent: 0, x: 65, y: 30, r: 1 },
+    308: { t: "数组和指针", bk: "c-ch10", pg: 1, parent: 0, x: 75, y: 30, r: 1 },
+    309: { t: "字符串", bk: "c-ch11", pg: 1, parent: 0, x: 85, y: 30, r: 1 },
+    310: { t: "存储与内存", bk: "c-ch12", pg: 1, parent: 0, x: 95, y: 30, r: 1 },
+    3011: { t: "程序结构", tag: "包含", bk: "c-ch1", parent: 301, x: 5, y: 48 },
+    3012: { t: "main 与头文件", tag: "包含", bk: "c-ch1", parent: 301, x: 5, y: 58 },
+    3013: { t: "编译运行流程", tag: "前置", bk: "c-ch1", parent: 301, x: 5, y: 68 },
+    3021: { t: "数据类型", tag: "包含", bk: "c-ch3", parent: 302, x: 15, y: 48 },
+    3022: { t: "变量与常量", tag: "包含", bk: "c-ch3", parent: 302, x: 15, y: 58 },
+    3023: { t: "整数与浮点", tag: "前置", bk: "c-ch3", parent: 302, x: 15, y: 68 },
+    3031: { t: "printf 格式化输出", tag: "包含", bk: "c-ch4", parent: 303, x: 25, y: 48 },
+    3032: { t: "scanf 输入", tag: "包含", bk: "c-ch4", parent: 303, x: 25, y: 58 },
+    3033: { t: "字符与字符串", tag: "前置", bk: "c-ch4", parent: 303, x: 25, y: 68 },
+    3041: { t: "算术运算符", tag: "包含", bk: "c-ch5", parent: 304, x: 35, y: 48 },
+    3042: { t: "赋值与类型转换", tag: "包含", bk: "c-ch5", parent: 304, x: 35, y: 58 },
+    3043: { t: "表达式求值", tag: "前置", bk: "c-ch5", parent: 304, x: 35, y: 68 },
+    3051: { t: "while 循环", tag: "包含", bk: "c-ch6", parent: 305, x: 45, y: 48 },
+    3052: { t: "for 循环", tag: "包含", bk: "c-ch6", parent: 305, x: 45, y: 58 },
+    3053: { t: "do-while 与嵌套", tag: "前置", bk: "c-ch6", parent: 305, x: 45, y: 68 },
+    3061: { t: "if-else", tag: "包含", bk: "c-ch7", parent: 306, x: 55, y: 48 },
+    3062: { t: "switch", tag: "包含", bk: "c-ch7", parent: 306, x: 55, y: 58 },
+    3063: { t: "break 与 continue", tag: "前置", bk: "c-ch7", parent: 306, x: 55, y: 68 },
+    3071: { t: "函数定义与调用", tag: "包含", bk: "c-ch9", parent: 307, x: 65, y: 48 },
+    3072: { t: "参数与返回值", tag: "包含", bk: "c-ch9", parent: 307, x: 65, y: 58 },
+    3073: { t: "递归", tag: "前置", bk: "c-ch9", parent: 307, x: 65, y: 68 },
+    3081: { t: "一维数组", tag: "包含", bk: "c-ch10", parent: 308, x: 75, y: 48 },
+    3082: { t: "二维数组", tag: "包含", bk: "c-ch10", parent: 308, x: 75, y: 56 },
+    3083: { t: "指针基础", tag: "前置", bk: "c-ch10", parent: 308, x: 75, y: 64 },
+    3084: { t: "指针与数组", tag: "前置", bk: "c-ch10", parent: 308, x: 75, y: 72 },
+    3091: { t: "字符串定义", tag: "包含", bk: "c-ch11", parent: 309, x: 85, y: 48 },
+    3092: { t: "字符串函数", tag: "包含", bk: "c-ch11", parent: 309, x: 85, y: 58 },
+    3093: { t: "字符串输入输出", tag: "前置", bk: "c-ch11", parent: 309, x: 85, y: 68 },
+    3101: { t: "存储类别", tag: "包含", bk: "c-ch12", parent: 310, x: 95, y: 48 },
+    3102: { t: "链接", tag: "包含", bk: "c-ch12", parent: 310, x: 95, y: 58 },
+    3103: { t: "动态内存分配", tag: "前置", bk: "c-ch12", parent: 310, x: 95, y: 68 }
+  };
+  var C_CHILDREN = { 301: [3011,3012,3013], 302: [3021,3022,3023], 303: [3031,3032,3033], 304: [3041,3042,3043], 305: [3051,3052,3053], 306: [3061,3062,3063], 307: [3071,3072,3073], 308: [3081,3082,3083,3084], 309: [3091,3092,3093], 310: [3101,3102,3103] };
+  var C_LV1 = [301,302,303,304,305,306,307,308,309,310];
+  var CUR = { nodes: NODES, children: CHILDREN, lv1: LV1, stats: GRAPH_STATS, title: "知识图谱 · 高等数学（一）" };
+
+  function esc3(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+  /* 花瓣式大画布：一级三圈同心圆（半径 36/45/54 大幅散开），二级沿父方向花瓣式逐层向外（r2 = r1+14+层10+奇偶5），
+     扇形半宽限制 ≤ 0.55 相邻半角（防跨模块侵入重叠）；无 clamp 边界，overlay 滚动查看大画布 */
+  function layoutGraph(){
+    var n1 = CUR.lv1.length;
+    var R1b = n1 >= 9 ? 40 : n1 >= 6 ? 44 : 32;
+    var halfStep = 180 / n1;
+    /* 中心下移（根节点偏下），一级模块沿上半圆花瓣拱形张开，分级间距拉开 */
+    CUR.nodes[0].x = 50; CUR.nodes[0].y = 62;
+    CUR.lv1.forEach(function(id, i){
+      var a = -180 + (n1 > 1 ? i * (180 / (n1 - 1)) : 0);
+      var rad = a * Math.PI / 180;
+      var n = CUR.nodes[id];
+      var r1 = R1b + (i % 3) * 10;
+      n.x = Math.round((50 + r1 * Math.cos(rad)) * 10) / 10;
+      n.y = Math.round((62 + r1 * Math.sin(rad) * 0.5) * 10) / 10;
+      var kids = CUR.children[id] || [];
+      var span = Math.min(halfStep * 0.7, Math.max(3, (kids.length - 1) * 7));
+      kids.forEach(function(k, j){
+        var kn = CUR.nodes[k];
+        var step = kids.length > 1 ? (2 * span) / (kids.length - 1) : 0;
+        var ka = (a - span + j * step) * Math.PI / 180;
+        var r2 = r1 + 30 + (j % 3) * 12 + (i % 2) * 5;
+        kn.x = Math.round((50 + r2 * Math.cos(ka)) * 10) / 10;
+        kn.y = Math.round((62 + r2 * Math.sin(ka) * 0.5) * 10) / 10;
+      });
+    });
+  }
+
+  function linkLine(n, isLv2, nid){
+    var p = CUR.nodes[n.parent];
+    var pc = n.parent === 0 ? [168,85,247] : COLORS[(n.parent - 1) % 8];
+    var x1 = p.x, y1 = p.y, x2 = n.x, y2 = n.y;
+    var midx = (x1 + x2) / 2, midy = (y1 + y2) / 2;
+    var tag = n.tag ? '<span class="kgLTag" data-from="' + n.parent + '" data-to="' + nid + '" style="position:absolute;left:' + midx + '%;top:' + midy + '%;transform:translate(-50%,-50%);display:none;background:rgba(12,8,28,.9);color:' + TAG_COLOR[n.tag] + ';font-size:10px;padding:1px 7px;border-radius:20px;border:1px solid ' + TAG_COLOR[n.tag] + '44">' + esc3(n.tag) + '</span>' : "";
+    return '<svg class="kgLine" style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible" data-from="' + n.parent + '" data-to="' + nid + '" data-lv2="' + (isLv2 ? 1 : 0) + '"><line x1="' + x1 + '%" y1="' + y1 + '%" x2="' + x2 + '%" y2="' + y2 + '%" stroke="rgba(' + pc[0] + ',' + pc[1] + ',' + pc[2] + ',' + (isLv2 ? ".32" : ".42") + ')" stroke-width="' + (isLv2 ? 1.4 : 1.8) + '" stroke-dasharray="4 3"/></svg>' + tag;
+  }
+
+  function nodeCard(id){
+    var n = CUR.nodes[id];
+    var isRoot = id === 0;
+    var isLv1 = !isRoot && !n.parent;
+    var kids = CUR.children[id];
+    var pc = id;
+    if (!isRoot && !isLv1) { CUR.lv1.forEach(function(mid){ if ((CUR.children[mid] || []).indexOf(id) >= 0) pc = mid; }); }
+    var c = COLORS[(pc - 1) % 8];
+    var col = isRoot ? "radial-gradient(circle at 50% 30%, rgba(192,132,252,.55), rgba(88,28,135,.4))" : "linear-gradient(160deg, rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + (isLv1 ? ".5" : ".26") + "), rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + (isLv1 ? ".28" : ".12") + "))";
+    var bd = isRoot ? "rgba(216,180,254,.7)" : "rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + (isLv1 ? ".65" : ".42") + ")";
+    var gl = isRoot ? "0 0 16px rgba(168,85,247,.5)" : "0 0 16px rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + (isLv1 ? ".5" : ".26") + ")";
+    var w = isRoot ? 30 : isLv1 ? 16 : 8;
+    var go = n.bk ? '<div class="kgGo" style="margin-top:6px;background:rgba(139,92,246,.3);border:1px solid rgba(168,85,247,.5);color:#d8b4fe;font-size:10.5px;padding:3px 9px;border-radius:14px;cursor:pointer;display:inline-block">跳转 ›</div>' : "";
+    var dot = isRoot ? "" : '<div style="position:absolute;top:5px;right:5px;width:15px;height:15px;border-radius:50%;background:rgba(12,8,28,.85);color:' + (isLv1 ? "#fff" : "rgba(" + c[0] + "," + c[1] + "," + c[2] + ",1)") + ';font-size:8.5px;display:flex;align-items:center;justify-content:center;font-weight:700">' + id + '</div>';
+    return '<div class="kgNode" data-id="' + id + '" data-open="0" style="position:absolute;left:' + n.x + '%;top:' + n.y + '%;transform:translate(-50%,-50%);width:' + w + '%;min-width:' + (isRoot ? 90 : isLv1 ? 78 : 66) + 'px;border-radius:20px;padding:' + (isRoot ? 13 : isLv1 ? 11 : 9) + 'px ' + (isRoot ? 8 : 5) + 'px;text-align:center;background:' + col + ';border:1.5px solid ' + bd + ';backdrop-filter:blur(6px);cursor:' + (kids ? "pointer" : "default") + ';box-shadow:0 6px 22px rgba(0,0,0,.35),' + gl + ';transition:opacity .3s,transform .45s ease-out;z-index:2">' + dot + '<div style="font-size:' + (isRoot ? 14 : isLv1 ? 12 : 10.5) + 'px;font-weight:' + (isRoot || isLv1 ? 700 : 400) + ';color:' + (isRoot ? "#f0d9ff" : "#e8eaf2") + ';line-height:1.3">' + esc3(n.t) + '</div>' + go + (kids ? '<div class="kgAr" style="margin-top:5px;color:#94a3b8;font-size:10px;transition:transform .3s">▾ 展开</div>' : '') + '</div>';
+  }
+
+  window.openKnowledgeGraph = function(subject){
+    subject = subject || "calc";
+    if (subject === "phys") { CUR.nodes = PH_NODES; CUR.children = PH_CHILDREN; CUR.lv1 = PH_LV1; CUR.stats = PH_STATS; CUR.title = "知识图谱 · 大学物理（上）"; }
+    else if (subject === "la") { CUR.nodes = LA_NODES; CUR.children = LA_CHILDREN; CUR.lv1 = LA_LV1; CUR.stats = LA_STATS; CUR.title = "知识图谱 · 线性代数"; }
+    else if (subject === "c") { CUR.nodes = C_NODES; CUR.children = C_CHILDREN; CUR.lv1 = C_LV1; CUR.stats = C_STATS; CUR.title = "知识图谱 · C 语言"; }
+    else { subject = "calc"; CUR.nodes = NODES; CUR.children = CHILDREN; CUR.lv1 = LV1; CUR.stats = GRAPH_STATS; CUR.title = "知识图谱 · 高等数学（一）"; }
+    var old = document.getElementById("kgOverlay"); if (old) old.remove();
+    var m = document.createElement("div");
+    m.id = "kgOverlay";
+    m.style.cssText = "position:fixed;inset:0;z-index:99997;background:#0d0a22;overflow:auto;padding:20px 14px 60px;";
+    var html = '<div style="max-width:900px;margin:0 auto"><div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;flex-wrap:wrap"><button id="kgBack" style="background:rgba(255,255,255,.1);border:none;color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px">← 返回</button><span style="font-size:17px;font-weight:700;color:#e9d5ff">' + CUR.title + '</span></div>';
+    html += '<div style="display:flex;gap:8px;margin:4px 0 8px;flex-wrap:wrap">' +
+      '<button id="kgSubCalc" style="flex:1;min-width:130px;padding:8px 6px;border-radius:10px;cursor:pointer;font-size:12.5px;border:1px solid ' + (subject === "calc" ? "rgba(168,85,247,.8)" : "rgba(148,163,184,.25)") + ';background:' + (subject === "calc" ? "rgba(139,92,246,.25)" : "rgba(255,255,255,.04)") + ';color:' + (subject === "calc" ? "#e9d5ff" : "#94a3b8") + '">📐 高数</button>' +
+      '<button id="kgSubPhys" style="flex:1;min-width:130px;padding:8px 6px;border-radius:10px;cursor:pointer;font-size:12.5px;border:1px solid ' + (subject === "phys" ? "rgba(16,185,129,.8)" : "rgba(148,163,184,.25)") + ';background:' + (subject === "phys" ? "rgba(16,185,129,.22)" : "rgba(255,255,255,.04)") + ';color:' + (subject === "phys" ? "#a7f3d0" : "#94a3b8") + '">⚛️ 大物</button>' +
+      '<button id="kgSubLa" style="flex:1;min-width:130px;padding:8px 6px;border-radius:10px;cursor:pointer;font-size:12.5px;border:1px solid ' + (subject === "la" ? "rgba(245,158,11,.8)" : "rgba(148,163,184,.25)") + ';background:' + (subject === "la" ? "rgba(245,158,11,.2)" : "rgba(255,255,255,.04)") + ';color:' + (subject === "la" ? "#fde68a" : "#94a3b8") + '">🔢 线代</button>' +
+      '<button id="kgSubC" style="flex:1;min-width:130px;padding:8px 6px;border-radius:10px;cursor:pointer;font-size:12.5px;border:1px solid ' + (subject === "c" ? "rgba(236,72,153,.8)" : "rgba(148,163,184,.25)") + ';background:' + (subject === "c" ? "rgba(236,72,153,.2)" : "rgba(255,255,255,.04)") + ';color:' + (subject === "c" ? "#fbcfe8" : "#94a3b8") + '">⌨️ C语言</button></div>';
+    html += '<div style="display:flex;gap:10px;margin:6px 0 14px">' +
+      '<div style="flex:1;text-align:center;background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.3);border-radius:12px;padding:8px 4px"><div style="font-size:18px;font-weight:800;color:#d8b4fe">' + CUR.stats.kp + '</div><div style="font-size:11px;color:#94a3b8">知识点</div></div>' +
+      '<div style="flex:1;text-align:center;background:rgba(77,107,254,.14);border:1px solid rgba(77,107,254,.3);border-radius:12px;padding:8px 4px"><div style="font-size:18px;font-weight:800;color:#a5b8ff">' + CUR.stats.res + '</div><div style="font-size:11px;color:#94a3b8">教学资源</div></div>' +
+      '<div style="flex:1;text-align:center;background:rgba(16,185,129,.14);border:1px solid rgba(16,185,129,.3);border-radius:12px;padding:8px 4px"><div style="font-size:18px;font-weight:800;color:#86efac">' + CUR.stats.rel + '</div><div style="font-size:11px;color:#94a3b8">知识关系</div></div></div>';
+    html += '<div style="font-size:11.5px;color:#94a3b8;margin-bottom:8px">点击模块节点展开子知识点（虚线=关联 · 橙色=前置 · 绿色=包含）· 点击「跳转课件」直达对应讲义</div>';
+    html += '<div id="kgZoomBar" style="display:flex;gap:8px;align-items:center;justify-content:center;margin:6px 0 4px">' +
+      '<button id="kgZmOut" style="width:34px;height:30px;border-radius:8px;border:1px solid rgba(148,163,184,.3);background:rgba(255,255,255,.06);color:#e8eaf2;font-size:16px;cursor:pointer">−</button>' +
+      '<span id="kgZmVal" style="min-width:52px;text-align:center;font-size:12px;color:#cbd5e1">100%</span>' +
+      '<button id="kgZmIn" style="width:34px;height:30px;border-radius:8px;border:1px solid rgba(148,163,184,.3);background:rgba(255,255,255,.06);color:#e8eaf2;font-size:16px;cursor:pointer">＋</button>' +
+      '<button id="kgZmFit" style="height:30px;padding:0 12px;border-radius:8px;border:1px solid rgba(139,92,246,.5);background:rgba(139,92,246,.18);color:#d8b4fe;font-size:12px;cursor:pointer">适应</button></div>';
+    html += '<div id="kgZoomWrap" style="transform-origin:50% 0;transition:transform .2s ease-out">';
+    html += '<div id="kgCanvas" style="position:relative;width:100%;height:auto">';
+    layoutGraph();
+    var maxL = 0, maxT = 0;
+    Object.keys(CUR.nodes).forEach(function(ndid){ var nd = CUR.nodes[ndid]; if (nd.x > maxL) maxL = nd.x; if (nd.y > maxT) maxT = nd.y; });
+    html += nodeCard(0);
+    CUR.lv1.forEach(function(i){
+      html += linkLine(CUR.nodes[i], false, i);
+      html += nodeCard(i);
+      (CUR.children[i] || []).forEach(function(k){ html += linkLine(CUR.nodes[k], true, k); html += nodeCard(k); });
+    });
+    html += '</div></div></div>';
+    m.innerHTML = html;
+    setTimeout(function(){
+      try {
+        /* dsh 风：光标移动背景光斑 */
+        var _glow1 = document.createElement("div"), _glow2 = document.createElement("div");
+        _glow1.style.cssText = "position:fixed;width:520px;height:520px;border-radius:50%;pointer-events:none;z-index:1;background:radial-gradient(circle,rgba(139,92,246,.16),transparent 70%);transform:translate(-50%,-50%);left:0;top:0;transition:left .6s ease-out,top .6s ease-out";
+        _glow2.style.cssText = "position:fixed;width:340px;height:340px;border-radius:50%;pointer-events:none;z-index:1;background:radial-gradient(circle,rgba(16,185,129,.10),transparent 70%);transform:translate(-50%,-50%);left:0;top:0;transition:left 1s ease-out,top 1s ease-out";
+        m.appendChild(_glow1); m.appendChild(_glow2);
+        m.addEventListener("mousemove", function(e){
+          _glow1.style.left = e.clientX + "px"; _glow1.style.top = e.clientY + "px";
+          _glow2.style.left = (e.clientX - 120) + "px"; _glow2.style.top = (e.clientY - 90) + "px";
+        });
+        /* 图谱美感：节点渐变 + 连线流动 */
+        var _st = document.createElement("style");
+        _st.textContent = ".kgLine line{animation:dashflow 7s linear infinite}@keyframes dashflow{to{stroke-dashoffset:-56}}";
+        m.appendChild(_st);
+      } catch (e) { console.error("kg-inject", e); }
+    }, 30);
+    /* 图谱缩放：按钮 + 双指捏合（可收放自如） */
+    var zw = m.querySelector("#kgZoomWrap");
+    var _zs = 1;
+    function _zoom(){
+      zw.style.transform = "scale(" + _zs + ")";
+      var zv = m.querySelector("#kgZmVal"); if (zv) zv.textContent = Math.round(_zs * 100) + "%";
+    }
+    var zIn = m.querySelector("#kgZmIn"), zOut = m.querySelector("#kgZmOut"), zFit = m.querySelector("#kgZmFit");
+    if (zIn) zIn.onclick = function(){ _zs = Math.min(2, Math.round((_zs + 0.25) * 100) / 100); _zoom(); };
+    if (zOut) zOut.onclick = function(){ _zs = Math.max(0.4, Math.round((_zs - 0.25) * 100) / 100); _zoom(); };
+    if (zFit) zFit.onclick = function(){ _zs = 1; _zoom(); };
+    var _pd = 0;
+    var _rszT = 0;
+    m.addEventListener("touchstart", function(e){ if (e.touches.length === 2) { _pd = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); } }, {passive:true});
+    m.addEventListener("touchmove", function(e){ if (e.touches.length === 2 && _pd) { var d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); _zs = Math.max(0.4, Math.min(2, Math.round(_zs * (d / _pd) * 100) / 100)); _pd = d; _zoom(); } }, {passive:true});
+    m.addEventListener("touchend", function(){ _pd = 0; });
+    /* 初始隐藏全部二级节点与连线 */
+    var cvs = m.querySelector("#kgCanvas");
+    /* 屏幕自适应：画布尺寸随内容撑开（宽高按节点实际布局，窄屏/平板自动适应） */
+    var _mt = 0, _ml = 0;
+    cvs.querySelectorAll('.kgNode').forEach(function(x){ var t = parseFloat(x.style.top); if (t > _mt) _mt = t; var l = parseFloat(x.style.left); if (l > _ml) _ml = l; });
+    cvs.style.width = Math.max(100, _ml + 10) + '%';
+    cvs.style.height = Math.max(900, Math.round((_mt / 100) * cvs.offsetWidth + 120)) + 'px';
+    Array.prototype.slice.call(cvs.querySelectorAll('.kgNode')).forEach(function(x){
+      var idn = parseInt(x.getAttribute("data-id"), 10);
+      if (idn !== 0 && CUR.lv1.indexOf(idn) < 0) { x.style.display = "none"; }
+    });
+    Array.prototype.slice.call(cvs.querySelectorAll('.kgLine[data-lv2="1"]')).forEach(function(x){ x.style.display = "none"; });
+    m.querySelector("#kgBack").onclick = function(){ m.remove(); };
+    var sc = m.querySelector("#kgSubCalc"); if (sc) sc.onclick = function(){ window.openKnowledgeGraph("calc"); };
+    var sp = m.querySelector("#kgSubPhys"); if (sp) sp.onclick = function(){ window.openKnowledgeGraph("phys"); };
+    var sla = m.querySelector("#kgSubLa"); if (sla) sla.onclick = function(){ window.openKnowledgeGraph("la"); };
+    var sc2 = m.querySelector("#kgSubC"); if (sc2) sc2.onclick = function(){ window.openKnowledgeGraph("c"); };
+    m.addEventListener("mouseover", function(e){
+      var nd = e.target && e.target.closest ? e.target.closest(".kgNode") : null;
+      if (!nd) return;
+      var id = nd.getAttribute("data-id");
+      m.querySelectorAll(".kgLTag").forEach(function(t){
+        t.style.display = (t.getAttribute("data-from") === id || t.getAttribute("data-to") === id) ? "block" : "none";
+      });
+    });
+    m.addEventListener("mouseout", function(e){
+      var nd = e.target && e.target.closest ? e.target.closest(".kgNode") : null;
+      if (!nd) return;
+      m.querySelectorAll(".kgLTag").forEach(function(t){ t.style.display = "none"; });
+    });
+    m.addEventListener("click", function(e){
+      var tar = e.target && e.target.nodeType === 3 ? e.target.parentNode : e.target;
+      var go = tar && tar.closest ? tar.closest(".kgGo") : null;
+      if (go) {
+        var nd = go.closest(".kgNode");
+        var n = CUR.nodes[nd.getAttribute("data-id")];
+        if (n && n.bk) {
+          if (window.switchBook) { try { window.switchBook(n.bk, n.pg || 1); } catch(err){ alert("跳转失败：" + n.t); } }
+          else alert("课件跳转暂不可用（需先打开一本书）");
+        }
+        return;
+      }
+      var nd2 = tar && tar.closest ? tar.closest(".kgNode") : null;
+      if (!nd2) return;
+      var id = nd2.getAttribute("data-id");
+      var kids = CUR.children[id];
+      if (!kids) return;
+      var open = nd2.getAttribute("data-open") === "1";
+      nd2.setAttribute("data-open", open ? "0" : "1");
+      var ar = nd2.querySelector(".kgAr"); if (ar) ar.textContent = open ? "▾ 展开" : "▴ 收起";
+      var canvas = document.getElementById("kgCanvas");
+      if (!open) {
+        var cvr = canvas.getBoundingClientRect();
+        var nr = nd2.getBoundingClientRect();
+        m.scrollTo({ left: (nr.left - cvr.left + nr.width / 2) - m.clientWidth / 2, top: (nr.top - cvr.top + nr.height / 2) - m.clientHeight / 2, behavior: "smooth" });
+      }
+      var pw = canvas.clientWidth || 900, ph = canvas.clientHeight || 920;
+      var pn = CUR.nodes[id];
+      for (var ki = 0; ki < kids.length; ki++) {
+        (function(k, dly){
+          var card = canvas.querySelector('.kgNode[data-id="' + k + '"]');
+          var line = canvas.querySelector('.kgLine[data-to="' + k + '"]');
+          if (!card) return;
+          var kn = CUR.nodes[k];
+          var fx = (kn.x - pn.x) * pw / 100, fy = (kn.y - pn.y) * ph / 100;
+          if (open) {
+            setTimeout(function(){
+              card.style.transform = "translate(calc(-50% + " + fx + "px), calc(-50% + " + fy + "px)) scale(0.3)";
+              card.style.opacity = "0";
+              if (line) { line.style.opacity = "0"; }
+              setTimeout(function(){ card.style.display = "none"; if (line) line.style.display = "none"; }, 300);
+            }, dly);
+          } else {
+            card.style.display = "";
+            card.style.transform = "translate(calc(-50% + " + fx + "px), calc(-50% + " + fy + "px)) scale(0.3)";
+            card.style.opacity = "0";
+            if (line) { line.style.display = ""; line.style.opacity = "0"; }
+            setTimeout(function(){
+              card.style.transform = "translate(-50%,-50%) scale(1)";
+              card.style.opacity = "1";
+              if (line) line.style.opacity = "1";
+              /* 展开后按实际节点位置重算画布尺寸（内容适配） */
+              clearTimeout(_rszT);
+              _rszT = setTimeout(function(){
+                var mx = 0, my = 0;
+                canvas.querySelectorAll('.kgNode').forEach(function(c){
+                  if (c.style.display === "none") return;
+                  var r = c.getBoundingClientRect(), cr = canvas.getBoundingClientRect();
+                  var ty = r.top - cr.top + r.height / 2, tx = r.left - cr.left + r.width / 2;
+                  if (tx > mx) mx = tx;
+                  if (ty > my) my = ty;
+                });
+                canvas.style.width = Math.max(100, (mx / (canvas.clientWidth || 900)) * 100 + 10) + '%';
+                canvas.style.height = Math.max(900, my + 120) + 'px';
+              }, 120);
+            }, 20 + dly);
+          }
+        })(kids[ki], ki * 60);
+      }
+    });
+    document.body.appendChild(m);
+  };
+  var _tg = document.getElementById("tabGraph");
+  if (_tg) _tg.addEventListener("click", function(){ if (window.openKnowledgeGraph) window.openKnowledgeGraph(); });
+})();
+/* ============ 物理题库（大学物理·上） ============ */
+(function(){
+  var PH_QUIZ = {
+    101: { name: "质点运动学", items: [
+      { q: "一质点沿 x 轴运动，x=5t²-2t³(SI)，质点在 t=1s 时的速度为？", opts: ["4 m/s","2 m/s","-1 m/s","8 m/s"], ans: 0, expl: "v=dx/dt=10t-6t²，t=1s 时 v=10-6=4 m/s" },
+      { q: "匀速率圆周运动中，加速度方向为？", opts: ["指向圆心","沿切线","背离圆心","为零"], ans: 0, expl: "匀速圆周只有向心加速度，指向圆心" },
+      { q: "位移与路程的区别：质点从 A 到 B 再回到 A，则？", opts: ["位移为 0，路程为 2AB","位移为 2AB，路程为 0","均为 0","均为 2AB"], ans: 0, expl: "位移是位置矢量变化，回到起点为 0；路程为轨迹长度 2AB" }
+    ]},
+    102: { name: "牛顿定律", items: [
+      { q: "牛顿第二定律 F=ma 成立的参考系是？", opts: ["惯性系","非惯性系","任何参考系","地心系"], ans: 0, expl: "F=ma 仅在惯性系中成立" },
+      { q: "质量 2kg 物体受合力 10N，加速度为？", opts: ["5 m/s²","2 m/s²","10 m/s²","20 m/s²"], ans: 0, expl: "a=F/m=10/2=5 m/s²" },
+      { q: "作用力与反作用力（牛顿第三定律）的特点是？", opts: ["大小相等方向相反，作用在不同物体","大小相等方向相反，作用在同一物体","大小不等","只存在于接触物体间"], ans: 0, expl: "第三定律两力等大反向、作用在不同物体上" }
+    ]},
+    103: { name: "动量与冲量", items: [
+      { q: "动量定理 I=Δp 中冲量 I 等于？", opts: ["力对时间的积分","力对位移的积分","速度对时间的积分","质量对时间的积分"], ans: 0, expl: "冲量 I=∫Fdt，等于动量变化" },
+      { q: "系统动量守恒的条件是？", opts: ["合外力为零","合内力为零","外力远小于内力","系统静止"], ans: 0, expl: "动量守恒要求系统所受合外力为零" },
+      { q: "质量 2kg 球以 10m/s 撞墙反弹速度 8m/s，动量变化大小为？", opts: ["36 kg·m/s","4 kg·m/s","20 kg·m/s","16 kg·m/s"], ans: 0, expl: "Δp=m(v'-v)=2×(8-(-10))=36 kg·m/s（取反弹为正）" }
+    ]},
+    104: { name: "功与能量", items: [
+      { q: "保守力做功与路径的关系是？", opts: ["与路径无关","与路径有关","只与始末位置有关且等于势能变化负值","A 和 C"], ans: 3, expl: "保守力做功与路径无关，等于势能变化的负值" },
+      { q: "动能定理：合外力做功等于？", opts: ["动能增量","势能增量","动量增量","机械能增量"], ans: 0, expl: "动能定理：W合=ΔEk" },
+      { q: "弹簧弹性势能公式为？", opts: ["½kx²","kx²","½kx","kx"], ans: 0, expl: "弹性势能 Ep=½kx²" }
+    ]},
+    105: { name: "刚体转动", items: [
+      { q: "转动惯量的物理意义是？", opts: ["转动惯性的量度","质量的量度","角速度的量度","力矩的量度"], ans: 0, expl: "转动惯量是刚体转动惯性的量度，与质量分布有关" },
+      { q: "角动量守恒的条件是？", opts: ["合外力矩为零","合外力为零","角速度为零","转动惯量不变"], ans: 0, expl: "合外力矩为零时角动量守恒" },
+      { q: "细杆绕端点转动惯量为？", opts: ["⅓ml²","½ml²","ml²","¹⁄₁₂ml²"], ans: 0, expl: "均匀细杆绕一端：J=⅓ml²；绕中心：¹⁄₁₂ml²" }
+    ]},
+    106: { name: "机械振动", items: [
+      { q: "简谐振动 x=Acos(ωt+φ) 中 ω 与周期的关系？", opts: ["ω=2π/T","ω=T/2π","ω=1/T","ω=T"], ans: 0, expl: "角频率 ω=2π/T" },
+      { q: "弹簧振子周期公式为？", opts: ["T=2π√(m/k)","T=2π√(k/m)","T=√(m/k)","T=2π√(mk)"], ans: 0, expl: "弹簧振子周期 T=2π√(m/k)" },
+      { q: "两个同频率同方向简谐振动的合成：相位差为 π 时？", opts: ["相互抵消（合振幅最小）","加强","合振幅不变","产生拍"], ans: 0, expl: "反相合成振幅 A=|A1-A2|，最小" }
+    ]},
+    107: { name: "机械波", items: [
+      { q: "波速 u、频率 f、波长 λ 的关系？", opts: ["u=fλ","u=λ/f","f=uλ","λ=uf"], ans: 0, expl: "u=λ/T=fλ" },
+      { q: "波从一种介质进入另一种介质，不变的量是？", opts: ["频率","波速","波长","振幅"], ans: 0, expl: "频率由波源决定，进入新介质不变；波速波长改变" },
+      { q: "驻波中相邻波节间距为？", opts: ["λ/2","λ","λ/4","2λ"], ans: 0, expl: "驻波相邻波节间距为半波长 λ/2" }
+    ]},
+    108: { name: "热力学基础", items: [
+      { q: "热力学第一定律表达式为？", opts: ["ΔU=Q+W","ΔU=Q-W","ΔU=Q","ΔU=W"], ans: 0, expl: "第一定律：ΔU=Q+W（W 为外界对系统做功）" },
+      { q: "理想气体等温过程中内能变化为？", opts: ["ΔU=0","ΔU>0","ΔU<0","无法确定"], ans: 0, expl: "理想气体内能只与温度有关，等温 ΔT=0 则 ΔU=0" },
+      { q: "熵增原理表明孤立系统自发过程熵的变化为？", opts: ["ΔS≥0","ΔS≤0","ΔS=0","不确定"], ans: 0, expl: "孤立系统自发过程熵不减少，ΔS≥0" }
+    ]}
+  };
+  window.PH_QUIZ_DATA = PH_QUIZ; /* v132：统一题库面板数据导出（定义即导出） */
+  window.initPhQuiz = function(){
+    var old = document.getElementById("phQuizOverlay"); if (old) old.remove();
+    var m = document.createElement("div");
+    m.id = "phQuizOverlay";
+    m.style.cssText = "position:fixed;inset:0;z-index:99996;background:#0a0c18;overflow:auto;padding:20px 16px 60px;color:#e2e8f0";
+    var names = Object.keys(PH_QUIZ);
+    var h = '<div style="max-width:860px;margin:0 auto"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><button onclick="document.getElementById(\'phQuizOverlay\').remove()" style="background:rgba(255,255,255,.1);border:none;color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px">← 返回</button><span style="font-size:17px;font-weight:700;color:#a7f3d0">物理题库 · 大学物理（上）</span></div>';
+    h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">';
+    names.forEach(function(k, i){
+      h += '<button data-mod="' + k + '" style="flex:1;min-width:90px;padding:8px 4px;border-radius:10px;cursor:pointer;font-size:12px;border:1px solid ' + (i===0 ? "rgba(16,185,129,.8)" : "rgba(148,163,184,.25)") + ';background:' + (i===0 ? "rgba(16,185,129,.22)" : "rgba(255,255,255,.04)") + ';color:' + (i===0 ? "#a7f3d0" : "#94a3b8") + '">' + PH_QUIZ[k].name + '</button>';
+    });
+    h += '</div><div id="phqBody"></div></div>';
+    m.innerHTML = h;
+    document.body.appendChild(m);
+    var cur = names[0];
+    function render(){
+      var b = m.querySelector("#phqBody");
+      var it = PH_QUIZ[cur].items;
+      var s = '';
+      it.forEach(function(t, i){
+        s += '<div style="background:rgba(255,255,255,.05);border:1px solid rgba(148,163,184,.2);border-radius:12px;padding:12px 14px;margin-bottom:10px"><div style="font-size:13.5px;font-weight:600;color:#e8eaf2;margin-bottom:8px">' + (i + 1) + '. ' + t.q + '</div>';
+        t.opts.forEach(function(o, oi){
+          s += '<div data-ans="' + oi + '" data-ok="' + (oi === t.ans ? 1 : 0) + '" style="padding:7px 12px;border-radius:8px;border:1px solid rgba(148,163,184,.25);margin:5px 0;cursor:pointer;font-size:13px;color:#cbd5e1;background:rgba(255,255,255,.03)">' + String.fromCharCode(65 + oi) + '. ' + o + '</div>';
+        });
+        s += '<div data-expl style="display:none;margin-top:8px;font-size:12.5px;color:#86efac;background:rgba(16,185,129,.1);border-radius:8px;padding:7px 10px">✅ ' + t.expl + '</div></div>';
+      });
+      b.innerHTML = s;
+      b.querySelectorAll("[data-ans]").forEach(function(el){
+        el.addEventListener("click", function(){
+          b.querySelectorAll("[data-ans]").forEach(function(x){ x.style.background = "rgba(255,255,255,.03)"; x.style.color = "#cbd5e1"; });
+          var ok = el.getAttribute("data-ok") === "1";
+          el.style.background = ok ? "rgba(16,185,129,.25)" : "rgba(236,72,153,.2)";
+          el.style.color = ok ? "#a7f3d0" : "#fbcfe8";
+          var exp = el.parentNode.querySelector("[data-expl]");
+          if (exp) exp.style.display = "block";
+        });
+      });
+    }
+    render();
+    m.querySelectorAll("[data-mod]").forEach(function(b){
+      b.addEventListener("click", function(){
+        cur = b.getAttribute("data-mod");
+        m.querySelectorAll("[data-mod]").forEach(function(x){
+          var act = x === b;
+          x.style.border = "1px solid " + (act ? "rgba(16,185,129,.8)" : "rgba(148,163,184,.25)");
+          x.style.background = act ? "rgba(16,185,129,.22)" : "rgba(255,255,255,.04)";
+          x.style.color = act ? "#a7f3d0" : "#94a3b8";
+        });
+        render();
+      });
+    });
+  };
+})();
+
+/* v130：题库中心 —— 书架式题库 + 练习册自动扫描入库 + 电子信息题库（2026-10-07） */
+(function(){
+  var QS_KEY = "reader-quiz-shelf-v1";
+  var QS_SCAN_KEY = "reader-quiz-scan-v1";
+
+  /* ---------- 电子信息题库（EE_QUIZ，大一新生向，选择题即时判对错） ---------- */
+  var EE_QUIZ = [
+    { s:"电路基础", q:"欧姆定律的表达式是？", o:["U = I×R","U = I÷R","U = R÷I","I = U×R"], ans:0, e:"电压 = 电流 × 电阻。伏特 = 安培 × 欧姆。" },
+    { s:"电路基础", q:"KCL（基尔霍夫电流定律）说的是：流入节点的电流之和 ____ 流出节点的电流之和。", o:["大于","等于","小于","无关"], ans:1, e:"电荷守恒：流入 = 流出。" },
+    { s:"电路基础", q:"两个 10Ω 电阻串联，总电阻是？", o:["5Ω","10Ω","20Ω","100Ω"], ans:2, e:"串联相加：10+10=20Ω。" },
+    { s:"电路基础", q:"两个 10Ω 电阻并联，总电阻是？", o:["5Ω","10Ω","20Ω","0.5Ω"], ans:0, e:"并联：1/R=1/10+1/10 → R=5Ω。" },
+    { s:"电路基础", q:"电阻功率公式是？", o:["P = U×I","P = U÷I","P = I÷U","P = U²×R"], ans:0, e:"功率 = 电压 × 电流（瓦特）。" },
+    { s:"电路基础", q:"KVL（基尔霍夫电压定律）说的是：闭合回路中电压升之和 ____ 电压降之和。", o:["大于","等于","小于","无关"], ans:1, e:"能量守恒：绕一圈电压代数和为 0。" },
+    { s:"模拟电路", q:"二极管正向导通时，硅管压降约为？", o:["0.3V","0.7V","1.4V","5V"], ans:1, e:"硅管约 0.7V，锗管约 0.3V。" },
+    { s:"模拟电路", q:"二极管最重要的特性是？", o:["放大","单向导电性","稳压","滤波"], ans:1, e:"正向导通、反向截止——单向导电。" },
+    { s:"模拟电路", q:"三极管的三个极是？", o:["阳极/阴极/栅极","基极/集电极/发射极","源极/漏极/栅极","正极/负极/地"], ans:1, e:"B（基极）/C（集电极）/E（发射极）。" },
+    { s:"模拟电路", q:"NPN 三极管工作在放大区的条件是？", o:["发射结正偏、集电结反偏","两个结都正偏","两个结都反偏","发射结反偏、集电结正偏"], ans:0, e:"发射结正偏 + 集电结反偏 → 放大。" },
+    { s:"模拟电路", q:"共射极放大电路输出电压与输入电压的关系是？", o:["同相","反相","无关系","同幅"], ans:1, e:"共射放大是反相放大。" },
+    { s:"模拟电路", q:"运放（运算放大器）的输入阻抗通常？", o:["很小","极大","为零","等于输出阻抗"], ans:1, e:"理想运放输入阻抗无穷大。" },
+    { s:"数字电路", q:"与门（AND）的规则：只有输入 ____ 时输出才为 1。", o:["全 0","全 1","任一为 1","任一为 0"], ans:1, e:"1·1=1，其余为 0。" },
+    { s:"数字电路", q:"非门（NOT）的功能是？", o:["取反","取与","取或","存储"], ans:0, e:"0→1，1→0。" },
+    { s:"数字电路", q:"二进制数 1010 等于十进制？", o:["8","10","12","14"], ans:1, e:"8+0+2+0=10。" },
+    { s:"数字电路", q:"十进制 15 的二进制是？", o:["1010","1101","1110","1111"], ans:3, e:"8+4+2+1=15 → 1111。" },
+    { s:"数字电路", q:"布尔代数中 A + 1 = ？", o:["A","0","1","2A"], ans:2, e:"或运算：A 或 1 恒为 1。" },
+    { s:"数字电路", q:"触发器（Flip-Flop）的主要用途是？", o:["放大信号","存储一位二进制","整流","滤波"], ans:1, e:"时序逻辑的基础存储单元。" },
+    { s:"信号与系统", q:"模拟信号与数字信号的区别是？", o:["前者连续、后者离散","前者离散、后者连续","没有区别","前者只能传声音"], ans:0, e:"模拟=时间/幅度连续；数字=离散化采样。" },
+    { s:"信号与系统", q:"采样定理（奈奎斯特）要求采样频率至少是信号最高频率的？", o:["1 倍","2 倍","10 倍","100 倍"], ans:1, e:"fs ≥ 2×fmax，否则混叠。" },
+    { s:"信号与系统", q:"傅里叶变换的作用是？", o:["把时域信号变到频域","把频域信号变到频域","放大信号","压缩信号"], ans:0, e:"时域 ↔ 频域的桥梁。" },
+    { s:"信号与系统", q:"一个周期信号的基本参数不包括？", o:["周期","频率","幅度","电阻"], ans:3, e:"周期/频率/幅度/相位是基本参数。" },
+    { s:"信号与系统", q:"数字电路中『1』和『0』用电压表示，TTL 电平中高电平约为？", o:["0V","2~5V","-5V","0.7V"], ans:1, e:"TTL 高电平约 2V 以上（典型 3.3/5V）。" },
+    { s:"信号与系统", q:"滤波器的作用是？", o:["让特定频率通过/衰减","产生信号","放大所有信号","存储信号"], ans:0, e:"低通/高通/带通，选频。" }
+  ];
+
+  /* ---------- 内置科目（含已有题库） ---------- */
+  var BUILTIN = [
+    { key:"c",     name:"C 语言题库", icon:"🖥", desc:"改错/编程/填空 · 取自各章练习册", act:function(){ if (window.initCPractice) window.initCPractice(); } },
+    { key:"calc",  name:"高等数学题库", icon:"🧮", desc:"CAL 系列 · 映射与函数等", act:function(){ window.openUnifiedQuiz("calc"); } },
+    { key:"la",    name:"线性代数题库", icon:"📐", desc:"LA 系列 · 行列式基础", act:function(){ window.openUnifiedQuiz("la"); } },
+    { key:"phys",  name:"大学物理题库", icon:"⚛", desc:"8 模块 × 3 题 · 即时判对错", act:function(){ window.openUnifiedQuiz("phys"); } },
+    { key:"ee",    name:"电子信息题库", icon:"🔌", desc:"电路/模电/数电/信号 · " + EE_QUIZ.length + " 题", act:function(){ window.openUnifiedQuiz("ee"); } }
+  ];
+
+  /* ---------- 练习册自动扫描 ---------- */
+  var SCAN_LISTS = [
+    { subj:"c",    name:"C 语言练习册", files:["ch1","ch3","ch4","ch5","ch6","ch7","ch9","ch10","ch11","ch12"].map(function(x){ return "c-course/" + x + "-练习册.html"; }) },
+    { subj:"calc", name:"高数练习册",   files:["cal1","cal2","cal3","cal4","cal5","cal6","cal7","cal8","cal10","cal11","cal14","cal15","cal16","cal17","cal18","cal20","cal21"].map(function(x){ return "math-course/" + x + "-练习册.html"; }) },
+    { subj:"la",   name:"线代练习册",   files:["la1","la2","la2b","la3","lam1","lam2","lam3","lam4","lam5","lam6","lam7","lam8","lam9","lam10","lam11","lam12","lam13"].map(function(x){ return "math-course/" + x + "-练习册.html"; }) }
+  ];
+
+  function parseWorkbook(html, src){
+    var out = [];
+    try {
+      var doc = new DOMParser().parseFromString(html, "text/html");
+      var hs = doc.querySelectorAll("h2");
+      for (var i = 0; i < hs.length; i++) {
+        var h = hs[i];
+        var qEl = h.nextElementSibling;
+        if (!qEl || !qEl.classList || !qEl.classList.contains("q")) continue;
+        var title = (h.textContent || "").replace(/\s+/g, " ").trim();
+        var q = (qEl.textContent || "").replace(/\s+/g, " ").trim();
+        if (!q || q.length < 4) continue;
+        var ans = "";
+        var sib = qEl.nextElementSibling;
+        var guard = 0;
+        while (sib && guard < 3) {
+          if (sib.classList && sib.classList.contains("ans")) { ans = (sib.textContent || "").replace(/\s+/g, " ").trim().slice(0, 220); break; }
+          sib = sib.nextElementSibling; guard++;
+        }
+        out.push({ t: title, q: q, a: ans, src: src });
+      }
+    } catch (e) { /* 单册解析失败不影响整体 */ }
+    return out;
+  }
+
+  function loadScan(){
+    try { return JSON.parse(localStorage.getItem(QS_SCAN_KEY) || "null"); } catch (e) { return null; }
+  }
+
+  function scanAllWorkbooks(done){
+    var cached = loadScan();
+    if (cached && Date.now() - cached.ts < 12 * 3600 * 1000) { done(cached); return; }
+    var all = [], pending = 0;
+    SCAN_LISTS.forEach(function(list){
+      list.files.forEach(function(f){
+        pending++;
+        fetch(f, { cache: "no-store" }).then(function(r){ return r.ok ? r.text() : ""; }).then(function(txt){
+          var items = parseWorkbook(txt, f).map(function(it){ it.subj = list.subj; it.name = list.name; return it; });
+          all = all.concat(items);
+        }).catch(function(){}).then(function(){ pending--; if (pending === 0) {
+          var data = { ts: Date.now(), items: all };
+          try { localStorage.setItem(QS_SCAN_KEY, JSON.stringify(data)); } catch (e) {}
+          done(data);
+        }});
+      });
+    });
+  }
+
+  /* ---------- 书架渲染 ---------- */
+  function renderShelf(){
+    var grid = document.getElementById("quizShelfGrid");
+    if (!grid) return;
+    var scan = loadScan();
+    var scanCount = scan ? scan.items.length : 0;
+    var html = "";
+    BUILTIN.forEach(function(b){
+      var isEE = b.key === "ee";
+      var n = isEE ? EE_QUIZ.length : (b.key === "phys" ? 24 : (b.key === "c" ? 40 : 15));
+      var t = isEE ? "电路 · 模电 · 数电 · 信号" : (b.key === "phys" ? "质点 · 刚体 · 振动 · 热学" : (b.key === "c" ? "改错/编程/填空" : "自评模式"));
+      html += '<div class="qs-card" data-key="' + b.key + '" style="cursor:pointer;background:linear-gradient(135deg,rgba(77,107,254,.12),rgba(124,58,237,.10));border:1px solid var(--glass-border);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px;transition:transform .15s ease,box-shadow .15s ease">'
+        + '<div style="display:flex;align-items:center;gap:10px"><span style="font-size:24px">' + b.icon + '</span><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px;color:var(--ink)">' + b.name + '</div><div style="font-size:11.5px;color:var(--muted);margin-top:2px">' + b.desc + '</div></div></div>'
+        + '<div style="display:flex;gap:6px;flex-wrap:wrap"><span style="font-size:11px;background:rgba(77,107,254,.12);color:var(--teal-dark);border-radius:20px;padding:3px 10px">' + n + ' 题</span><span style="font-size:11px;background:rgba(124,58,237,.10);color:#7c3aed;border-radius:20px;padding:3px 10px">' + t + '</span></div>'
+        + '<div style="font-size:12px;color:var(--teal-dark);margin-top:auto">打开刷题 ›</div></div>';
+    });
+    var scanBlock = '<div class="qs-card" data-key="scan" style="cursor:pointer;border:1px dashed var(--glass-border);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px;background:rgba(255,255,255,.05)">'
+      + '<div style="display:flex;align-items:center;gap:10px"><span style="font-size:24px">📚</span><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px;color:var(--ink)">练习册自动扫描</div><div style="font-size:11.5px;color:var(--muted);margin-top:2px">从练习册 HTML 自动提取题目入库' + (scan ? " · 已入库 " + scanCount + " 题" : "") + '</div></div></div>'
+      + '<div style="display:flex;gap:6px"><span style="font-size:11px;background:rgba(16,185,129,.12);color:#059669;border-radius:20px;padding:3px 10px">' + (scan ? "最近扫描 " + new Date(scan.ts).toLocaleDateString() : "未扫描") + '</span></div>'
+      + '<div style="font-size:12px;color:#059669;margin-top:auto">扫描入库（重扫更新）›</div></div>';
+    grid.innerHTML = html + scanBlock;
+
+    grid.querySelectorAll(".qs-card").forEach(function(card){
+      card.addEventListener("click", function(){
+        var k = card.getAttribute("data-key");
+        if (k === "scan") { doScan(grid); return; }
+        var b = BUILTIN.filter(function(x){ return x.key === k; })[0];
+        if (b) b.act();
+      });
+    });
+  }
+
+  function doScan(grid){
+    grid.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">正在扫描练习册并入库…（约 40 份，几秒）</div>';
+    scanAllWorkbooks(function(data){
+      var bySubj = {};
+      data.items.forEach(function(it){ (bySubj[it.subj] = bySubj[it.subj] || []).push(it); });
+      try { localStorage.setItem(QS_KEY, JSON.stringify(bySubj)); } catch (e) {}
+      var names = { c:"C 语言", calc:"高等数学", la:"线性代数" };
+      var line = Object.keys(bySubj).map(function(k){ return names[k] + " " + bySubj[k].length + " 题"; }).join(" · ");
+      grid.innerHTML = '<div style="padding:16px;border-radius:12px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);margin-bottom:12px;color:#059669;font-size:13px;line-height:1.7">✅ 扫描完成：' + line + '（已缓存，12 小时内重进不重复扫描）<div style="margin-top:8px;font-size:12px;color:var(--muted)">点下方科目卡可进入「练习册真题」模式查看题目与答案。</div></div>';
+      var inner = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px">';
+      Object.keys(bySubj).forEach(function(k){
+        var nm = names[k] || k;
+        var items = bySubj[k];
+        inner += '<div class="qs-scan-card" data-k="' + k + '" style="cursor:pointer;border:1px solid var(--glass-border);border-radius:12px;padding:12px;background:rgba(255,255,255,.06)"><div style="font-weight:700;font-size:13.5px;color:var(--ink)">' + nm + '练习册</div><div style="font-size:12px;color:var(--muted);margin-top:4px">' + items.length + ' 题 · 点击浏览</div></div>';
+      });
+      inner += '</div>';
+      grid.insertAdjacentHTML("beforeend", inner);
+      grid.querySelectorAll(".qs-scan-card").forEach(function(c){
+        c.addEventListener("click", function(){
+          var k = c.getAttribute("data-k");
+          var items = JSON.parse(localStorage.getItem(QS_KEY) || "{}")[k] || [];
+          window.openQuizPanel("scan", items);
+        });
+      });
+    });
+  }
+
+  /* ---------- 统一刷题面板 ---------- */
+  window.openQuizPanel = function(subj, scanItems){
+    var isScan = subj === "scan";
+    var data = isScan ? (scanItems || []) : EE_QUIZ;
+    if (!isScan && subj === "ee") data = EE_QUIZ;
+    var title = isScan ? "练习册真题" : "电子信息题库 · 基础";
+    var m = document.createElement("div");
+    m.style.cssText = "position:fixed;inset:0;z-index:99998;background:rgba(10,15,30,.96);backdrop-filter:blur(10px);overflow:auto;padding:24px 16px 60px;";
+    var html = '<div style="max-width:760px;margin:0 auto">'
+      + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button id="qzBack" style="background:rgba(255,255,255,.1);border:none;color:#fff;padding:7px 14px;border-radius:10px;cursor:pointer;font-size:13px">← 返回</button>'
+      + '<span style="font-size:16px;font-weight:700;color:#fff">' + title + '</span>'
+      + '<span style="font-size:12px;color:#94a3b8;margin-left:auto">' + data.length + ' 题' + (isScan ? " · 点击查看答案" : " · 点选项即时判对错") + '</span></div>';
+    data.forEach(function(it, idx){
+      var tag = it.s ? '<span style="font-size:11px;background:rgba(77,107,254,.25);color:#cfe0ff;border-radius:20px;padding:2px 10px;margin-right:8px">' + it.s + '</span>' : "";
+      var opts = it.o ? it.o.map(function(o, oi){
+        return '<div class="qz-opt" data-i="' + oi + '" style="margin-top:8px;background:rgba(255,255,255,.05);border:1px solid rgba(148,163,184,.22);border-radius:10px;padding:9px 12px;color:#e8eaf2;font-size:13px;cursor:pointer">' + (oi + 1) + ". " + o + '</div>';
+      }).join("") : "";
+      var ansHtml = isScan
+        ? '<button class="qz-ans-btn" style="margin-top:10px;background:rgba(77,107,254,.25);border:1px solid rgba(77,107,254,.5);color:#cfe0ff;padding:5px 12px;border-radius:10px;cursor:pointer;font-size:12px">' + (it.a ? "显示答案" : "无答案") + '</button><div class="qz-ans" style="display:none;margin-top:8px;color:#8ddc97;font-size:13px;line-height:1.7;background:rgba(16,185,129,.08);border-radius:10px;padding:10px 12px;white-space:pre-wrap">' + (it.a || "（本题为开放式练习，对照原练习册）") + '</div>'
+        : (it.expl ? '<div class="qz-expl" style="display:none;margin-top:8px;color:#8ddc97;font-size:12.5px;line-height:1.7;background:rgba(16,185,129,.08);border-radius:10px;padding:9px 12px">' + it.expl + '</div>' : "");
+      html += '<div style="background:rgba(255,255,255,.05);border:1px solid rgba(148,163,184,.18);border-radius:14px;padding:14px 16px;margin-bottom:12px">'
+        + '<div style="color:#e8eaf2;font-size:13.5px;line-height:1.7;white-space:pre-wrap">' + tag + '<b style="color:#c7d2fe">' + (idx + 1) + '.</b> ' + it.q + '</div>'
+        + opts + ansHtml + '</div>';
+    });
+    html += '</div>';
+    m.innerHTML = html;
+    m.querySelector("#qzBack").onclick = function(){ m.remove(); };
+    m.addEventListener("click", function(e){
+      if (e.target.classList.contains("qz-ans-btn")) {
+        var b = e.target.nextElementSibling;
+        var show = b.style.display === "block";
+        b.style.display = show ? "none" : "block";
+        e.target.textContent = show ? "显示答案" : "收起答案";
+      } else if (e.target.classList.contains("qz-opt")) {
+        var card = e.target.parentElement;
+        var correct = parseInt(e.target.getAttribute("data-i"), 10) === (data[parseInt(card.querySelector("b").textContent, 10) - 1] ? data[parseInt(card.querySelector("b").textContent, 10) - 1].ans : -1);
+        if (correct === -1) return;
+        card.querySelectorAll(".qz-opt").forEach(function(x){
+          x.style.borderColor = "rgba(148,163,184,.22)"; x.style.background = "rgba(255,255,255,.05)";
+        });
+        var right = data[parseInt(card.querySelector("b").textContent, 10) - 1].ans;
+        var opts2 = card.querySelectorAll(".qz-opt");
+        opts2[right].style.borderColor = "#34d399"; opts2[right].style.background = "rgba(16,185,129,.18)";
+        if (e.target !== opts2[right]) { e.target.style.borderColor = "#f87171"; e.target.style.background = "rgba(248,113,113,.15)"; }
+        var ex = card.querySelector(".qz-expl");
+        if (ex) ex.style.display = "block";
+      }
+    });
+    document.body.appendChild(m);
+  };
+
+  window.initQuizCenter = function(){
+    renderShelf();
+  };
+
+  /* ---------- v132：统一题库面板（C 语言三栏版式 + 物理即时判对错答题） ---------- */
+  window.openUnifiedQuiz = function(subj, scanItems){
+    var items = [];
+    var title = "";
+    var isScan = subj === "scan";
+    if (isScan) {
+      items = (scanItems || []).map(function(it){ return { g: it.name, q: it.q, a: it.a, src: it.src }; });
+      title = "练习册真题";
+    } else if (subj === "ee") {
+      items = EE_QUIZ.map(function(it){ return { g: it.s, q: it.q, o: it.o, ans: it.ans, expl: it.e }; });
+      title = "电子信息题库 · 基础";
+    } else if (subj === "phys") {
+      var ph = window.PH_QUIZ_DATA || {};
+      Object.keys(ph).forEach(function(k){
+        ph[k].items.forEach(function(it){ items.push({ g: ph[k].name, q: it.q, o: it.opts, ans: it.ans, expl: it.expl }); });
+      });
+      title = "大学物理题库 · 大学物理（上）";
+    } else {
+      var sq = (window.SUBJ_QUIZ_DATA || {})[subj] || [];
+      items = sq.map(function(it){ return { g: subj === "la" ? "线性代数" : "高等数学", q: it.q, a: it.a }; });
+      title = subj === "la" ? "线性代数题库 · 行列式基础" : "高等数学题库 · 映射与函数";
+    }
+    if (!items.length) return;
+    var n = items.length;
+    var progKey = "reader-quiz-progress:" + subj;
+    var status = [];
+    try { status = JSON.parse(localStorage.getItem(progKey) || "[]"); } catch (e) {}
+    while (status.length < n) status.push(0);
+    var cur = 0;
+
+    var m = document.createElement("div");
+    m.id = "uqOverlay";
+    m.style.cssText = "position:fixed;inset:0;z-index:99997;background:#0a0c18;display:flex;flex-direction:column;color:#e2e8f0";
+    m.innerHTML =
+      '<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid rgba(148,163,184,.18);flex-shrink:0">'
+      + '<button id="uqBack" style="background:rgba(255,255,255,.1);border:none;color:#fff;padding:7px 14px;border-radius:10px;cursor:pointer;font-size:13px">← 返回</button>'
+      + '<span id="uqTitle" style="font-size:16px;font-weight:700;color:#a7f3d0"></span>'
+      + '<span id="uqProg" style="font-size:12px;color:#94a3b8;margin-left:auto"></span></div>'
+      + '<div style="display:flex;flex:1;min-height:0">'
+      +   '<div id="uqList" style="width:230px;flex-shrink:0;overflow-y:auto;border-right:1px solid rgba(148,163,184,.15);padding:10px 8px"></div>'
+      +   '<div id="uqMain" style="flex:1;overflow-y:auto;padding:18px 22px 60px"></div>'
+      + '</div>';
+    document.body.appendChild(m);
+    m.querySelector("#uqBack").onclick = function(){ m.remove(); };
+    m.querySelector("#uqTitle").textContent = title;
+
+    function saveProg(){ try { localStorage.setItem(progKey, JSON.stringify(status)); } catch (e) {} }
+
+    function renderList(){
+      var L = m.querySelector("#uqList");
+      var h = "";
+      items.forEach(function(it, i){
+        var st = status[i];
+        var mark = st === 0 ? '<span style="color:#475569">○</span>' : (st === 1 ? '<span style="color:#34d399">✓</span>' : '<span style="color:#f87171">✗</span>');
+        var bg = i === cur ? "rgba(77,107,254,.18)" : "transparent";
+        h += '<div data-i="' + i + '" style="display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:9px;cursor:pointer;background:' + bg + ';border:1px solid ' + (i === cur ? "rgba(77,107,254,.4)" : "transparent") + ';margin-bottom:3px">'
+          + mark + '<span style="font-size:12px;color:#cbd5e1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">' + (i + 1) + '. ' + (it.q || "").replace(/<[^>]*>/g, "").slice(0, 14) + '</span></div>';
+      });
+      L.innerHTML = h;
+      L.querySelectorAll("[data-i]").forEach(function(el){
+        el.addEventListener("click", function(){ cur = parseInt(el.getAttribute("data-i"), 10); renderList(); renderMain(); });
+      });
+    }
+
+    function renderMain(){
+      var it = items[cur];
+      var M = m.querySelector("#uqMain");
+      var st = status[cur];
+      var head = (st === 0 ? '<span style="color:#475569;font-size:12px">未作答</span>' : (st === 1 ? '<span style="color:#34d399;font-size:12px">✓ 已答对</span>' : '<span style="color:#f87171;font-size:12px">✗ 已答错</span>'));
+      var g = it.g ? '<span style="font-size:11px;background:rgba(77,107,254,.25);color:#cfe0ff;border-radius:20px;padding:2px 10px;margin-right:8px">' + it.g + '</span>' : "";
+      var body = "";
+      if (it.o) {
+        body = it.o.map(function(o, oi){
+          var picked = st === 0 ? "" : (oi === it.ans ? "rgba(16,185,129,.25);color:#a7f3d0;border-color:rgba(16,185,129,.7)" : (st === 2 && oi === status[cur] ? "" : ""));
+          return '<div class="uq-opt" data-i="' + oi + '" style="margin-top:9px;background:rgba(255,255,255,.05);border:1px solid rgba(148,163,184,.25);border-radius:10px;padding:10px 13px;color:#cbd5e1;font-size:13.5px;cursor:pointer">' + String.fromCharCode(65 + oi) + '. ' + o + '</div>';
+        }).join("");
+        body += '<div style="margin-top:14px">' + body + '</div>';
+      } else {
+        body += '<button class="uq-ans-btn" style="margin-top:14px;background:rgba(77,107,254,.25);border:1px solid rgba(77,107,254,.5);color:#cfe0ff;padding:7px 14px;border-radius:10px;cursor:pointer;font-size:12.5px">' + (it.a ? "显示答案" : "无答案") + '</button>'
+          + '<div class="uq-ans" style="display:none;margin-top:10px;color:#86efac;font-size:13px;line-height:1.8;background:rgba(16,185,129,.09);border-radius:10px;padding:11px 13px;white-space:pre-wrap">' + (it.a || "（开放式练习，对照原练习册）") + '</div>';
+      }
+      var expl = it.expl ? '<div class="uq-expl" style="display:none;margin-top:10px;color:#86efac;font-size:12.5px;line-height:1.7;background:rgba(16,185,129,.09);border-radius:10px;padding:10px 13px">' + it.expl + '</div>' : "";
+      M.innerHTML =
+        '<div style="max-width:720px;margin:0 auto">'
+        + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">' + head + '<span style="font-size:12px;color:#94a3b8">第 ' + (cur + 1) + ' / ' + n + ' 题</span></div>'
+        + '<div style="background:rgba(255,255,255,.05);border:1px solid rgba(148,163,184,.2);border-radius:14px;padding:16px 18px">'
+        + '<div style="font-size:14.5px;font-weight:600;color:#e8eaf2;line-height:1.7;white-space:pre-wrap">' + g + it.q + '</div>'
+        + body + expl + '</div>'
+        + '<div style="display:flex;gap:10px;margin-top:16px">'
+        + '<button id="uqPrev" style="flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(148,163,184,.3);color:#cbd5e1;padding:9px;border-radius:10px;cursor:pointer;font-size:13px"' + (cur === 0 ? ' disabled' : '') + '>← 上一题</button>'
+        + '<button id="uqNext" style="flex:1;background:rgba(77,107,254,.3);border:1px solid rgba(77,107,254,.6);color:#dbe4ff;padding:9px;border-radius:10px;cursor:pointer;font-size:13px"' + (cur === n - 1 ? ' disabled' : '') + '>下一题 →</button>'
+        + '</div></div>';
+      M.querySelector("#uqPrev").onclick = function(){ if (cur > 0) { cur--; renderList(); renderMain(); } };
+      M.querySelector("#uqNext").onclick = function(){ if (cur < n - 1) { cur++; renderList(); renderMain(); } };
+      M.querySelectorAll(".uq-opt").forEach(function(el){
+        el.addEventListener("click", function(){
+          var oi = parseInt(el.getAttribute("data-i"), 10);
+          var ok = oi === it.ans;
+          status[cur] = ok ? 1 : 2;
+          saveProg();
+          M.querySelectorAll(".uq-opt").forEach(function(x){
+            var xi = parseInt(x.getAttribute("data-i"), 10);
+            x.style.background = xi === it.ans ? "rgba(16,185,129,.25)" : "rgba(255,255,255,.05)";
+            x.style.color = xi === it.ans ? "#a7f3d0" : "#cbd5e1";
+            x.style.borderColor = xi === it.ans ? "rgba(16,185,129,.7)" : "rgba(148,163,184,.25)";
+            x.style.pointerEvents = "none";
+          });
+          var ex = M.querySelector(".uq-expl");
+          if (ex) ex.style.display = "block";
+          renderList();
+        });
+      });
+      var ab = M.querySelector(".uq-ans-btn");
+      if (ab) ab.onclick = function(){
+        var b = M.querySelector(".uq-ans");
+        var show = b.style.display === "block";
+        b.style.display = show ? "none" : "block";
+        ab.textContent = show ? "显示答案" : "收起答案";
+        if (!show && status[cur] === 0) { status[cur] = 1; saveProg(); renderList(); }
+      };
+      var prog = m.querySelector("#uqProg");
+      var done = status.filter(function(x){ return x !== 0; }).length;
+      prog.textContent = "进度 " + done + "/" + n + (done === n ? " · 🎉 全部完成" : "");
+    }
+
+    renderList();
+    renderMain();
+  };
 })();
