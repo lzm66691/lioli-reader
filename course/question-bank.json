@@ -1,8 +1,8 @@
 {
  "meta": {
   "name": "莉萝题库 · 拼题A风格题集",
-  "schema_version": "2.0",
-  "schema_note": "type=大类(circuit/programming) + questionType=题型(blank/code/single/multiple)；answer语义：电路题=标准答案(归一化比对)，编程题=参考代码；samples[]展示用，testCases[]判分用；2026-10-12 补录 PTA-007~014（8道）",
+  "schema_version": "2.1",
+  "schema_note": "type=大类(circuit/programming) + questionType=题型(blank/code/single/multiple)；answer语义：电路题=标准答案(归一化比对)，编程题=参考代码；samples[]展示用，testCases[]判分用；2026-10-13 题库全面整理：界面加搜索/课程/难度/题型四维筛选+统计面板，组内按难度排序，数据 schema 2.1（题型接口预留 single/multiple）",
   "source_note": "题目取材自清华《电工电子技术基础》、大学电路教材例题及 PTA 经典编程题，来源字段见每题 source"
  },
  "circuit": [
