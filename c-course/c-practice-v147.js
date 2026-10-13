@@ -3081,7 +3081,8 @@ int main(void)
     { key:"calc",  name:"高等数学题库", icon:"🧮", desc:"CAL 系列 · 映射与函数等", act:function(){ window.openUnifiedQuiz("calc"); } },
     { key:"la",    name:"线性代数题库", icon:"📐", desc:"LA 系列 · 行列式基础", act:function(){ window.openUnifiedQuiz("la"); } },
     { key:"phys",  name:"大学物理题库", icon:"⚛", desc:"8 模块 × 3 题 · 即时判对错", act:function(){ window.openUnifiedQuiz("phys"); } },
-    { key:"ee",    name:"电子信息题库", icon:"🔌", desc:"电路/模电/数电/信号 · " + EE_QUIZ.length + " 题", act:function(){ window.openUnifiedQuiz("ee"); } }
+    { key:"ee",    name:"电子信息题库", icon:"🔌", desc:"电路/模电/数电/信号 · " + EE_QUIZ.length + " 题", act:function(){ window.openUnifiedQuiz("ee"); } },
+    { key:"qb",    name:"拼题A题库", icon:"🧩", desc:"PTA 经典编程 + 电路填空 · 统一刷题（并入练习区）", act:function(){ window.openQuizBank(); } }
   ];
 
   /* ---------- 练习册自动扫描 ---------- */
@@ -3380,5 +3381,167 @@ int main(void)
 
     renderList();
     renderMain();
+  };
+
+  /* ===== v150：练习区统一题库 —— 把 question-bank.json（原独立题库页）的题并入练习区，做题统一在此 ===== */
+  var QB_KEY = "reader-quiz-progress:qb";
+  var QB_CACHE = null;
+
+  function qbJudge(user, ans, norm){
+    norm = norm || {};
+    var u = String(user).trim(), a = String(ans).trim();
+    if (norm.strip_space){ u = u.replace(/\s+/g, " "); a = a.replace(/\s+/g, " "); }
+    var al = norm.unit_aliases || {};
+    Object.keys(al).forEach(function(k){ u = u.split(k).join(al[k]); a = a.split(k).join(al[k]); });
+    if (u === a) return true;
+    var nu = u.match(/-?\d+(\.\d+)?/g) || [], na = a.match(/-?\d+(\.\d+)?/g) || [];
+    if (nu.length && nu.length === na.length){
+      var tol = norm.tolerance != null ? norm.tolerance : 0.01, allOk = true;
+      for (var i = 0; i < nu.length; i++){ if (Math.abs(parseFloat(nu[i]) - parseFloat(na[i])) > tol) allOk = false; }
+      var restU = u.replace(/-?\d+(\.\d+)?/g, "").trim(), restA = a.replace(/-?\d+(\.\d+)?/g, "").trim();
+      if (allOk && restU === restA) return true;
+    }
+    return false;
+  }
+
+  window.openQuizBank = function(){
+    function loadQB(done){
+      if (QB_CACHE){ done(QB_CACHE); return; }
+      fetch("course/question-bank.json?v=" + Date.now()).then(function(r){ return r.json(); }).then(function(d){
+        QB_CACHE = d; done(d);
+      }).catch(function(){ done(null); });
+    }
+    loadQB(function(bank){
+      if (!bank){ alert("题库加载失败：course/question-bank.json 读取不到"); return; }
+      var items = bank.circuit.concat(bank.programming).map(function(q){
+        return { id:q.id, g:q.course, q:q.title, desc:q.desc, type:q.questionType,
+                 input:q.input, output:q.output, testCases:q.testCases || [], answer:q.answer,
+                 answerNote:q.answerNote || "参考答案", hint:q.hint, normalize:q.normalize, analysis:q.analysis || "" };
+      });
+      var n = items.length, status = [];
+      try { status = JSON.parse(localStorage.getItem(QB_KEY) || "[]"); } catch (e) {}
+      while (status.length < n) status.push(0);
+      var cur = 0;
+      var m = document.createElement("div");
+      m.id = "uqOverlay";
+      m.style.cssText = "position:fixed;inset:0;z-index:99997;background:#0a0c18;display:flex;flex-direction:column;color:#e2e8f0";
+      m.innerHTML =
+        '<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid rgba(148,163,184,.18);flex-shrink:0">'
+        + '<button id="qbBack" style="background:rgba(255,255,255,.1);border:none;color:#fff;padding:7px 14px;border-radius:10px;cursor:pointer;font-size:13px">← 返回</button>'
+        + '<span id="qbTitle" style="font-size:16px;font-weight:700;color:#a7f3d0">拼题A题库 · 统一刷题</span>'
+        + '<span id="qbProg" style="font-size:12px;color:#94a3b8;margin-left:auto"></span></div>'
+        + '<div style="display:flex;flex:1;min-height:0">'
+        +   '<div id="qbList" style="width:230px;flex-shrink:0;overflow-y:auto;border-right:1px solid rgba(148,163,184,.15);padding:10px 8px"></div>'
+        +   '<div id="qbMain" style="flex:1;overflow-y:auto;padding:18px 22px 60px"></div>'
+        + '</div>';
+      document.body.appendChild(m);
+      m.querySelector("#qbBack").onclick = function(){ m.remove(); };
+      function saveProg(){ try { localStorage.setItem(QB_KEY, JSON.stringify(status)); } catch (e) {} }
+      function renderList(){
+        var L = m.querySelector("#qbList"), h = "";
+        items.forEach(function(it, i){
+          var st = status[i], mark = st === 0 ? '<span style="color:#475569">○</span>' : (st === 1 ? '<span style="color:#34d399">✓</span>' : '<span style="color:#f87171">✗</span>');
+          var bg = i === cur ? "rgba(77,107,254,.18)" : "transparent";
+          h += '<div data-i="' + i + '" style="display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:9px;cursor:pointer;background:' + bg + ';border:1px solid ' + (i === cur ? "rgba(77,107,254,.4)" : "transparent") + ';margin-bottom:3px">'
+            + mark + '<span style="font-size:12px;color:#cbd5e1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">' + (i + 1) + '. ' + it.g + ' · ' + String(it.q || "").slice(0, 12) + '</span></div>';
+        });
+        L.innerHTML = h;
+        L.querySelectorAll("[data-i]").forEach(function(el){
+          el.addEventListener("click", function(){ cur = parseInt(el.getAttribute("data-i"), 10); renderList(); renderMain(); });
+        });
+      }
+      function runCode(btn, it){
+        var box = btn.closest(".qb-code");
+        var ta = box.querySelector("textarea"), inp = box.querySelector(".qb-in");
+        var out = box.querySelector(".qb-out");
+        btn.disabled = true; btn.textContent = "编译中…";
+        (async function(){
+          try {
+            var c = cpComp ? cpComp : await loadCompiler();
+            btn.textContent = "运行中…";
+            var r = await c.run(ta.value, inp.value || "");
+            btn.textContent = "运行";
+            var h = "";
+            if (r.errors && r.errors.length){ h += '<div class="err">' + r.errors.map(escHtml).join("<br>") + '</div>'; }
+            else { h += '<div class="ok">运行成功（exit ' + r.exitCode + '）</div>'; }
+            if (r.output) h += '<div style="white-space:pre-wrap;color:#cbd5e1;margin-top:8px">' + escHtml(r.output) + '</div>';
+            var exp = it.testCases && it.testCases[0] ? String(it.testCases[0].expected).trim() : "";
+            if (exp && r.output && !(r.errors && r.errors.length)){
+              var ok = r.output.trim() === exp;
+              h += '<div class="' + (ok ? "ok" : "err") + '">' + (ok ? "✓ 与样例输出一致" : "✗ 与样例输出不同（期望：" + escHtml(exp) + "）") + '</div>';
+            }
+            out.innerHTML = h;
+          } catch (e) {
+            btn.textContent = "运行";
+            var why = e && e.message ? e.message : String(e);
+            out.innerHTML = '<div class="err">编译内核暂不可用：' + escHtml(why) + '。可点下方按钮下载内核后重试。</div>'
+              + '<button class="qb-kernel" style="margin-top:8px;background:rgba(245,158,11,.2);border:1px solid rgba(245,158,11,.5);color:#fcd34d;padding:6px 12px;border-radius:9px;cursor:pointer;font-size:12px">⚡ 下载编译内核</button>';
+            var b = out.querySelector(".qb-kernel");
+            if (b) b.onclick = async function(){ b.disabled = true; b.textContent = "下载中（约20-30秒）…"; try { var c2 = await loadCompiler(); b.textContent = "已就绪，点上方「运行」"; } catch (e2) { b.textContent = "下载失败：" + escHtml(e2 && e2.message ? e2.message : String(e2)); } };
+          }
+        })();
+      }
+      function submitBlank(btn, it){
+        var box = btn.closest(".qb-blank");
+        var inp = box.querySelector("input"), res = box.querySelector(".qb-res");
+        var ok = qbJudge(inp.value, it.answer, it.normalize);
+        res.className = "qb-res " + (ok ? "ok" : "err");
+        res.textContent = ok ? "✓ 判定正确！" : "✗ 再想想（提示：" + (it.hint || "可先看答案") + "）";
+        if (ok && status[cur] === 0){ status[cur] = 1; saveProg(); renderList(); var prog = m.querySelector("#qbProg"); var done = status.filter(function(x){ return x !== 0; }).length; prog.textContent = "进度 " + done + "/" + n + (done === n ? " · 🎉 全部完成" : ""); }
+      }
+      function renderMain(){
+        var it = items[cur], M = m.querySelector("#qbMain"), st = status[cur];
+        var head = st === 0 ? '<span style="color:#475569;font-size:12px">未作答</span>' : (st === 1 ? '<span style="color:#34d399;font-size:12px">✓ 已答对</span>' : '<span style="color:#f87171;font-size:12px">✗ 已答错</span>');
+        var tag = '<span style="font-size:11px;background:rgba(77,107,254,.25);color:#cfe0ff;border-radius:20px;padding:2px 10px;margin-right:8px">' + it.g + '</span>';
+        var dsc = '<div style="font-size:14px;line-height:1.8;color:#cbd5e1;white-space:pre-wrap">' + escHtml(it.desc) + '</div>';
+        var io = "";
+        if (it.type === "code"){
+          io = (it.input ? '<div style="margin-top:8px;font-size:12.5px;color:#a5b4fc"><b style="color:#94a3b8">输入格式：</b>' + escHtml(it.input) + '</div>' : '')
+             + (it.output ? '<div style="margin-top:4px;font-size:12.5px;color:#a5b4fc"><b style="color:#94a3b8">输出格式：</b>' + escHtml(it.output) + '</div>' : '')
+             + '<div class="qb-code" style="margin-top:12px">'
+             + '<textarea spellcheck="false" style="width:100%;min-height:150px;background:#0f172a;color:#e2e8f0;border:1px solid rgba(148,163,184,.3);border-radius:10px;padding:12px;font-family:Consolas,monospace;font-size:13px;line-height:1.6;resize:vertical">#include &lt;stdio.h&gt;\n\nint main(void)\n{\n    /* 在这里写你的代码 */\n\n    return 0;\n}</textarea>'
+             + '<div style="display:flex;gap:8px;align-items:center;margin-top:8px"><input class="qb-in" style="flex:1;background:#0f172a;border:1px solid rgba(148,163,184,.3);color:#cbd5e1;border-radius:9px;padding:8px 11px;font-size:12.5px;outline:none" placeholder="输入（无输入留空）" value="' + escHtml(it.testCases && it.testCases[0] ? String(it.testCases[0].input) : "").replace(/&quot;/g, "&quot;") + '">'
+             + '<button class="qb-run" style="background:rgba(77,107,254,.3);border:1px solid rgba(77,107,254,.6);color:#dbe4ff;padding:8px 16px;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600">运行</button></div>'
+             + '<div class="qb-out" style="margin-top:8px"></div>'
+             + '<div style="margin-top:10px"><button class="qb-ans" style="background:rgba(255,255,255,.06);border:1px solid rgba(148,163,184,.35);color:#cbd5e1;padding:6px 12px;border-radius:9px;cursor:pointer;font-size:12px">看答案</button></div>'
+             + '<div class="qb-ref" style="display:none;margin-top:9px;background:rgba(16,185,129,.09);border:1px solid rgba(16,185,129,.25);border-radius:10px;padding:11px 13px;color:#86efac;font-size:12.5px;white-space:pre-wrap">' + escHtml(it.answer) + '</div>'
+             + '</div>';
+        } else {
+          io = '<div style="margin-top:12px" class="qb-blank">'
+             + '<input style="width:100%;background:#0f172a;border:1px solid rgba(148,163,184,.3);color:#e2e8f0;border-radius:9px;padding:9px 12px;font-size:13px;outline:none" placeholder="输入你的答案（如 0.5 A）">'
+             + '<div style="display:flex;gap:8px;margin-top:9px"><button class="qb-sub" style="background:rgba(77,107,254,.3);border:1px solid rgba(77,107,254,.6);color:#dbe4ff;padding:8px 16px;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600">判定</button>'
+             + '<button class="qb-ans" style="background:rgba(255,255,255,.06);border:1px solid rgba(148,163,184,.35);color:#cbd5e1;padding:8px 14px;border-radius:9px;cursor:pointer;font-size:12px">看答案</button></div>'
+             + '<div class="qb-res" style="margin-top:9px;font-size:13px;font-weight:600"></div>'
+             + '<div class="qb-ref" style="display:none;margin-top:9px;background:rgba(16,185,129,.09);border:1px solid rgba(16,185,129,.25);border-radius:10px;padding:11px 13px;color:#86efac;font-size:12.5px"><b>参考答案：</b>' + escHtml(it.answer) + '<br><b style="color:#c4b5fd">解析：</b>' + escHtml(it.analysis) + '</div>'
+             + '</div>';
+        }
+        M.innerHTML =
+          '<div style="max-width:760px;margin:0 auto">'
+          + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">' + head + '<span style="font-size:12px;color:#94a3b8">第 ' + (cur + 1) + ' / ' + n + ' 题</span></div>'
+          + '<div style="background:rgba(255,255,255,.05);border:1px solid rgba(148,163,184,.2);border-radius:14px;padding:16px 18px">'
+          + '<div style="font-size:15px;font-weight:600;color:#e8eaf2;line-height:1.6;margin-bottom:8px">' + tag + escHtml(it.q) + '</div>'
+          + dsc + io + '</div>'
+          + '<div style="display:flex;gap:10px;margin-top:16px">'
+          + '<button id="qbPrev" style="flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(148,163,184,.3);color:#cbd5e1;padding:9px;border-radius:10px;cursor:pointer;font-size:13px"' + (cur === 0 ? ' disabled' : '') + '>← 上一题</button>'
+          + '<button id="qbNext" style="flex:1;background:rgba(77,107,254,.3);border:1px solid rgba(77,107,254,.6);color:#dbe4ff;padding:9px;border-radius:10px;cursor:pointer;font-size:13px"' + (cur === n - 1 ? ' disabled' : '') + '>下一题 →</button>'
+          + '</div></div>';
+        M.querySelector("#qbPrev").onclick = function(){ if (cur > 0) { cur--; renderList(); renderMain(); } };
+        M.querySelector("#qbNext").onclick = function(){ if (cur < n - 1) { cur++; renderList(); renderMain(); } };
+        var r = M.querySelector(".qb-run"); if (r) r.onclick = function(){ runCode(r, it); };
+        var s = M.querySelector(".qb-sub"); if (s) s.onclick = function(){ submitBlank(s, it); };
+        M.querySelectorAll(".qb-ans").forEach(function(b){
+          b.onclick = function(){
+            var ref = M.querySelector(".qb-ref"), show = ref.style.display === "block";
+            ref.style.display = show ? "none" : "block";
+            b.textContent = show ? "看答案" : "收起答案";
+            if (!show && status[cur] === 0){ status[cur] = 1; saveProg(); renderList(); }
+          };
+        });
+        var prog = m.querySelector("#qbProg");
+        var done = status.filter(function(x){ return x !== 0; }).length;
+        prog.textContent = "进度 " + done + "/" + n + (done === n ? " · 🎉 全部完成" : "");
+      }
+      renderList(); renderMain();
+    });
   };
 })();
