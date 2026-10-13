@@ -3406,9 +3406,19 @@ int main(void)
   window.openQuizBank = function(){
     function loadQB(done){
       if (QB_CACHE){ done(QB_CACHE); return; }
-      fetch("course/question-bank.json?v=" + Date.now()).then(function(r){ return r.json(); }).then(function(d){
-        QB_CACHE = d; done(d);
-      }).catch(function(){ done(null); });
+      /* 相对路径优先（线上同源）；本地 file:// 或相对失败时回退线上绝对 URL（需联网） */
+      var urls = [
+        "course/question-bank.json",
+        "https://lzm66691.github.io/lioli-reader/course/question-bank.json"
+      ];
+      var i = 0;
+      (function next(){
+        if (i >= urls.length){ done(null); return; }
+        var u = urls[i++] + "?v=" + Date.now();
+        fetch(u).then(function(r){ if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+          .then(function(d){ QB_CACHE = d; done(d); })
+          .catch(function(){ next(); });
+      })();
     }
     loadQB(function(bank){
       if (!bank){ alert("题库加载失败：course/question-bank.json 读取不到"); return; }
