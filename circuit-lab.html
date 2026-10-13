@@ -54,7 +54,7 @@
   <header>
     <button class="back" id="backBtn" title="返回阅读器主页">← 返回</button>
     <h1>⚡ 电路画板</h1>
-    <span class="sub">KiCad 符号库 · 可导出 .kicad_sch</span>
+    <span class="sub">KiCad 符号库 · 可导出 .kicad_sch（KiCad 8+ 兼容）</span>
     <select class="tpl" id="tplSel" title="预置示例电路图">
       <option value="">▾ 示例电路</option>
       <option value="series">串联电路（1灯）</option>
@@ -69,7 +69,7 @@
       <button class="tbtn" id="eraseBtn" title="橡皮：点选要删除的元素">🧽 橡皮</button>
       <button class="tbtn" id="rotBtn" title="旋转选中元件 90°（或按 R）">⟳ 旋转</button>
       <button class="tbtn" id="pngBtn" title="导出画板为 PNG 图片">📥 PNG</button>
-      <button class="tbtn" id="schBtn" title="导出为 KiCad 原理图 .kicad_sch">📤 SCH</button>
+      <button class="tbtn" id="schBtn" title="导出 KiCad 8+ 原理图 .kicad_sch">📤 SCH</button>
       <button class="tbtn" id="impBtn" title="导入 KiCad 原理图 .kicad_sch">📂 导入</button>
       <button class="tbtn" id="delBtn" title="删除选中元件">🗑 删除</button>
       <button class="tbtn" id="clearBtn" title="清空画布">✖ 清空</button>
@@ -145,7 +145,8 @@ function addPart(type, x, y){
   if (!sym) return null;
   var p = {id:uid++, type:type, x:x, y:y, rot:0, val:null, on:true, sym:sym, pins:[]};
   sym.pins.forEach(function(pn){
-    p.pins.push({num:pn.num, x:pn.x*SCALE, y:pn.y*SCALE, dir:pn.dir});
+    /* KiCad 符号库 y 向上 → 画板 y 向下，引脚 Y 取反（萝评审：absolute_Y = symbol_Y - pin_Y） */
+    p.pins.push({num:pn.num, x:pn.x*SCALE, y:-pn.y*SCALE, dir:pn.dir});
   });
   var def = {BAT:9, R:1000, C:10, L:10, BULB:200, POT:10, THERM:1000, F:2};
   if (def[type] !== undefined) p.val = def[type];
@@ -543,7 +544,7 @@ function exportSch(){
   a.href = URL.createObjectURL(blob);
   document.body.appendChild(a); a.click(); a.remove();
   URL.revokeObjectURL(a.href);
-  toast("已导出 .kicad_sch（可用 KiCad 打开继续编辑）");
+  toast("已导出 .kicad_sch（KiCad 8+ 可打开继续编辑）");
 }
 document.getElementById("schBtn").addEventListener("click", exportSch);
 
