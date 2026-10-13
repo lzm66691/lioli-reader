@@ -1,7 +1,8 @@
 /* PWA Service Worker — 莉萝阅读器 v91：知识图谱 v2（放射状网络图 + 连线 + 课件跳转按钮）（c-practice-v121）（2026-10-05）
-   外壳缓存 reader-p2-dg-v147（含 pdf.js 全套 + KaTeX）；PDF 缓存 reader-pdf-v3（按需 cache-first）
-   升级纪律：改外壳/pdf.js → 同时改缓存名 */
-var CACHE_SHELL = "reader-p2-dg-v151";
+   外壳缓存 reader-p2-dg-v153（含 pdf.js 全套 + KaTeX）；PDF 缓存 reader-pdf-v3（按需 cache-first）
+   升级纪律：改外壳/pdf.js → 同时改缓存名
+   2026-10-13 修复：阅读器引入 c-practice.js 主文件（含 openQuizBank v150），v153 新外壳强制刷新 */
+var CACHE_SHELL = "reader-p2-dg-v153";
 var CACHE_PDF   = "reader-pdf-v3";
 var CACHE_CRUNNER = "reader-crun-v1";
 
@@ -23,7 +24,7 @@ var SHELL_URLS = [
   "./config.json",
   "./circuit-lab.html",
   "./question-bank.html",
-  "./c-course/c-practice-v147.js",
+  "./c-course/c-practice.js",
   "./c-course/c-mindmap.html",
   "./manifest.json",
   "./vendor/pdfjs/LICENSE",
