@@ -60,6 +60,9 @@
       <option value="series">串联电路（1灯）</option>
       <option value="twolamp">双灯串联</option>
       <option value="switch">开关控制</option>
+      <option value="kvl">KVL 串联环路</option>
+      <option value="kcl">KCL 并联支路</option>
+      <option value="thevenin">戴维南等效</option>
     </select>
     <div class="parts" id="parts">
       <button class="tbtn" id="wireBtn" title="画走线：起点单击 → 折点单击 → 终点双击">🔗 走线</button>
@@ -657,15 +660,40 @@ document.getElementById("shareBtn").addEventListener("click", share);
 
 /* ---------- 示例模板 ---------- */
 var TEMPLATES = {
-  series: { p: [[0,"BAT",240,300,9,1],[1,"BULB",480,300,200,1]], w: [[{pid:0,pin:"2"},{pid:1,pin:"1"}],[{pid:1,pin:"2"},{pid:0,pin:"1"}]] },
-  twolamp: { p: [[0,"BAT",200,300,12,1],[1,"BULB",430,300,100,1],[2,"BULB",660,300,300,1]], w: [[{pid:0,pin:"2"},{pid:1,pin:"1"}],[{pid:1,pin:"2"},{pid:2,pin:"1"}],[{pid:2,pin:"2"},{pid:0,pin:"1"}]] },
-  switch: { p: [[0,"BAT",200,300,9,1],[1,"SW",430,300,0,1],[2,"BULB",660,300,200,1]], w: [[{pid:0,pin:"2"},{pid:1,pin:"1"}],[{pid:1,pin:"2"},{pid:2,pin:"1"}],[{pid:2,pin:"2"},{pid:0,pin:"1"}]] }
+  /* v3 格式：[id, type, x, y, rot, val, on]；w = [A, B, pts?]；t = [x,y,txt]；n = [x,y] */
+  series: { p: [[0,"BAT",240,300,0,9,1],[1,"BULB",480,300,0,200,1]], w: [[{pid:0,pin:"2"},{pid:1,pin:"1"}],[{pid:1,pin:"2"},{pid:0,pin:"1"}]] },
+  twolamp: { p: [[0,"BAT",200,300,0,12,1],[1,"BULB",430,300,0,100,1],[2,"BULB",660,300,0,300,1]], w: [[{pid:0,pin:"2"},{pid:1,pin:"1"}],[{pid:1,pin:"2"},{pid:2,pin:"1"}],[{pid:2,pin:"2"},{pid:0,pin:"1"}]] },
+  switch: { p: [[0,"BAT",200,300,0,9,1],[1,"SW",430,300,0,0,1],[2,"BULB",660,300,0,200,1]], w: [[{pid:0,pin:"2"},{pid:1,pin:"1"}],[{pid:1,pin:"2"},{pid:2,pin:"1"}],[{pid:2,pin:"2"},{pid:0,pin:"1"}]] },
+  kvl: {
+    p: [[0,"BAT",140,360,0,9,1],[1,"R",340,360,0,1000,1],[2,"R",540,360,0,2000,1],[3,"R",740,360,0,3000,1]],
+    w: [[{pid:0,pin:"2"},{pid:1,pin:"1"}],[{pid:1,pin:"2"},{pid:2,pin:"1"}],[{pid:2,pin:"2"},{pid:3,pin:"1"}],
+        [{pid:3,pin:"2"},{pid:0,pin:"1"},[{abs:true,x:880,y:360},{abs:true,x:880,y:490},{abs:true,x:60,y:490}]]],
+    t: [[90,330,"Vs"],[340,430,"R1"],[540,430,"R2"],[740,430,"R3"]], n: []
+  },
+  kcl: {
+    p: [[0,"BAT",160,300,0,9,1],[1,"R",580,180,0,1000,1],[2,"R",580,420,0,2000,1]],
+    n: [[360,300],[760,180],[760,420]],
+    w: [[{pid:0,pin:"2"},{abs:true,x:360,y:300}],
+        [{abs:true,x:360,y:300},{pid:1,pin:"1"},[{abs:true,x:360,y:180}]],
+        [{abs:true,x:360,y:300},{pid:2,pin:"1"},[{abs:true,x:360,y:420}]],
+        [{pid:1,pin:"2"},{abs:true,x:760,y:180}],
+        [{pid:2,pin:"2"},{abs:true,x:760,y:420}],
+        [{abs:true,x:760,y:180},{abs:true,x:760,y:420}],
+        [{abs:true,x:760,y:420},{pid:0,pin:"1"},[{abs:true,x:760,y:490},{abs:true,x:60,y:490},{abs:true,x:60,y:300}]]],
+    t: [[300,140,"支路1"],[300,470,"支路2"],[100,330,"Is"]]
+  },
+  thevenin: {
+    p: [[0,"BAT",160,300,0,9,1],[1,"R",400,300,0,1000,1],[2,"R",640,300,0,3000,1]],
+    w: [[{pid:0,pin:"2"},{pid:1,pin:"1"}],[{pid:1,pin:"2"},{pid:2,pin:"1"}],
+        [{pid:2,pin:"2"},{pid:0,pin:"1"},[{abs:true,x:770,y:300},{abs:true,x:770,y:460},{abs:true,x:60,y:460},{abs:true,x:60,y:300}]]],
+    t: [[120,330,"Vth"],[340,330,"Rth"],[580,330,"RL"],[800,330,"Vout"]], n: []
+  }
 };
 document.getElementById("tplSel").addEventListener("change", function(e){
   var key = e.target.value; e.target.value = "";
   if (!key || !TEMPLATES[key]) return;
-  restore({v:3, p:TEMPLATES[key].p, w:TEMPLATES[key].w, t:[], n:[], b:[]});
-  toast("已加载示例：" + ({series:"串联电路", twolamp:"双灯串联", switch:"开关控制"}[key]));
+  restore({v:3, p:TEMPLATES[key].p, w:TEMPLATES[key].w, t:TEMPLATES[key].t||[], n:TEMPLATES[key].n||[], b:[]});
+  toast("已加载模板：" + ({series:"串联电路", twolamp:"双灯串联", switch:"开关控制", kvl:"KVL 串联环路", kcl:"KCL 并联支路", thevenin:"戴维南等效"}[key]));
 });
 
 /* ---------- 属性面板 ---------- */
