@@ -559,7 +559,7 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
 <header class="topbar">
 
-  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v154</span></div>
+  <div class="brand"><span class="brand-mark">L</span><span class="txt" id="brandTxt">阅读器 · F-VIS</span><span class="app-ver" id="appVer" title="阅读器版本（PWA 缓存版本）">v155</span></div>
 
   <div class="spacer"></div>
 
@@ -650,6 +650,12 @@ body.sepia .page-jump input, body.sepia .search-box{background:#fff}
 
       <div class="empty-tip" id="bmEmpty">还没有收藏/标注。阅读时：右侧「收藏本页」存书签；<b>选中 PDF 文字</b>划词标注（三色高亮 + 笔记）。</div>
 
+    </div>
+
+    <!-- v155：最近阅读（逆向 Librera IsRecent/进度 落地；放 shelfBody 外避免被 renderShelf 清空） -->
+    <div id="recentWrap" style="display:none;margin:8px 12px 2px">
+      <div style="font-weight:700;font-size:13px;color:var(--ink);margin:2px 2px 8px;display:flex;align-items:center;gap:8px"><span>🕘 最近阅读</span><span id="recentClear" title="清空最近记录" style="font-size:11px;color:var(--muted);font-weight:400;cursor:pointer;margin-left:auto">清空</span></div>
+      <div id="recentList" style="display:flex;flex-direction:column;gap:6px"></div>
     </div>
 
     <div class="side-body" id="shelfBody" style="display:none">
@@ -912,6 +918,21 @@ if (!BOOKS.length) {
 
   var LS_BM   = "reader-app-bookmarks:" + BOOK.id;
 
+  /* v155：全局最近阅读 + 收藏（逆向 Librera FileMeta 的 IsRecent/IsStar 落地） */
+
+  var LS_RECENT = "reader-app-recent";   /* [{id,title,group,color,pages,page,time}] 全局 */
+  var LS_STARS  = "reader-app-stars";    /* [id] 全局收藏 */
+
+  function loadJSON(k, d){ try { var v = JSON.parse(localStorage.getItem(k) || "null"); return v == null ? d : v; } catch(e){ return d; } }
+  function saveJSON(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+  function isStarred(id){ return loadJSON(LS_STARS, []).indexOf(id) >= 0; }
+  function toggleStar(id){
+    var s = loadJSON(LS_STARS, []), i = s.indexOf(id);
+    if (i >= 0) s.splice(i, 1); else s.unshift(id);
+    saveJSON(LS_STARS, s);
+    return i < 0;
+  }
+
   [["reader-app-state",LS_STATE],["reader-app-notes",LS_NOTES],["reader-app-bookmarks",LS_BM]].forEach(function(pair){
 
     if (BOOK.id === "c-ch4" && !localStorage.getItem(pair[1]) && localStorage.getItem(pair[0])) {
@@ -1042,9 +1063,45 @@ if (!BOOKS.length) {
 
   var GROUP_ORDER = (window.__LIOLI_CFG && window.__LIOLI_CFG.groupOrder) || ["C 讲义","C 练习册","兰大·C语言","兰大·数分","兰大·高代","兰大·大物","日报","线代速查"];
 
+  /* v155：最近阅读横条（书架顶部，继续读直达）+ ★ 收藏置顶（Librera IsStar） */
+  function renderRecent(){
+    var wrap = document.getElementById("recentWrap"), list = document.getElementById("recentList");
+    if (!wrap || !list) return;
+    var shelfTab = document.getElementById("tabShelf");
+    var shelfActive = !shelfTab || shelfTab.classList.contains("active");
+    var stars = loadJSON(LS_STARS, []).filter(function(id){ return BOOKS.some(function(b){ return b.id === id; }); });
+    var rc = loadJSON(LS_RECENT, []).filter(function(x){ return x.id && BOOKS.some(function(b){ return b.id === x.id; }); });
+    if (!rc.length && !stars.length || !shelfActive) { wrap.style.display = "none"; return; }
+    wrap.style.display = "";
+    list.innerHTML = "";
+    var items = [];
+    stars.forEach(function(id){ var b = BOOKS.filter(function(x){ return x.id === id; })[0]; if (b) { var _r = rc.filter(function(x){ return x.id === id; })[0]; items.push({ b: b, r: _r, star: true }); } });
+    rc.slice(0, 6).forEach(function(r){ var b = BOOKS.filter(function(x){ return x.id === r.id; })[0]; if (b && !items.some(function(it){ return it.b.id === b.id; })) items.push({ b: b, r: r }); });
+    items.forEach(function(it){
+      var b = it.b, r = it.r;
+      var card = document.createElement("div");
+      card.className = "shelf-item";
+      card.style.setProperty("--sc", (r && r.color) || b.color || "#4D6BFE");
+      var page = (r && r.page) || 1;
+      var prog = (b.pages && page) ? Math.max(3, Math.round(page / b.pages * 100)) : 0;
+      var when = "";
+      if (r && r.time) { var d = new Date(r.time), now = new Date(); var same = d.toDateString() === now.toDateString(); when = same ? ("今天 " + ("0"+d.getHours()).slice(-2) + ":" + ("0"+d.getMinutes()).slice(-2)) : (d.getMonth()+1) + "/" + d.getDate(); }
+      var label = it.star ? "★ " : "📖 ";
+      var meta = it.star ? ("已收藏 · " + (b.pages ? ("读到 p" + page) : b.meta || "")) : (b.pages ? ("p" + page + " / " + b.pages) : b.meta || "") + (when ? " · " + when : "");
+      card.innerHTML = "<span class=\"sf-expand\" style=\"font-size:11px\">" + label + "</span><span class=\"sf-info\"><span class=\"sf-title\">" + esc(b.title) + "</span><span class=\"sf-meta\">" + esc(meta) + "</span>" + (prog ? "<span class=\"sf-progress\"><i style=\"width:" + prog + "%\"></i></span>" : "") + "</span><span style=\"color:var(--teal-dark);font-size:13px;flex-shrink:0\">" + (it.star ? "打开 ›" : "继续读 ›") + "</span>";
+      card.title = "打开「" + b.title + "」" + (b.pages ? "到 p" + page : "");
+      card.onclick = function(){ switchBook(b.id, page); };
+      list.appendChild(card);
+    });
+    var cc = document.getElementById("recentClear");
+    if (cc) cc.onclick = function(ev){ ev.stopPropagation(); if (confirm("清空最近阅读记录？收藏的书会保留。")) { saveJSON(LS_RECENT, []); renderRecent(); } };
+  }
+
   function renderShelf(){
 
     shelfBody.innerHTML = "";
+
+    renderRecent();  /* v155：最近阅读横条 */
 
     var groups = {};
 
@@ -1100,6 +1157,21 @@ if (!BOOKS.length) {
 
         exp.textContent = (b.toc && b.toc.length) ? "▸" : "";
 
+        var star = document.createElement("span");   /* v155：收藏星标（Librera IsStar） */
+        star.className = "sf-expand";
+        star.style.width = "auto";
+        star.textContent = isStarred(b.id) ? "★" : "☆";
+        star.style.color = isStarred(b.id) ? "#F59E0B" : "var(--muted)";
+        star.title = isStarred(b.id) ? "取消收藏" : "收藏到书架顶部";
+        star.onclick = function(ev){
+          ev.stopPropagation();
+          var on = toggleStar(b.id);
+          star.textContent = on ? "★" : "☆";
+          star.style.color = on ? "#F59E0B" : "var(--muted)";
+          star.title = on ? "取消收藏" : "收藏到书架顶部";
+          renderRecent();
+        };
+
         var info = document.createElement("span");
 
         info.className = "sf-info";
@@ -1109,6 +1181,8 @@ if (!BOOKS.length) {
         info.innerHTML = "<span class=\"sf-title\">" + esc(b.title) + "</span><span class=\"sf-meta\">" + esc(b.meta || "") + "</span>" + (_prog ? "<span class=\"sf-progress\"><i style=\"width:" + _prog + "%\"></i></span>" : "");
 
         card.appendChild(exp);
+
+        card.appendChild(star);
 
         card.appendChild(info);
 
@@ -1245,6 +1319,14 @@ if (!BOOKS.length) {
   function save(){
     if (BOOK.volatile) { var cp = {}; for (var k in state) if (k !== "page") cp[k] = state[k]; localStorage.setItem(LS_STATE, JSON.stringify(cp)); }
     else localStorage.setItem(LS_STATE, JSON.stringify(state));
+    /* v155：翻页/操作即记录最近阅读（去重置顶，上限 12） */
+    if (!BOOK.volatile && BOOK.id) {
+      var rc = loadJSON(LS_RECENT, []);
+      rc = rc.filter(function(x){ return x.id !== BOOK.id; });
+      rc.unshift({ id: BOOK.id, title: BOOK.title, group: BOOK.group || "", color: BOOK.color || "#4D6BFE", pages: BOOK.pages || 0, page: state.page || 1, time: Date.now() });
+      if (rc.length > 12) rc = rc.slice(0, 12);
+      saveJSON(LS_RECENT, rc);
+    }
   }
 
 
@@ -2047,6 +2129,8 @@ if (!BOOKS.length) {
 
     tocBody.style.display = ""; bmBody.style.display = "none"; shelfBody.style.display = "none"; practiceBody.style.display = "none"; searchBody.classList.remove("open");
 
+    var rw = document.getElementById("recentWrap"); if (rw) rw.style.display = "none";   /* v155 */
+
   });
 
   document.getElementById("tabBookmarks").addEventListener("click", function(){
@@ -2054,6 +2138,8 @@ if (!BOOKS.length) {
     this.classList.add("active"); document.getElementById("tabToc").classList.remove("active"); document.getElementById("tabShelf").classList.remove("active"); document.getElementById("tabPractice").classList.remove("active");
 
     tocBody.style.display = "none"; bmBody.style.display = ""; shelfBody.style.display = "none"; practiceBody.style.display = "none"; searchBody.classList.remove("open");
+
+    var rw = document.getElementById("recentWrap"); if (rw) rw.style.display = "none";   /* v155 */
 
   });
 
@@ -2072,6 +2158,8 @@ if (!BOOKS.length) {
     this.classList.add("active"); document.getElementById("tabToc").classList.remove("active"); document.getElementById("tabBookmarks").classList.remove("active"); document.getElementById("tabShelf").classList.remove("active");
 
     tocBody.style.display = "none"; bmBody.style.display = "none"; shelfBody.style.display = "none"; practiceBody.style.display = ""; searchBody.classList.remove("open");
+
+    var rw = document.getElementById("recentWrap"); if (rw) rw.style.display = "none";   /* v155 */
 
     renderPracticeBoard();
 
@@ -2142,6 +2230,8 @@ if (!BOOKS.length) {
     document.getElementById("tabToc").classList.remove("active"); document.getElementById("tabBookmarks").classList.remove("active"); document.getElementById("tabShelf").classList.remove("active"); document.getElementById("tabPractice").classList.remove("active");
 
     tocBody.style.display = "none"; bmBody.style.display = "none"; shelfBody.style.display = "none"; practiceBody.style.display = "none"; searchBody.classList.add("open");
+
+    var rw = document.getElementById("recentWrap"); if (rw) rw.style.display = "none";   /* v155 */
 
     try { searchInput.focus(); } catch(e){}
   }
@@ -2612,6 +2702,29 @@ if (!BOOKS.length) {
             }, true);
             doc.addEventListener("pointerup", function(){ _pDown = null; }, true);
             doc.addEventListener("pointercancel", function(){ _pDown = null; }, true);
+          })();
+
+          /* ===== v155: 翻页实时同步进度（pdf.js pagechange → state.page + 最近阅读）===== */
+          (function(){
+            try {
+              var PAPP = pdfFrame.contentWindow.PDFViewerApplication;
+              if (PAPP && PAPP.eventBus) {
+                PAPP.eventBus.on("pagechange", function(ev){
+                  try {
+                    var n = ev && (ev.pageNumber || ev.page);
+                    if (!n || BOOK.volatile || n === state.page) return;
+                    state.page = n;
+                    save();
+                    var pi = document.getElementById("pageInput"); if (pi) pi.value = n;
+                    var _sl = document.getElementById("pageSlider");
+                    if (_sl) { _sl.value = n; var _sp = document.getElementById("sliderPage"); if (_sp) _sp.textContent = n + "/" + (_sl.max || "?"); }
+                    var np = document.getElementById("notePage"); if (np) np.textContent = n;
+                    try { if (window.renderNotes) renderNotes(); } catch(e2){}
+                    try { if (window.highlightToc) highlightToc(n); } catch(e2){}
+                  } catch(e){}
+                });
+              }
+            } catch(e){}
           })();
           /* ?debug=1：pointer 事件探针（萝要求：真机复测失败时先区分「事件没来/来了看不见」） */
           if (window.location.search.indexOf("debug=1") >= 0) {
